@@ -22,3 +22,8 @@ jobs:
       # Quick on each push to a pull request, full after merge. The
       # `full-ci` label runs the full set on a pull request before merging.
       profile: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'full-ci') && 'quick' || 'full' }}
+      # Each leg builds the bundled libhs twice (vignettes, then the check), so
+      # use the runners' cores and allow for the slow build.
+      env: |
+        VECTORSCAN_BUILD_JOBS=4
+      timeout-minutes: 90

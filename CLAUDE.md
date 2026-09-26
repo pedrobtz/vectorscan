@@ -23,8 +23,9 @@ Rscript -e "devtools::check()"              # full R CMD check
 Rscript -e "pkgdown::check_pkgdown()"       # validate _pkgdown.yml reference index
 ```
 
-Building requires `cmake`, `ragel`, and Boost headers (see README for
-per-platform install). These are install-time only.
+Building requires `cmake` (install-time only). Boost headers come from the
+`BH` package (`LinkingTo`); Ragel is optional because the generated parser
+sources are vendored as `src/vendor/vectorscan/src/parser/*.rl.cpp`.
 
 ## Build configuration
 

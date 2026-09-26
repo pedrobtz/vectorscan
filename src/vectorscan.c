@@ -2,6 +2,7 @@
 #include <R_ext/Memory.h>
 #include <R_ext/Utils.h>
 #include <Rinternals.h>
+#include <Rversion.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -482,7 +483,14 @@ SEXP vctrsn_hs_stream_open(SEXP database_xptr, SEXP database_env) {
     stop_hs_error(hs_err, "stream open");
   }
 
+  /* Rf_findVarInFrame left the API in R 4.5; R_getVarEx replaces it. A
+     missing binding yields R_NilValue, which scratch_addr() rejects. */
+#if R_VERSION >= R_Version(4, 5, 0)
+  SEXP scratch =
+      R_getVarEx(Rf_install("scratch"), database_env, FALSE, R_NilValue);
+#else
   SEXP scratch = Rf_findVarInFrame(database_env, Rf_install("scratch"));
+#endif
   vctrsn_stream_t *wrapper = R_Calloc(1, vctrsn_stream_t);
   wrapper->stream = stream;
   wrapper->scratch = scratch_addr(scratch);

@@ -62,6 +62,40 @@ find_system_vectorscan() {
   done
 }
 
+# R CMD config reports a compiler as a command line, e.g. "ccache clang -arch
+# arm64". CMake wants the compiler, an optional launcher, and the rest as flags.
+compiler_cmake_args() {
+  lang="$1"
+  # shellcheck disable=SC2086
+  set -- $2
+  case "$1" in
+    ccache|*/ccache|sccache|*/sccache)
+      printf ' -DCMAKE_%s_COMPILER_LAUNCHER=%s' "$lang" "$1"
+      shift
+      ;;
+  esac
+  printf ' -DCMAKE_%s_COMPILER=%s' "$lang" "$1"
+}
+
+# The flags part of an R CMD config compiler line, minus any -std= (the
+# vendored build sets its own language standard).
+compiler_flags() {
+  # shellcheck disable=SC2086
+  set -- $1
+  case "$1" in
+    ccache|*/ccache|sccache|*/sccache) shift ;;
+  esac
+  shift
+  flags=""
+  for word in "$@"; do
+    case "$word" in
+      -std=*) ;;
+      *) flags="$flags $word" ;;
+    esac
+  done
+  printf '%s' "${flags# }"
+}
+
 build_bundled_vectorscan() {
   if [ ! -f "$BUNDLED_SOURCE_DIR/src/hs.h" ]; then
     echo "configure: bundled Vectorscan source is missing at $BUNDLED_SOURCE_DIR"
@@ -73,10 +107,8 @@ build_bundled_vectorscan() {
     return 1
   fi
 
-  if ! command -v ragel >/dev/null 2>&1; then
-    echo "configure: ragel is required to build bundled Vectorscan"
-    return 1
-  fi
+  # ragel is optional: without it the vendored CMake uses the pre-generated
+  # src/parser/*.rl.cpp sources.
 
   cmake_args="
     -DCMAKE_BUILD_TYPE=Release
@@ -92,13 +124,29 @@ build_bundled_vectorscan() {
     -DHS_CXX_FLAGS=-Wno-error
   "
 
-  if [ -n "$VECTORSCAN_BOOST_ROOT" ]; then
-    cmake_args="$cmake_args -DBOOST_ROOT=$VECTORSCAN_BOOST_ROOT"
-  elif command -v brew >/dev/null 2>&1; then
-    boost_prefix="$(brew --prefix boost 2>/dev/null || true)"
-    if [ -n "$boost_prefix" ]; then
-      cmake_args="$cmake_args -DBOOST_ROOT=$boost_prefix"
+  # Boost headers: an explicit root, else the BH package (LinkingTo), else
+  # Homebrew. Passed as its own argument so a path with spaces survives, and
+  # with system paths off: the vendored boost.cmake's first lookup would
+  # otherwise take any system Boost ahead of BOOST_ROOT.
+  boost_root="$VECTORSCAN_BOOST_ROOT"
+  if [ -z "$boost_root" ] && [ -n "$R_HOME" ]; then
+    boost_root="$("$R_HOME/bin/Rscript" -e 'cat(system.file(package = "BH"))' 2>/dev/null || true)"
+  fi
+  if [ -z "$boost_root" ] && command -v brew >/dev/null 2>&1; then
+    boost_root="$(brew --prefix boost 2>/dev/null || true)"
+  fi
+
+  # Build with R's compilers, so libhs uses the same C++ standard library
+  # as the package code that links against it.
+  if [ -n "$R_HOME" ]; then
+    cc_line="$("$R_HOME/bin/R" CMD config CC)"
+    cxx_line="$("$R_HOME/bin/R" CMD config CXX17)"
+    if [ -z "$cxx_line" ]; then
+      cxx_line="$("$R_HOME/bin/R" CMD config CXX)"
     fi
+    cmake_args="$cmake_args $(compiler_cmake_args C "$cc_line") $(compiler_cmake_args CXX "$cxx_line")"
+    cc_flags="$(compiler_flags "$cc_line")"
+    cxx_flags="$(compiler_flags "$cxx_line")"
   fi
 
   if [ -n "$VECTORSCAN_CMAKE_ARGS" ]; then
@@ -112,7 +160,11 @@ build_bundled_vectorscan() {
 
   echo "configure: building bundled Vectorscan"
   # shellcheck disable=SC2086
-  cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args
+  cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args \
+    ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
+    ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
+    ${cc_flags:+"-DCMAKE_C_FLAGS=$cc_flags"} \
+    ${cxx_flags:+"-DCMAKE_CXX_FLAGS=$cxx_flags"}
   cmake --build "$BUNDLED_BUILD_DIR" --target hs --config Release -j "$jobs"
   cmake --build "$BUNDLED_BUILD_DIR" --target hs_runtime --config Release -j "$jobs"
   cmake --install "$BUNDLED_BUILD_DIR" --prefix "$install_prefix"
@@ -136,7 +188,7 @@ else
       echo "configure: falling back to runtime stubs because VECTORSCAN_ALLOW_STUBS is set"
     else
       echo "configure: failed to build bundled Vectorscan"
-      echo "configure: install cmake, ragel, and Boost headers, or set VECTORSCAN_USE_SYSTEM=true"
+      echo "configure: install cmake, or set VECTORSCAN_USE_SYSTEM=true"
       exit 1
     fi
   fi

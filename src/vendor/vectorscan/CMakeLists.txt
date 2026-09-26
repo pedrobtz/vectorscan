@@ -31,7 +31,8 @@ find_package(PkgConfig QUIET)
 find_program(RAGEL ragel)
 
 if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
-    message(FATAL_ERROR "Ragel state machine compiler not found")
+    # R package patch: fall back to the pre-generated parser sources
+    message(STATUS "Ragel not found, using pre-generated parser sources")
 endif()
 
 # Add ccache to speed builds

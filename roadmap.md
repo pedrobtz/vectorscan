@@ -188,10 +188,10 @@ hardest stage; start de-risking it early.*
 
 Known blockers and their mitigations:
 
-- [ ] **Ragel**: not present on CRAN build machines. Pre-generate the ragel
+- [x] **Ragel**: not present on CRAN build machines. Pre-generate the ragel
       outputs (`.rl` → `.cpp`) and vendor the generated sources, dropping
       ragel from `SystemRequirements` entirely.
-- [ ] **Boost headers**: avoid requiring a system Boost. Options, in order of
+- [x] **Boost headers**: avoid requiring a system Boost. Options, in order of
       preference: (a) point the CMake build at the `BH` package's headers via
       `LinkingTo: BH` + `BOOST_ROOT`; (b) vendor the small subset of Boost
       headers Vectorscan actually uses.

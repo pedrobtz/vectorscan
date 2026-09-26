@@ -24,9 +24,9 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORS
     echo "configure.win: bundled Vectorscan source is missing at $BUNDLED_SOURCE_DIR"
   elif ! command -v cmake >/dev/null 2>&1; then
     echo "configure.win: cmake is required to build bundled Vectorscan"
-  elif ! command -v ragel >/dev/null 2>&1; then
-    echo "configure.win: ragel is required to build bundled Vectorscan"
   else
+    # ragel is optional: without it the vendored CMake uses the pre-generated
+    # src/parser/*.rl.cpp sources.
     cmake_args="
       -DCMAKE_BUILD_TYPE=Release
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -41,9 +41,16 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORS
       -DHS_CXX_FLAGS=-Wno-error
     "
 
-    if [ -n "$VECTORSCAN_BOOST_ROOT" ]; then
-      cmake_args="$cmake_args -DBOOST_ROOT=$VECTORSCAN_BOOST_ROOT"
+    # Boost headers: an explicit root, else the BH package (LinkingTo).
+    boost_root="$VECTORSCAN_BOOST_ROOT"
+    if [ -z "$boost_root" ]; then
+      boost_root="$("${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e 'cat(system.file(package = "BH"))' 2>/dev/null || true)"
     fi
+
+    # Build with R's (Rtools) compilers and make, never a Visual Studio
+    # generator: MSVC objects cannot be linked into the package.
+    cc_bin="$("${R_HOME}/bin${R_ARCH_BIN}/R.exe" CMD config CC | cut -d' ' -f1)"
+    cxx_bin="$("${R_HOME}/bin${R_ARCH_BIN}/R.exe" CMD config CXX17 | cut -d' ' -f1)"
     if [ -n "$VECTORSCAN_CMAKE_ARGS" ]; then
       cmake_args="$cmake_args $VECTORSCAN_CMAKE_ARGS"
     fi
@@ -55,7 +62,11 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORS
 
     echo "configure.win: building bundled Vectorscan"
     # shellcheck disable=SC2086
-    cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args
+    cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" -G "Unix Makefiles" $cmake_args \
+      ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
+      ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
+      ${cc_bin:+"-DCMAKE_C_COMPILER=$cc_bin"} \
+      ${cxx_bin:+"-DCMAKE_CXX_COMPILER=$cxx_bin"}
     cmake --build "$BUNDLED_BUILD_DIR" --target hs --config Release -j "$jobs"
     cmake --build "$BUNDLED_BUILD_DIR" --target hs_runtime --config Release -j "$jobs"
     cmake --install "$BUNDLED_BUILD_DIR" --prefix "$install_prefix"
@@ -75,7 +86,7 @@ fi
 
 if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_ALLOW_STUBS" != "true" ] && [ "$VECTORSCAN_ALLOW_STUBS" != "1" ]; then
   echo "configure.win: failed to build bundled Vectorscan"
-  echo "configure.win: install cmake, ragel, and Boost headers, or set VECTORSCAN_USE_SYSTEM=true"
+  echo "configure.win: install cmake, or set VECTORSCAN_USE_SYSTEM=true"
   exit 1
 fi
 

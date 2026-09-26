@@ -10,12 +10,14 @@ License: MIT + file LICENSE
 URL: https://pedrobtz.github.io/vectorscan/,
     https://github.com/pedrobtz/vectorscan
 BugReports: https://github.com/pedrobtz/vectorscan/issues
-SystemRequirements: cmake, ragel, Boost headers
+SystemRequirements: cmake
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
 Depends:
     R (>= 4.1)
+LinkingTo:
+    BH
 Suggests:
     knitr,
     rmarkdown,
