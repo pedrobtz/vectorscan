@@ -188,7 +188,7 @@ uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers:
 - [x] M1 PCRE2 in the build: system PCRE2 (Rtools, `pkg-config`) or a
       vendored 10.48 fallback with hidden symbols; a build-modes job for the
       symbol-collision setting.
-- [ ] M2 C capture loop: columns filled in place; differential test against
+- [x] M2 C capture loop: columns filled in place; differential test against
       `regexec(perl = TRUE)`; sanitizers clean.
 - [ ] M3 R API: `hs_capture(pattern, x, proto)` like `strcapture()`, at least
       10× faster; docs, a "Parsing logs" article, benchmarks.

@@ -33,6 +33,8 @@ SEXP vctrsn_hs_database_size(SEXP database_xptr);
 SEXP vctrsn_hs_serialize(SEXP database_xptr);
 SEXP vctrsn_hs_deserialize(SEXP bytes);
 SEXP vctrsn_pcre2_info(void);
+SEXP vctrsn_pcre2_compile(SEXP pattern);
+SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x);
 SEXP vctrsn_hs_scan_many(SEXP database_xptr,
                          SEXP scratch_xptr,
                          SEXP x,
@@ -52,6 +54,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"vctrsn_hs_deserialize", (DL_FUNC)&vctrsn_hs_deserialize, 1},
     {"vctrsn_hs_scan_many", (DL_FUNC)&vctrsn_hs_scan_many, 4},
     {"vctrsn_pcre2_info", (DL_FUNC)&vctrsn_pcre2_info, 0},
+    {"vctrsn_pcre2_compile", (DL_FUNC)&vctrsn_pcre2_compile, 1},
+    {"vctrsn_pcre2_capture_many", (DL_FUNC)&vctrsn_pcre2_capture_many, 2},
     {NULL, NULL, 0}};
 
 void R_init_vectorscan(DllInfo *dll) {
