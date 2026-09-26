@@ -76,9 +76,10 @@ builds on this.*
       - [x] `R CMD check` on Linux / macOS / Windows with the **bundled**
         build, via pedrobtz/r-actions (only cmake is needed now), plus the
         clang23, ubuntu-clang and ubuntu-gcc16 containers.
-      - [ ] One Linux job with `VECTORSCAN_USE_SYSTEM=true`.
-      - [ ] One job with `VECTORSCAN_ALLOW_STUBS=true` to keep the stub path
-        compiling and the `hs_available()` gating honest.
+      - [x] One Linux job with `VECTORSCAN_USE_SYSTEM=true`.
+      - [x] One job with `VECTORSCAN_ALLOW_STUBS=true` to keep the stub path
+        compiling and the `hs_available()` gating honest. Both are in
+        `build-modes.yaml` (system: Ubuntu's `libhyperscan-dev`).
       - [ ] Cache the compiled `libhs` between runs (the bundled build is the
         slow step).
 - [x] Memory-safety CI (`native-checks.yaml`: ASan containers running

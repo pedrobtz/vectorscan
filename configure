@@ -241,11 +241,26 @@ build_bundled_vectorscan() {
   FOUND_HS=yes
 }
 
+allow_stubs() {
+  [ "$VECTORSCAN_ALLOW_STUBS" = "true" ] || [ "$VECTORSCAN_ALLOW_STUBS" = "1" ]
+}
+
 if [ "$VECTORSCAN_USE_SYSTEM" = "true" ] || [ "$VECTORSCAN_USE_SYSTEM" = "1" ]; then
   find_system_vectorscan
+  # Same rule as the bundled path: no library means a failed install, not a
+  # silent stub build, unless stubs were asked for.
+  if [ "$FOUND_HS" = no ]; then
+    if allow_stubs; then
+      echo "configure: no system libhs found; runtime stubs because VECTORSCAN_ALLOW_STUBS is set"
+    else
+      echo "configure: VECTORSCAN_USE_SYSTEM is set but no Vectorscan/Hyperscan libhs was found"
+      echo "configure: install it (pkg-config libhs), set VECTORSCAN_INCLUDE_DIR and VECTORSCAN_LIB_DIR, or unset VECTORSCAN_USE_SYSTEM"
+      exit 1
+    fi
+  fi
 else
   if ! build_bundled_vectorscan; then
-    if [ "$VECTORSCAN_ALLOW_STUBS" = "true" ] || [ "$VECTORSCAN_ALLOW_STUBS" = "1" ]; then
+    if allow_stubs; then
       echo "configure: falling back to runtime stubs because VECTORSCAN_ALLOW_STUBS is set"
     else
       echo "configure: failed to build bundled Vectorscan"
