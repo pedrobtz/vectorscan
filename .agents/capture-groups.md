@@ -65,6 +65,14 @@ already made; the earlier numbers in this file's history had that bias.
 | `utils::strcapture(perl = TRUE)` | 12.8 s | 6.5 s |
 | `hs_capture()` (M3) | 0.60 s (21x) | 0.24 s (27x) |
 
+M4, rule sets: 20 formats, 1M lines that all match the last format (the
+worst case for trying formats in order): trying each format with PCRE2 in
+order 4.14 s, routed through Vectorscan's prefilter 1.53 s (2.7x).
+
+A prefilter for a single pattern was measured and dropped: Vectorscan's
+pass over 1M lines (0.24-0.30 s) costs about half of a whole capture, so it
+cannot pay for itself when there is only one pattern to rule out.
+
 ## Decisions
 
 - **PCRE2, preferably the one R itself uses.**

@@ -68,7 +68,8 @@ test_that("elements PCRE2 cannot match give NA rows and one warning", {
 })
 
 test_that("inputs are validated", {
-  expect_error(hs_capture(c("a", "b"), "a"), class = "vectorscan_error")
+  expect_error(hs_capture(NA_character_, "a"), class = "vectorscan_error")
+  expect_error(hs_capture(1, "a"), class = "vectorscan_error")
   expect_error(hs_capture("(a)", 1), class = "vectorscan_error")
   expect_error(hs_capture("(a)(b)", "ab", proto), "2 capture groups but `proto` has 5", class = "vectorscan_error")
   expect_error(hs_capture("(a", "a"), "Invalid pattern")

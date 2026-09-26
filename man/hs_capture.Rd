@@ -10,18 +10,20 @@ hs_capture(pattern, x, proto = NULL)
 hs_capture_compile(pattern)
 }
 \arguments{
-\item{pattern}{A single regular expression with capture groups, or a
-pattern compiled with \code{hs_capture_compile()} to reuse across calls.}
+\item{pattern}{A single regular expression with capture groups, a
+character vector of formats (see "Several formats"), or either compiled
+with \code{hs_capture_compile()} to reuse across calls.}
 
 \item{x}{A character vector.}
 
 \item{proto}{Optional data frame (typically with zero rows) giving the
 names and types of the columns, as in \code{\link[utils:strcapture]{utils::strcapture()}}. It must have
-one column per capture group.}
+one column per capture group; for several formats, one column per group
+name, matched by name.}
 }
 \value{
 A data frame with \code{length(x)} rows and one column per capture
-group.
+group, plus a \code{pattern} column first for several formats.
 }
 \description{
 \code{hs_capture()} matches a regular expression with capture groups against
@@ -40,6 +42,24 @@ Columns are named after \code{proto}, else after named groups
 converted to the type of the matching \code{proto} column as
 \code{utils::strcapture()} converts it (\code{as.integer()} for an integer column,
 and so on); without it every column is character.
+}
+\section{Several formats}{
+
+\code{pattern} can also be a character vector of formats, typically named, for
+input that mixes them (log lines from several services, say). Each element
+is captured by the first format, in order, that matches it. The result
+gains a first column, \code{pattern}, with the name of that format (or the
+expression, for an unnamed one), and has one column per group name across
+all formats: groups with the same name share a column, and a format that
+lacks a group leaves it \code{NA}.
+
+Formats are routed with Vectorscan: one pass over \code{x} finds, for each
+element, the formats that can match it (Vectorscan's prefilter mode, which
+never misses a match), and PCRE2 then runs only there. The result is the
+same as trying every format on every element in order, but with many
+formats it is several times faster. A format Vectorscan cannot compile
+even in prefilter mode (PCRE2's branch reset \verb{(?|...)}, for example) is
+simply tried on every element that is still unmatched.
 
 Elements that do not match, and \code{NA} elements, give a row of \code{NA}. A group
 that does not take part in the match (an optional group, or a branch not
@@ -47,6 +67,7 @@ taken) is \code{NA}, where \code{utils::strcapture()} gives \code{""}. An elemen
 cannot match at all (for example invalid UTF-8) also gives an \code{NA} row, and
 \code{hs_capture()} warns once with the number of such elements.
 }
+
 \examples{
 lines <- c(
   "2026-09-26 10:15:02 [INFO] api.server:42 - listening",
@@ -65,6 +86,13 @@ str(hs_capture(fmt, lines, proto))
 compiled <- hs_capture_compile(fmt)
 compiled
 hs_capture(compiled, lines)
+
+# Several formats
+mixed <- c("GET /index.html 200", "user=ada action=login", "GET /api 500")
+hs_capture(c(
+  http = "^(?<method>[A-Z]+) (?<path>\\\\S+) (?<status>\\\\d{3})$",
+  audit = "^user=(?<user>\\\\w+) action=(?<action>\\\\w+)$"
+), mixed)
 }
 \seealso{
 \link[=hs_verbs]{hs_detect()} and friends for matching many patterns at once.

@@ -7,6 +7,12 @@
   a million log lines, by matching with PCRE2 (with JIT) and filling the
   columns in C. `hs_capture_compile()` compiles a pattern once for reuse. See
   the "Parsing logs" article.
+- `hs_capture()` also takes several formats, for input that mixes them: each
+  element is captured by the first format that matches, with a `pattern`
+  column and the union of group columns by name. Vectorscan routes each
+  element to the formats that can match it (prefilter mode), so PCRE2 runs
+  only there: 2.7 times faster than trying 20 formats in order on a million
+  lines.
 - PCRE2 is now part of the build, for the upcoming `hs_capture()`: a system
   PCRE2 (>= 10.34) when available, else a bundled PCRE2 10.48 compiled with
   its symbols hidden so it cannot clash with the PCRE2 R itself loads.
