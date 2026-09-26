@@ -2,6 +2,9 @@ url: https://pedrobtz.github.io/vectorscan/
 template:
   bootstrap: 5
 reference:
+- title: Matching character vectors
+  contents:
+  - hs_verbs
 - title: Database lifecycle
   contents:
   - hs_database

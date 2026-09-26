@@ -151,6 +151,21 @@ for (i in 1:20) {
 rm(s)
 invisible(gc())
 
+cat("-- vectorized verbs ----------------------------------------------\n")
+
+# vctrsn_hs_scan_many(): one scan per element, NA elements skipped, match
+# buffers grown with realloc() and freed on every exit path.
+words <- c("foo", "bar", NA, "", strrep("foobar ", 2000), "caf\u00e9 foo")
+rules <- c(a = "foo", b = "o+b", c = "\\w+")
+check("detect", identical(length(hs_detect(rules, words)), length(words)))
+check("detect per pattern", is.matrix(hs_detect(rules, words, per_pattern = TRUE)))
+check("count", is.integer(hs_count(rules, words)))
+check("match", is.data.frame(hs_match(rules, words)))
+check("extract", is.list(hs_extract(rules, words)))
+check("many elements", sum(hs_detect("foo", rep(words, 500)), na.rm = TRUE) > 0)
+check("no elements", identical(hs_detect("foo", character()), logical()))
+check("verbs on a stream db", raises(hs_detect(sdb, "foo")))
+
 cat("-- serialization -------------------------------------------------\n")
 
 bytes <- hs_serialize(db)

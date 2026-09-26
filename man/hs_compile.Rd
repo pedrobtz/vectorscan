@@ -7,9 +7,11 @@
 hs_compile(database, expressions, ids = NULL, flags = NULL, ext = NULL)
 }
 \arguments{
-\item{database}{An \code{hs_database} object.}
+\item{database}{An \code{hs_database} object, or the expressions themselves to
+compile into a new block-mode database.}
 
-\item{expressions}{Character vector of regular expressions.}
+\item{expressions}{Character vector of regular expressions, or a data frame
+of rules (see Details).}
 
 \item{ids}{Optional integer ids. Defaults to zero-based pattern positions.}
 
@@ -21,12 +23,23 @@ hs_compile(database, expressions, ids = NULL, flags = NULL, ext = NULL)
 \code{database}, invisibly.
 }
 \description{
-Compile expressions into a database
+Patterns can be given as a character vector, optionally named, or as a
+data frame of rules with a \code{pattern} column and optional \code{id}, \code{flags} and
+\code{name} columns. Names label the patterns in the output of \link[=hs_verbs]{hs_match()},
+\link[=hs_verbs]{hs_detect()} and friends.
+}
+\details{
+\code{hs_compile(expressions)}, without a database, compiles into a new
+block-mode database and returns it.
 }
 \examples{
 if (hs_available()) {
   db <- hs_database()
   hs_compile(db, "foo")
   hs_scan(db, "foo")
+
+  # One call, named patterns
+  db <- hs_compile(c(greeting = "hel+o", number = "[0-9]+"))
+  hs_match(db, c("hello 42", "nothing"))
 }
 }

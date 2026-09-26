@@ -29,6 +29,8 @@ new_hs_database <- function(mode = NA_integer_) {
   database$mode <- mode
   database$pattern_ids <- integer()
   database$pattern_flags <- integer()
+  database$patterns <- character()
+  database$pattern_names <- character()
   class(database) <- "hs_database"
   database
 }
@@ -95,8 +97,18 @@ check_database <- function(database, compiled = FALSE) {
 
 #' Compile expressions into a database
 #'
-#' @param database An `hs_database` object.
-#' @param expressions Character vector of regular expressions.
+#' Patterns can be given as a character vector, optionally named, or as a
+#' data frame of rules with a `pattern` column and optional `id`, `flags` and
+#' `name` columns. Names label the patterns in the output of [hs_match()][hs_verbs],
+#' [hs_detect()][hs_verbs] and friends.
+#'
+#' `hs_compile(expressions)`, without a database, compiles into a new
+#' block-mode database and returns it.
+#'
+#' @param database An `hs_database` object, or the expressions themselves to
+#'   compile into a new block-mode database.
+#' @param expressions Character vector of regular expressions, or a data frame
+#'   of rules (see Details).
 #' @param ids Optional integer ids. Defaults to zero-based pattern positions.
 #' @param flags Optional integer flags, recycled from length 1.
 #' @param ext Optional `hs_ext()` object or list of `hs_ext()` objects.
@@ -107,6 +119,10 @@ check_database <- function(database, compiled = FALSE) {
 #'   db <- hs_database()
 #'   hs_compile(db, "foo")
 #'   hs_scan(db, "foo")
+#'
+#'   # One call, named patterns
+#'   db <- hs_compile(c(greeting = "hel+o", number = "[0-9]+"))
+#'   hs_match(db, c("hello 42", "nothing"))
 #' }
 hs_compile <- function(
   database,
@@ -115,17 +131,17 @@ hs_compile <- function(
   flags = NULL,
   ext = NULL
 ) {
+  if (!is_hs_database(database) && missing(expressions) &&
+    (is.character(database) || is.data.frame(database))) {
+    expressions <- database
+    database <- hs_database()
+  }
   check_database(database)
 
-  if (!is.character(expressions)) {
-    stop_vectorscan("`expressions` must be a character vector.")
-  }
-  if (length(expressions) == 0L) {
-    stop_vectorscan("`expressions` must contain at least one pattern.")
-  }
-  if (anyNA(expressions)) {
-    stop_vectorscan("`expressions` must not contain missing values.")
-  }
+  rules <- normalize_rules(expressions, ids, flags)
+  expressions <- rules$pattern
+  ids <- rules$id
+  flags <- rules$flags
 
   n <- length(expressions)
 
@@ -154,8 +170,59 @@ hs_compile <- function(
   database$scratch <- compiled$scratch
   database$pattern_ids <- ids
   database$pattern_flags <- flags
+  database$patterns <- expressions
+  database$pattern_names <- rules$name
 
   invisible(database)
+}
+
+# Expressions as a character vector (names optional) or a rules data frame,
+# returned as pattern / id / flags / name with ids and flags still to check.
+normalize_rules <- function(expressions, ids, flags) {
+  if (is.data.frame(expressions)) {
+    rules <- expressions
+    if (!"pattern" %in% names(rules)) {
+      stop_vectorscan("A rules data frame needs a `pattern` column.")
+    }
+    for (col in c("id", "flags")) {
+      if (col %in% names(rules) &&
+        !is.null(if (col == "id") ids else flags)) {
+        stop_vectorscan(sprintf(
+          "Give `%s` as a column of the rules or as an argument, not both.",
+          if (col == "id") "ids" else col
+        ))
+      }
+    }
+    expressions <- rules$pattern
+    if (is.factor(expressions)) {
+      expressions <- as.character(expressions)
+    }
+    ids <- if ("id" %in% names(rules)) rules$id else ids
+    flags <- if ("flags" %in% names(rules)) rules$flags else flags
+    labels <- if ("name" %in% names(rules)) as.character(rules$name) else NULL
+  } else {
+    labels <- names(expressions)
+  }
+
+  if (!is.character(expressions)) {
+    stop_vectorscan("`expressions` must be a character vector.")
+  }
+  if (length(expressions) == 0L) {
+    stop_vectorscan("`expressions` must contain at least one pattern.")
+  }
+  if (anyNA(expressions)) {
+    stop_vectorscan("`expressions` must not contain missing values.")
+  }
+
+  labels <- labels %||% rep(NA_character_, length(expressions))
+  labels[!is.na(labels) & labels == ""] <- NA_character_
+
+  list(
+    pattern = unname(expressions),
+    id = ids,
+    flags = flags,
+    name = unname(labels)
+  )
 }
 
 #' Get database information

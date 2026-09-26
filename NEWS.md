@@ -1,5 +1,14 @@
 # vectorscan 0.0.0.9000
 
+- New vectorized verbs scan a whole character vector in one call:
+  `hs_detect()` (like `grepl()` for many patterns), `hs_count()`,
+  `hs_match()` (a data frame of every match with its pattern, offsets and
+  text) and `hs_extract()`. They take a compiled block-mode database or the
+  patterns themselves; given patterns, `hs_match()` and `hs_extract()` turn on
+  start-of-match offsets automatically.
+- `hs_compile()` accepts named patterns and rules data frames (`pattern`,
+  `id`, `flags`, `name`), and `hs_compile(patterns)` without a database
+  returns a new block-mode database.
 - Initial package implementation with native bindings for compiling databases,
   block scanning, vectored scanning, streaming, database metadata, and database
   serialization.

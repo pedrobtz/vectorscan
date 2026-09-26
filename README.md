@@ -19,6 +19,9 @@ path builds the bundled source.
 
 ## Features
 
+- Scan a whole character vector against many patterns at once with
+  `hs_detect()`, `hs_count()`, `hs_match()` and `hs_extract()`, with named
+  patterns or rule tables carried through to the results.
 - Compile Vectorscan/Hyperscan databases from R with `hs_database()` and
   `hs_compile()`.
 - Scan block, vectored, and streaming data with `hs_scan()`,
@@ -62,9 +65,57 @@ runtime machine does not need it.
 
 ## Usage
 
+Scan a whole character vector against a set of patterns in one call. Names
+label the patterns in the results:
+
 ```r
 library(vectorscan)
 
+x <- c("apple pie", "banana split", NA, "cherry tart")
+rules <- c(fruit = "apple|banana|cherry", dessert = "pie|split|tart")
+
+hs_detect(rules, x)
+#> [1] TRUE TRUE   NA TRUE
+
+hs_count(rules, x, per_pattern = TRUE)
+#>      fruit dessert
+#> [1,]     1       1
+#> [2,]     1       1
+#> [3,]    NA      NA
+#> [4,]     1       1
+
+hs_match(rules, x)
+#>   input id pattern from to  match
+#> 1     1  0   fruit    0  5  apple
+#> 2     1  1 dessert    6  9    pie
+#> 3     2  0   fruit    0  6 banana
+#> 4     2  1 dessert    7 12  split
+#> 5     4  0   fruit    0  6 cherry
+#> 6     4  1 dessert    7 11   tart
+
+hs_extract(rules, x)[[2]]
+#> [1] "banana" "split"
+```
+
+`hs_detect()`, `hs_count()`, `hs_match()` and `hs_extract()` take the patterns
+(a character vector, possibly named, or a data frame of rules) or a database
+compiled once with `hs_compile()` and reused:
+
+```r
+db <- hs_compile(rules)
+hs_detect(db, c("banana", "kiwi"))
+#> [1]  TRUE FALSE
+```
+
+Offsets are zero-based byte offsets into the UTF-8 encoding of each string.
+
+### Low-level interface
+
+The `hs_*` scanning functions map one to one onto the Vectorscan API: compile
+a database in a chosen mode, then scan single blocks, vectored blocks or
+streams, with the flags and extended parameters Vectorscan offers.
+
+```r
 db <- hs_database(mode = HS_MODE_BLOCK)
 hs_compile(
   db,
@@ -73,15 +124,15 @@ hs_compile(
   flags = c(
     HS_FLAG_NONE,
     HS_FLAG_NONE,
-    HS_FLAG_CASELESS | HS_FLAG_SOM_LEFTMOST
+    bitwOr(HS_FLAG_CASELESS, HS_FLAG_SOM_LEFTMOST)
   )
 )
 
 hs_scan(db, "foobar")
 #>   id from to flags
 #> 1  0   NA  3     0
-#> 2  1   NA  6     0
-#> 3  2    3  6     0
+#> 2  2    3  6     0
+#> 3  1   NA  6     0
 ```
 
 Use a callback to handle matches as they are reported by Vectorscan. Return

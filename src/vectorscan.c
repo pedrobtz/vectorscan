@@ -68,6 +68,13 @@ SEXP vctrsn_hs_serialize(SEXP database_xptr) { return unavailable(); }
 
 SEXP vctrsn_hs_deserialize(SEXP bytes) { return unavailable(); }
 
+SEXP vctrsn_hs_scan_many(SEXP database_xptr,
+                         SEXP scratch_xptr,
+                         SEXP x,
+                         SEXP first_only) {
+  return unavailable();
+}
+
 #else
 
 #include <hs/hs.h>
@@ -596,6 +603,150 @@ SEXP vctrsn_hs_deserialize(SEXP bytes) {
   }
 
   return make_compiled_database(database, scratch);
+}
+
+/* Scanning a character vector: one hs_scan() per element, reusing the
+   database's scratch, with matches tagged by (1-based) element index.
+
+   The match buffers are malloc()ed rather than R_alloc()ed and growth
+   failure is reported through `failed` rather than an R error, so nothing
+   longjmps out of match_many_handler() through Vectorscan's frames. */
+
+typedef struct {
+  int input;
+  int first_only;
+  int failed;
+  int *inputs;
+  int *ids;
+  double *from;
+  double *to;
+  R_xlen_t count;
+  R_xlen_t capacity;
+} vctrsn_many_context_t;
+
+static void free_many_context(vctrsn_many_context_t *ctx) {
+  free(ctx->inputs);
+  free(ctx->ids);
+  free(ctx->from);
+  free(ctx->to);
+  ctx->inputs = NULL;
+  ctx->ids = NULL;
+  ctx->from = NULL;
+  ctx->to = NULL;
+}
+
+static int grow_many_context(vctrsn_many_context_t *ctx) {
+  R_xlen_t capacity = ctx->capacity == 0 ? 64 : ctx->capacity * 2;
+  int *inputs = realloc(ctx->inputs, capacity * sizeof(int));
+  if (inputs != NULL) ctx->inputs = inputs;
+  int *ids = realloc(ctx->ids, capacity * sizeof(int));
+  if (ids != NULL) ctx->ids = ids;
+  double *from = realloc(ctx->from, capacity * sizeof(double));
+  if (from != NULL) ctx->from = from;
+  double *to = realloc(ctx->to, capacity * sizeof(double));
+  if (to != NULL) ctx->to = to;
+  if (inputs == NULL || ids == NULL || from == NULL || to == NULL) {
+    return 0;
+  }
+  ctx->capacity = capacity;
+  return 1;
+}
+
+static int match_many_handler(unsigned int id,
+                              unsigned long long from,
+                              unsigned long long to,
+                              unsigned int flags,
+                              void *context) {
+  (void)flags;
+  vctrsn_many_context_t *ctx = (vctrsn_many_context_t *)context;
+
+  if (ctx->count == ctx->capacity && !grow_many_context(ctx)) {
+    ctx->failed = 1;
+    return 1;
+  }
+
+  ctx->inputs[ctx->count] = ctx->input;
+  ctx->ids[ctx->count] = (int)id;
+  ctx->from[ctx->count] = (double)from;
+  ctx->to[ctx->count] = (double)to;
+  ctx->count++;
+
+  return ctx->first_only;
+}
+
+static void check_interrupt(void *unused) {
+  (void)unused;
+  R_CheckUserInterrupt();
+}
+
+SEXP vctrsn_hs_scan_many(SEXP database_xptr,
+                         SEXP scratch_xptr,
+                         SEXP x,
+                         SEXP first_only) {
+  hs_database_t *database = database_addr(database_xptr);
+  hs_scratch_t *scratch = scratch_addr(scratch_xptr);
+  R_xlen_t n = XLENGTH(x);
+
+  vctrsn_many_context_t ctx;
+  memset(&ctx, 0, sizeof(ctx));
+  ctx.first_only = Rf_asLogical(first_only) == TRUE;
+
+  for (R_xlen_t i = 0; i < n; ++i) {
+    SEXP element = STRING_ELT(x, i);
+    if (element == NA_STRING) {
+      continue;
+    }
+
+    /* translateCharUTF8() may allocate on R's transient stack. */
+    const void *vmax = vmaxget();
+    const char *text = Rf_translateCharUTF8(element);
+    ctx.input = (int)(i + 1);
+    hs_error_t hs_err = hs_scan(database, text, (unsigned int)strlen(text), 0,
+                                scratch, match_many_handler, &ctx);
+    vmaxset(vmax);
+
+    if (ctx.failed) {
+      free_many_context(&ctx);
+      Rf_error("Out of memory while collecting Vectorscan matches.");
+    }
+    if (hs_err != HS_SUCCESS && hs_err != HS_SCAN_TERMINATED) {
+      free_many_context(&ctx);
+      stop_hs_error(hs_err, "block scan");
+    }
+
+    /* R_ToplevelExec() stops a pending interrupt from longjmp-ing past
+       free_many_context(); raise it ourselves once the buffers are gone. */
+    if ((i & 1023) == 1023 && !R_ToplevelExec(check_interrupt, NULL)) {
+      free_many_context(&ctx);
+      Rf_error("Scan interrupted.");
+    }
+  }
+
+  SEXP inputs = PROTECT(Rf_allocVector(INTSXP, ctx.count));
+  SEXP ids = PROTECT(Rf_allocVector(INTSXP, ctx.count));
+  SEXP from = PROTECT(Rf_allocVector(REALSXP, ctx.count));
+  SEXP to = PROTECT(Rf_allocVector(REALSXP, ctx.count));
+  if (ctx.count > 0) {
+    memcpy(INTEGER(inputs), ctx.inputs, ctx.count * sizeof(int));
+    memcpy(INTEGER(ids), ctx.ids, ctx.count * sizeof(int));
+    memcpy(REAL(from), ctx.from, ctx.count * sizeof(double));
+    memcpy(REAL(to), ctx.to, ctx.count * sizeof(double));
+  }
+  free_many_context(&ctx);
+
+  SEXP out = PROTECT(Rf_allocVector(VECSXP, 4));
+  SEXP names = PROTECT(Rf_allocVector(STRSXP, 4));
+  SET_STRING_ELT(names, 0, Rf_mkChar("input"));
+  SET_STRING_ELT(names, 1, Rf_mkChar("id"));
+  SET_STRING_ELT(names, 2, Rf_mkChar("from"));
+  SET_STRING_ELT(names, 3, Rf_mkChar("to"));
+  Rf_setAttrib(out, R_NamesSymbol, names);
+  SET_VECTOR_ELT(out, 0, inputs);
+  SET_VECTOR_ELT(out, 1, ids);
+  SET_VECTOR_ELT(out, 2, from);
+  SET_VECTOR_ELT(out, 3, to);
+  UNPROTECT(6);
+  return out;
 }
 
 #endif
