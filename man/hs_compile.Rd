@@ -4,7 +4,14 @@
 \alias{hs_compile}
 \title{Compile expressions into a database}
 \usage{
-hs_compile(database, expressions, ids = NULL, flags = NULL, ext = NULL)
+hs_compile(
+  database,
+  expressions,
+  ids = NULL,
+  flags = NULL,
+  ext = NULL,
+  literal = FALSE
+)
 }
 \arguments{
 \item{database}{An \code{hs_database} object, or the expressions themselves to
@@ -15,9 +22,17 @@ of rules (see Details).}
 
 \item{ids}{Optional integer ids. Defaults to zero-based pattern positions.}
 
-\item{flags}{Optional integer flags, recycled from length 1.}
+\item{flags}{Optional flags, recycled from length 1: integers built from the
+\verb{HS_FLAG_*} constants, or strings of flag letters or names read by
+\code{\link[=hs_flags]{hs_flags()}}, such as \code{"i"} or \code{"caseless|dotall"}.}
 
 \item{ext}{Optional \code{hs_ext()} object or list of \code{hs_ext()} objects.}
+
+\item{literal}{If \code{TRUE}, the expressions are plain strings to find, not
+regular expressions: \code{"a.b"} matches only \code{"a.b"}. Literals compile
+faster and into smaller databases, and only the flags \code{HS_FLAG_CASELESS},
+\code{HS_FLAG_SINGLEMATCH} and \code{HS_FLAG_SOM_LEFTMOST} apply; \code{ext} cannot be
+used.}
 }
 \value{
 \code{database}, invisibly.
@@ -41,5 +56,9 @@ if (hs_available()) {
   # One call, named patterns
   db <- hs_compile(c(greeting = "hel+o", number = "[0-9]+"))
   hs_match(db, c("hello 42", "nothing"))
+
+  # Flags as letters, and plain strings instead of regular expressions
+  db <- hs_compile(c("Error", "a.b"), flags = "i", literal = TRUE)
+  hs_detect(db, c("ERROR: x", "a.b", "axb"))
 }
 }

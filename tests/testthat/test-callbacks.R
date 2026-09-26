@@ -46,7 +46,9 @@ test_that("scans work normally after a callback error", {
 
   for (i in 1:20) {
     try(
-      suppressMessages(hs_scan(db, "ooo", callback = function(...) stop("boom"))),
+      suppressMessages(hs_scan(db, "ooo", callback = function(...) {
+        stop("boom")
+      })),
       silent = TRUE
     )
   }

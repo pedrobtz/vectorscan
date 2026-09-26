@@ -7,7 +7,8 @@ SEXP vctrsn_hs_compile(SEXP expressions,
                         SEXP ids,
                         SEXP flags,
                         SEXP mode,
-                        SEXP ext);
+                        SEXP ext,
+                        SEXP literal);
 SEXP vctrsn_hs_scan(SEXP database_xptr,
                     SEXP scratch_xptr,
                     SEXP data,
@@ -46,7 +47,7 @@ SEXP vctrsn_hs_scan_many(SEXP database_xptr,
 
 static const R_CallMethodDef CallEntries[] = {
     {"vctrsn_hs_available", (DL_FUNC)&vctrsn_hs_available, 0},
-    {"vctrsn_hs_compile", (DL_FUNC)&vctrsn_hs_compile, 5},
+    {"vctrsn_hs_compile", (DL_FUNC)&vctrsn_hs_compile, 6},
     {"vctrsn_hs_scan", (DL_FUNC)&vctrsn_hs_scan, 5},
     {"vctrsn_hs_scan_vector", (DL_FUNC)&vctrsn_hs_scan_vector, 5},
     {"vctrsn_hs_stream_open", (DL_FUNC)&vctrsn_hs_stream_open, 2},

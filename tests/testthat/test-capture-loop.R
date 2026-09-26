@@ -6,18 +6,28 @@ capture_many <- vectorscan:::capture_many
 regexec_groups <- function(pattern, x, ncap) {
   m <- regexec(pattern, x, perl = TRUE)
   lapply(seq_len(ncap), function(g) {
-    vapply(seq_along(x), function(i) {
-      if (is.na(x[[i]]) || m[[i]][[1]] == -1L || m[[i]][[g + 1L]] == 0L) {
-        return(NA_character_)
-      }
-      substr(x[[i]], m[[i]][[g + 1L]],
-             m[[i]][[g + 1L]] + attr(m[[i]], "match.length")[[g + 1L]] - 1L)
-    }, character(1))
+    vapply(
+      seq_along(x),
+      function(i) {
+        if (is.na(x[[i]]) || m[[i]][[1]] == -1L || m[[i]][[g + 1L]] == 0L) {
+          return(NA_character_)
+        }
+        substr(
+          x[[i]],
+          m[[i]][[g + 1L]],
+          m[[i]][[g + 1L]] + attr(m[[i]], "match.length")[[g + 1L]] - 1L
+        )
+      },
+      character(1)
+    )
   })
 }
 
 test_that("groups, names and non-matches", {
-  out <- capture_many("^(?<key>\\w+)=(?<value>\\d*)(;)?$", c("a=1", "b=", "nope", NA, "c=22;"))
+  out <- capture_many(
+    "^(?<key>\\w+)=(?<value>\\d*)(;)?$",
+    c("a=1", "b=", "nope", NA, "c=22;")
+  )
 
   expect_identical(names(out$groups), c("key", "value", ""))
   expect_identical(out$matched, c(TRUE, TRUE, FALSE, NA, TRUE))
@@ -50,14 +60,28 @@ test_that("invalid patterns are reported", {
 test_that("capture_many() agrees with regexec(perl = TRUE)", {
   set.seed(20260926)
   patterns <- c(
-    "(a+)(b*)", "^(\\w+)\\s+(\\d+)", "(x)|(y)", "(?<k>[a-c]{2})(?<v>.)?",
-    "([^,]*),([^,]*)", "(\\d{2,3})", "^(a|ab)(c|bcd)?(d*)", "(\\s*)(\\S+)$",
+    "(a+)(b*)",
+    "^(\\w+)\\s+(\\d+)",
+    "(x)|(y)",
+    "(?<k>[a-c]{2})(?<v>.)?",
+    "([^,]*),([^,]*)",
+    "(\\d{2,3})",
+    "^(a|ab)(c|bcd)?(d*)",
+    "(\\s*)(\\S+)$",
     "(?:(a)|b)+c"
   )
   alphabet <- c(strsplit("abcdxy12 ,", "")[[1]], "é")
-  x <- c(NA, "", vapply(1:400, function(i) {
-    paste(sample(alphabet, sample(0:14, 1), TRUE), collapse = "")
-  }, character(1)))
+  x <- c(
+    NA,
+    "",
+    vapply(
+      1:400,
+      function(i) {
+        paste(sample(alphabet, sample(0:14, 1), TRUE), collapse = "")
+      },
+      character(1)
+    )
+  )
 
   for (p in patterns) {
     out <- capture_many(p, x)

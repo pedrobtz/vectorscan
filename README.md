@@ -105,14 +105,17 @@ path builds the bundled source.
   `hs_detect()`, `hs_count()`, `hs_match()` and `hs_extract()`, with named
   patterns or rule tables carried through to the results.
 - Compile Vectorscan/Hyperscan databases from R with `hs_database()` and
-  `hs_compile()`.
+  `hs_compile()`, from regular expressions or plain strings
+  (`literal = TRUE`), or load Hyperscan's `id:/regex/flags` pattern files
+  with `hs_read_patterns()`.
 - Scan block, vectored, and streaming data with `hs_scan()`,
   `hs_scan_vector()`, `hs_stream_open()`, `hs_stream_scan()`, and
   `hs_stream_close()`.
 - Return R data frames of match events by default.
 - Support Python-style callbacks for low-allocation scanning and early
   termination.
-- Expose common Hyperscan flags and modes as R constants.
+- Expose Hyperscan flags and modes as R constants; flags can also be written
+  as letters or names, `flags = "i"` or `"caseless|dotall"` (`hs_flags()`).
 - Support extended expression parameters with `hs_ext()`.
 - Serialize and deserialize compiled databases with `hs_serialize()`,
   `hs_deserialize()`, `hs_save()`, and `hs_load()`.

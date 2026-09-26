@@ -110,8 +110,15 @@ check_database <- function(database, compiled = FALSE) {
 #' @param expressions Character vector of regular expressions, or a data frame
 #'   of rules (see Details).
 #' @param ids Optional integer ids. Defaults to zero-based pattern positions.
-#' @param flags Optional integer flags, recycled from length 1.
+#' @param flags Optional flags, recycled from length 1: integers built from the
+#'   `HS_FLAG_*` constants, or strings of flag letters or names read by
+#'   [hs_flags()], such as `"i"` or `"caseless|dotall"`.
 #' @param ext Optional `hs_ext()` object or list of `hs_ext()` objects.
+#' @param literal If `TRUE`, the expressions are plain strings to find, not
+#'   regular expressions: `"a.b"` matches only `"a.b"`. Literals compile
+#'   faster and into smaller databases, and only the flags `HS_FLAG_CASELESS`,
+#'   `HS_FLAG_SINGLEMATCH` and `HS_FLAG_SOM_LEFTMOST` apply; `ext` cannot be
+#'   used.
 #' @return `database`, invisibly.
 #' @export
 #' @examples
@@ -123,25 +130,38 @@ check_database <- function(database, compiled = FALSE) {
 #'   # One call, named patterns
 #'   db <- hs_compile(c(greeting = "hel+o", number = "[0-9]+"))
 #'   hs_match(db, c("hello 42", "nothing"))
+#'
+#'   # Flags as letters, and plain strings instead of regular expressions
+#'   db <- hs_compile(c("Error", "a.b"), flags = "i", literal = TRUE)
+#'   hs_detect(db, c("ERROR: x", "a.b", "axb"))
 #' }
 hs_compile <- function(
   database,
   expressions,
   ids = NULL,
   flags = NULL,
-  ext = NULL
+  ext = NULL,
+  literal = FALSE
 ) {
-  if (!is_hs_database(database) && missing(expressions) &&
-    (is.character(database) || is.data.frame(database))) {
+  if (
+    !is_hs_database(database) &&
+      missing(expressions) &&
+      (is.character(database) || is.data.frame(database))
+  ) {
     expressions <- database
     database <- hs_database()
   }
   check_database(database)
 
-  rules <- normalize_rules(expressions, ids, flags)
+  if (!is.logical(literal) || length(literal) != 1L || is.na(literal)) {
+    stop_vectorscan("`literal` must be TRUE or FALSE.")
+  }
+
+  rules <- normalize_rules(expressions, ids, flags, ext)
   expressions <- rules$pattern
   ids <- rules$id
   flags <- rules$flags
+  ext <- rules$ext
 
   n <- length(expressions)
 
@@ -150,12 +170,13 @@ hs_compile <- function(
   ids <- recycle_or_check(ids, n, "ids")
   check_nonnegative(ids, "ids")
 
-  flags <- flags %||% HS_FLAG_NONE
-  flags <- check_integerish(flags, "flags")
+  flags <- normalize_flags(flags %||% HS_FLAG_NONE)
   flags <- recycle_or_check(flags, n, "flags")
-  check_nonnegative(flags, "flags")
 
   ext <- normalize_ext_list(ext, n)
+  if (literal && !is.null(ext)) {
+    stop_vectorscan("`ext` cannot be used with `literal = TRUE`.")
+  }
 
   compiled <- .Call(
     vctrsn_hs_compile,
@@ -163,7 +184,8 @@ hs_compile <- function(
     ids,
     flags,
     database$mode,
-    ext
+    ext,
+    literal
   )
 
   database$ptr <- compiled$database
@@ -177,16 +199,17 @@ hs_compile <- function(
 }
 
 # Expressions as a character vector (names optional) or a rules data frame,
-# returned as pattern / id / flags / name with ids and flags still to check.
-normalize_rules <- function(expressions, ids, flags) {
+# returned as pattern / id / flags / name / ext with ids, flags and ext still
+# to check.
+normalize_rules <- function(expressions, ids, flags, ext = NULL) {
   if (is.data.frame(expressions)) {
     rules <- expressions
     if (!"pattern" %in% names(rules)) {
       stop_vectorscan("A rules data frame needs a `pattern` column.")
     }
-    for (col in c("id", "flags")) {
-      if (col %in% names(rules) &&
-        !is.null(if (col == "id") ids else flags)) {
+    args <- list(id = ids, flags = flags, ext = ext)
+    for (col in names(args)) {
+      if (col %in% names(rules) && !is.null(args[[col]])) {
         stop_vectorscan(sprintf(
           "Give `%s` as a column of the rules or as an argument, not both.",
           if (col == "id") "ids" else col
@@ -199,6 +222,7 @@ normalize_rules <- function(expressions, ids, flags) {
     }
     ids <- if ("id" %in% names(rules)) rules$id else ids
     flags <- if ("flags" %in% names(rules)) rules$flags else flags
+    ext <- if ("ext" %in% names(rules)) rules$ext else ext
     labels <- if ("name" %in% names(rules)) as.character(rules$name) else NULL
   } else {
     labels <- names(expressions)
@@ -221,7 +245,8 @@ normalize_rules <- function(expressions, ids, flags) {
     pattern = unname(expressions),
     id = ids,
     flags = flags,
-    name = unname(labels)
+    name = unname(labels),
+    ext = ext
   )
 }
 

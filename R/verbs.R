@@ -145,7 +145,7 @@ verb_database <- function(patterns, som) {
 
   rules <- normalize_rules(patterns, NULL, NULL)
   flags <- if (is.data.frame(patterns) && "flags" %in% names(patterns)) {
-    check_integerish(patterns$flags, "flags")
+    normalize_flags(patterns$flags)
   } else {
     HS_FLAG_NONE
   }
@@ -184,8 +184,10 @@ count_matrix <- function(database, x) {
   out <- matrix(0L, nrow = length(x), ncol = length(ids))
   if (length(matches$input) > 0L) {
     cell <- cbind(matches$input, match(matches$id, ids))
-    counts <- table(factor(cell[, 1], levels = seq_along(x)),
-                    factor(cell[, 2], levels = seq_along(ids)))
+    counts <- table(
+      factor(cell[, 1], levels = seq_along(x)),
+      factor(cell[, 2], levels = seq_along(ids))
+    )
     out[] <- as.integer(counts)
   }
   out[is.na(x), ] <- NA_integer_
@@ -227,7 +229,9 @@ slice_matches <- function(x, input, from, to) {
       }
       rawToChar(bytes[[i]][(start + 1):end])
     },
-    slot, from[ok], to[ok],
+    slot,
+    from[ok],
+    to[ok],
     USE.NAMES = FALSE
   )
   Encoding(out) <- "UTF-8"

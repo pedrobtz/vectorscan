@@ -23,17 +23,33 @@ test_that("depth_limit bounds deep recursion; the defaults do not", {
       info = paste("jit", jit)
     )
     expect_identical(is.na(out$V1), c(TRUE, FALSE), info = paste("jit", jit))
-    expect_false(anyNA(hs_capture(p, c(deep, "ab"))$V1), info = paste("jit", jit))
+    expect_false(
+      anyNA(hs_capture(p, c(deep, "ab"))$V1),
+      info = paste("jit", jit)
+    )
   }
 })
 
 test_that("the interpreter and JIT give identical results", {
   set.seed(11)
   alphabet <- c(strsplit("abcdxy12 ,=", "")[[1]], "é")
-  x <- c(NA, "", vapply(1:500, function(i) {
-    paste(sample(alphabet, sample(0:16, 1), TRUE), collapse = "")
-  }, character(1)))
-  for (p in c("^(\\w+)=(\\d*)", "(a+)(b*)", "(?<k>[a-c]{2})(?<v>.)?", "(x)|(y)")) {
+  x <- c(
+    NA,
+    "",
+    vapply(
+      1:500,
+      function(i) {
+        paste(sample(alphabet, sample(0:16, 1), TRUE), collapse = "")
+      },
+      character(1)
+    )
+  )
+  for (p in c(
+    "^(\\w+)=(\\d*)",
+    "(a+)(b*)",
+    "(?<k>[a-c]{2})(?<v>.)?",
+    "(x)|(y)"
+  )) {
     expect_identical(
       hs_capture(hs_capture_compile(p, jit = FALSE), x),
       hs_capture(hs_capture_compile(p, jit = TRUE), x),
@@ -44,10 +60,22 @@ test_that("the interpreter and JIT give identical results", {
 })
 
 test_that("limits are validated", {
-  expect_error(hs_capture("(a)", "a", match_limit = 0), class = "vectorscan_error")
-  expect_error(hs_capture("(a)", "a", match_limit = "10"), class = "vectorscan_error")
-  expect_error(hs_capture("(a)", "a", depth_limit = c(1, 2)), class = "vectorscan_error")
-  expect_error(hs_capture("(a)", "a", depth_limit = 1.5), class = "vectorscan_error")
+  expect_error(
+    hs_capture("(a)", "a", match_limit = 0),
+    class = "vectorscan_error"
+  )
+  expect_error(
+    hs_capture("(a)", "a", match_limit = "10"),
+    class = "vectorscan_error"
+  )
+  expect_error(
+    hs_capture("(a)", "a", depth_limit = c(1, 2)),
+    class = "vectorscan_error"
+  )
+  expect_error(
+    hs_capture("(a)", "a", depth_limit = 1.5),
+    class = "vectorscan_error"
+  )
 })
 
 test_that("limits apply to rule sets too", {

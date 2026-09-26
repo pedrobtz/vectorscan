@@ -57,8 +57,25 @@ normalize_ext_value <- function(x, name) {
     return(NULL)
   }
 
-  x <- check_integerish(x, name, len = 1L)
+  # Offsets are 64-bit in Vectorscan, so values past .Machine$integer.max
+  # are kept as doubles rather than turned into NA by as.integer().
+  if (!is.numeric(x)) {
+    stop_vectorscan(sprintf("`%s` must be numeric.", name))
+  }
+  if (length(x) != 1L) {
+    stop_vectorscan(sprintf("`%s` must have length 1.", name))
+  }
+  if (is.na(x)) {
+    stop_vectorscan(sprintf("`%s` must not contain missing values.", name))
+  }
+  if (x != floor(x)) {
+    stop_vectorscan(sprintf("`%s` must contain whole numbers.", name))
+  }
   check_nonnegative(x, name)
+  if (x > 2^53) {
+    stop_vectorscan(sprintf("`%s` must be at most 2^53.", name))
+  }
+  x
 }
 
 normalize_ext_list <- function(ext, n) {
@@ -75,6 +92,7 @@ normalize_ext_list <- function(ext, n) {
   }
 
   ext <- recycle_or_check(ext, n, "ext")
+  ext[vapply(ext, is.null, logical(1))] <- list(hs_ext())
   bad <- !vapply(ext, inherits, logical(1), "hs_ext")
   if (any(bad)) {
     stop_vectorscan("Every element of `ext` must be an `hs_ext()` object.")

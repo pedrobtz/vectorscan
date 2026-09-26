@@ -9,8 +9,11 @@ log_lines <- c(
 )
 fmt <- "^(\\S+ \\S+) \\[(\\w+)\\] ([^ :]+):(\\d+) - (.*)$"
 proto <- data.frame(
-  timestamp = character(), level = character(), location = character(),
-  line = integer(), text = character()
+  timestamp = character(),
+  level = character(),
+  location = character(),
+  line = integer(),
+  text = character()
 )
 
 test_that("hs_capture() equals utils::strcapture() on a log", {
@@ -23,7 +26,10 @@ test_that("hs_capture() equals utils::strcapture() on a log", {
 test_that("column names come from proto, named groups, or V<k>", {
   named <- "^(?<time>\\S+ \\S+) \\[(?<level>\\w+)\\] ([^ :]+):(\\d+) - (.*)$"
 
-  expect_named(hs_capture(named, log_lines), c("time", "level", "V3", "V4", "V5"))
+  expect_named(
+    hs_capture(named, log_lines),
+    c("time", "level", "V3", "V4", "V5")
+  )
   expect_named(hs_capture(named, log_lines, proto), names(proto))
   expect_named(hs_capture(fmt, log_lines), paste0("V", 1:5))
 })
@@ -56,12 +62,18 @@ test_that("a compiled pattern can be reused", {
 test_that("zero-length input gives a zero-row data frame", {
   out <- hs_capture(fmt, character(), proto)
   expect_identical(nrow(out), 0L)
-  expect_identical(vapply(out, class, character(1)), vapply(proto, class, character(1)))
+  expect_identical(
+    vapply(out, class, character(1)),
+    vapply(proto, class, character(1))
+  )
 })
 
 test_that("elements PCRE2 cannot match give NA rows and one warning", {
   expect_warning(
-    out <- hs_capture("(\\w+)=(\\d)", c("a=1", rawToChar(as.raw(c(0x61, 0xff, 0x3d, 0x31))))),
+    out <- hs_capture(
+      "(\\w+)=(\\d)",
+      c("a=1", rawToChar(as.raw(c(0x61, 0xff, 0x3d, 0x31))))
+    ),
     "1 element could not be matched"
   )
   expect_identical(out$V1, c("a", NA))
@@ -71,6 +83,10 @@ test_that("inputs are validated", {
   expect_error(hs_capture(NA_character_, "a"), class = "vectorscan_error")
   expect_error(hs_capture(1, "a"), class = "vectorscan_error")
   expect_error(hs_capture("(a)", 1), class = "vectorscan_error")
-  expect_error(hs_capture("(a)(b)", "ab", proto), "2 capture groups but `proto` has 5", class = "vectorscan_error")
+  expect_error(
+    hs_capture("(a)(b)", "ab", proto),
+    "2 capture groups but `proto` has 5",
+    class = "vectorscan_error"
+  )
   expect_error(hs_capture("(a", "a"), "Invalid pattern")
 })
