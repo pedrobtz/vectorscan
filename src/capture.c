@@ -166,6 +166,16 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x) {
     Rf_error("Out of memory while preparing a PCRE2 match.");
   }
 
+  /* Each subject is scanned from our own buffer with zeroed padding after
+     it. PCRE2's JIT scans with wide loads that may read a little past the
+     end of the subject (within the same page, so safely); from R's heap
+     those bytes are neighbouring objects, which valgrind reports as
+     uninitialised. The buffer is R_alloc()ed and only ever grown before the
+     per-element vmax mark, so it survives the loop and cannot leak. */
+  char *buffer = NULL;
+  size_t capacity = 0;
+  const size_t padding = 64;
+
   for (R_xlen_t i = 0; i < n; ++i) {
     if ((i & 1023) == 1023) {
       R_CheckUserInterrupt();
@@ -177,12 +187,29 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x) {
     PCRE2_SIZE *ov = NULL;
     const char *text = NULL;
 
+    if (element != NA_STRING) {
+      /* An upper bound on the element's UTF-8 length: translation from any
+         R encoding at most quadruples the byte count. */
+      size_t need = 4 * (size_t)LENGTH(element) + padding;
+      if (need > capacity) {
+        capacity = need > 2 * capacity ? need : 2 * capacity;
+        buffer = R_alloc(capacity, 1);
+      }
+    }
+
     const void *vmax = vmaxget();
     if (element == NA_STRING) {
       matched_p[i] = NA_LOGICAL;
     } else {
-      text = Rf_translateCharUTF8(element);
-      rc = pcre2_match(code, (PCRE2_SPTR)text, strlen(text), 0, 0, md, NULL);
+      const char *utf8 = Rf_translateCharUTF8(element);
+      size_t length = strlen(utf8);
+      if (length + padding > capacity) {
+        Rf_error("Internal error: UTF-8 string longer than expected.");
+      }
+      memcpy(buffer, utf8, length);
+      memset(buffer + length, 0, padding);
+      text = buffer;
+      rc = pcre2_match(code, (PCRE2_SPTR)text, length, 0, 0, md, NULL);
       if (rc > 0) {
         matched_p[i] = TRUE;
         ov = pcre2_get_ovector_pointer(md);
