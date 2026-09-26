@@ -110,6 +110,9 @@ build_bundled_vectorscan() {
   # ragel is optional: without it the vendored CMake uses the pre-generated
   # src/parser/*.rl.cpp sources.
   #
+  # CMAKE_INSTALL_LIBDIR=lib: GNUInstallDirs picks lib64 on Fedora, RHEL and
+  # openSUSE, but the install is private and read back from lib/ below.
+  #
   # NO_SIMDE_IN_FAT: since 5.4.13 the x86-64 fat runtime also builds a SIMDe
   # variant for CPUs without SSE4.2, which needs the SIMDe headers -- a git
   # submodule that the release archive leaves empty and that is not vendored.
@@ -128,6 +131,7 @@ build_bundled_vectorscan() {
     -DHS_C_FLAGS=-Wno-error
     -DHS_CXX_FLAGS=-Wno-error
     -DNO_SIMDE_IN_FAT=ON
+    -DCMAKE_INSTALL_LIBDIR=lib
   "
 
   # Boost headers: an explicit root, else the BH package (LinkingTo), else
@@ -153,6 +157,27 @@ build_bundled_vectorscan() {
     cmake_args="$cmake_args $(compiler_cmake_args C "$cc_line") $(compiler_cmake_args CXX "$cxx_line")"
     cc_flags="$(compiler_flags "$cc_line")"
     cxx_flags="$(compiler_flags "$cxx_line")"
+  fi
+
+  # The x86-64 fat runtime (one build per microarchitecture, chosen at run
+  # time) relies on ELF ifunc and ELF symbol renaming, so upstream supports it
+  # on Linux and FreeBSD only. Elsewhere -- macOS on Intel, in particular --
+  # build a single x86-64-v2 (SSE4.2) library instead.
+  #
+  # Nor does it survive AddressSanitizer: clang puts instrumented globals in
+  # COMDAT groups keyed by a per-source hash that the per-microarchitecture
+  # copies share, so the linker discards all but one copy's data. When R's
+  # compilers carry -fsanitize=address, build a single library too.
+  fat_runtime=yes
+  case "$(uname -s)" in
+    Linux|FreeBSD) ;;
+    *) fat_runtime=no ;;
+  esac
+  case "$cc_line $cxx_line" in
+    *-fsanitize=*address*) fat_runtime=no ;;
+  esac
+  if [ "$fat_runtime" = no ]; then
+    cmake_args="$cmake_args -DFAT_RUNTIME=OFF"
   fi
 
   if [ -n "$VECTORSCAN_CMAKE_ARGS" ]; then

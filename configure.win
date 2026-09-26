@@ -27,6 +27,10 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORS
   else
     # ragel is optional: without it the vendored CMake uses the pre-generated
     # src/parser/*.rl.cpp sources.
+    #
+    # FAT_RUNTIME=OFF: the x86-64 fat runtime relies on ELF ifunc and symbol
+    # renaming and fails to link on Windows; build a single x86-64-v2
+    # (SSE4.2) library instead.
     cmake_args="
       -DCMAKE_BUILD_TYPE=Release
       -DCMAKE_POSITION_INDEPENDENT_CODE=ON
@@ -40,6 +44,8 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORS
       -DHS_C_FLAGS=-Wno-error
       -DHS_CXX_FLAGS=-Wno-error
       -DNO_SIMDE_IN_FAT=ON
+      -DFAT_RUNTIME=OFF
+      -DCMAKE_INSTALL_LIBDIR=lib
     "
 
     # Boost headers: an explicit root, else the BH package (LinkingTo).

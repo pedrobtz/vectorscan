@@ -124,8 +124,13 @@ static const u8 *vermicelliExecReal(SuperVector<S> const chars, SuperVector<S> c
     // finish off tail
 
     if (d != buf_end) {
-        SuperVector<S> data = SuperVector<S>::loadu_maskz(d, buf_end - d);
-        rv = vermicelliBlock(data, chars, casemask, d, buf_end - d);
+        // R package patch: loadu_maskz() loads S bytes from d and masks the
+        // excess, reading up to S - 1 bytes past buf_end. vermicelliExec()
+        // only gets here for ranges of at least S bytes, so re-scan the last
+        // S bytes ending at buf_end instead, as nvermicelliExecReal() does;
+        // the overlap before d was already scanned without a match.
+        SuperVector<S> data = SuperVector<S>::loadu(buf_end - S);
+        rv = vermicelliBlock(data, chars, casemask, buf_end - S, S);
         DEBUG_PRINTF("rv %p \n", rv);
         if (rv && rv < buf_end) return rv;
     }
