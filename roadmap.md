@@ -210,8 +210,10 @@ M0 (done 2026-09-26) measured where base R’s time goes. On 1M log lines,
 but PCRE2 matches the same lines in 0.23 s: the rest is building R
 objects. A C loop over PCRE2 with JIT that writes the columns directly
 takes 0.13 s. Chimera was 7.5× slower than that when every line matches,
-so `hs_capture()` runs on PCRE2 directly (preferably the one R uses),
-with Vectorscan as our own prefilter for rule sets. Plan and numbers:
+so
+[`hs_capture()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+runs on PCRE2 directly (preferably the one R uses), with Vectorscan as
+our own prefilter for rule sets. Plan and numbers:
 `.agents/capture-groups.md`.
 
 M0 Benchmark gate: base R, PCRE2 + JIT and Chimera on 1M lines
@@ -234,9 +236,11 @@ capture with PCRE2.
 
 M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.
 
-*Exit criteria: `hs_capture()` on all platforms, sanitizer-clean,
-identical to [`strcapture()`](https://rdrr.io/r/utils/strcapture.html)
-on its tests and at least 10× faster.*
+*Exit criteria:
+[`hs_capture()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+on all platforms, sanitizer-clean, identical to
+[`strcapture()`](https://rdrr.io/r/utils/strcapture.html) on its tests
+and at least 10× faster.*
 
 ## Stage 3 — Performance, parallelism, and scale
 

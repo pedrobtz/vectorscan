@@ -19,7 +19,8 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarking vectorscan against R's regex engines</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/parsing-logs.html">Parsing logs</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmarks.html">Benchmarking vectorscan against R's regex engines</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -39,7 +40,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="vectorscan-0009000">vectorscan 0.0.0.9000<a class="anchor" aria-label="anchor" href="#vectorscan-0009000"></a></h2>
-<ul><li>PCRE2 is now part of the build, for the upcoming <code>hs_capture()</code>: a system PCRE2 (&gt;= 10.34) when available, else a bundled PCRE2 10.48 compiled with its symbols hidden so it cannot clash with the PCRE2 R itself loads. <code>VECTORSCAN_PCRE2</code> selects the route.</li>
+<ul><li>New <code><a href="../reference/hs_capture.html">hs_capture()</a></code> turns text into a data frame with one regular expression: one row per element, one column per capture group, named after named groups or typed by a <code>proto</code> as in <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code>. It returns the same data frame as <code>strcapture(perl = TRUE)</code> about 20-27 times faster on a million log lines, by matching with PCRE2 (with JIT) and filling the columns in C. <code><a href="../reference/hs_capture.html">hs_capture_compile()</a></code> compiles a pattern once for reuse. See the “Parsing logs” article.</li>
+<li>PCRE2 is now part of the build, for the upcoming <code><a href="../reference/hs_capture.html">hs_capture()</a></code>: a system PCRE2 (&gt;= 10.34) when available, else a bundled PCRE2 10.48 compiled with its symbols hidden so it cannot clash with the PCRE2 R itself loads. <code>VECTORSCAN_PCRE2</code> selects the route.</li>
 <li>New vectorized verbs scan a whole character vector in one call: <code><a href="../reference/hs_verbs.html">hs_detect()</a></code> (like <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> for many patterns), <code><a href="../reference/hs_verbs.html">hs_count()</a></code>, <code><a href="../reference/hs_verbs.html">hs_match()</a></code> (a data frame of every match with its pattern, offsets and text) and <code><a href="../reference/hs_verbs.html">hs_extract()</a></code>. They take a compiled block-mode database or the patterns themselves; given patterns, <code><a href="../reference/hs_verbs.html">hs_match()</a></code> and <code><a href="../reference/hs_verbs.html">hs_extract()</a></code> turn on start-of-match offsets automatically.</li>
 <li>
 <code><a href="../reference/hs_compile.html">hs_compile()</a></code> accepts named patterns and rules data frames (<code>pattern</code>, <code>id</code>, <code>flags</code>, <code>name</code>), and <code>hs_compile(patterns)</code> without a database returns a new block-mode database.</li>

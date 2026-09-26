@@ -30,3 +30,11 @@ Other contributors:
 
 - Arm Limited (Vectorscan, bundled in src/vendor/vectorscan) \[copyright
   holder\]
+
+- University of Cambridge (PCRE2, bundled in src/vendor/pcre2)
+  \[copyright holder\]
+
+- Philip Hazel (PCRE2, bundled in src/vendor/pcre2) \[copyright holder\]
+
+- Zoltan Herczeg (PCRE2 just-in-time compiler, bundled in
+  src/vendor/pcre2) \[copyright holder\]

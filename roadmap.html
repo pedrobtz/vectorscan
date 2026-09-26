@@ -19,7 +19,8 @@
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/benchmarks.html">Benchmarking vectorscan against R's regex engines</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/parsing-logs.html">Parsing logs</a></li>
+    <li><a class="dropdown-item" href="articles/benchmarks.html">Benchmarking vectorscan against R's regex engines</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -99,14 +100,14 @@
 <div class="section level2">
 <h2 id="stage-2b--capture-groups">Stage 2b — Capture groups<a class="anchor" aria-label="anchor" href="#stage-2b--capture-groups"></a></h2>
 <p><em>Goal: turn text into columns with one regex, at least 10× faster than <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code>. The motivating case is reading a log file into a data frame (timestamp, level, location, text).</em></p>
-<p>M0 (done 2026-09-26) measured where base R’s time goes. On 1M log lines, <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code> takes 12.5 s, but PCRE2 matches the same lines in 0.23 s: the rest is building R objects. A C loop over PCRE2 with JIT that writes the columns directly takes 0.13 s. Chimera was 7.5× slower than that when every line matches, so <code>hs_capture()</code> runs on PCRE2 directly (preferably the one R uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers: <code>.agents/capture-groups.md</code>.</p>
+<p>M0 (done 2026-09-26) measured where base R’s time goes. On 1M log lines, <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code> takes 12.5 s, but PCRE2 matches the same lines in 0.23 s: the rest is building R objects. A C loop over PCRE2 with JIT that writes the columns directly takes 0.13 s. Chimera was 7.5× slower than that when every line matches, so <code><a href="reference/hs_capture.html">hs_capture()</a></code> runs on PCRE2 directly (preferably the one R uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers: <code>.agents/capture-groups.md</code>.</p>
 <ul class="task-list"><li><label><input type="checkbox" checked>M0 Benchmark gate: base R, PCRE2 + JIT and Chimera on 1M lines (<code>tools/bench-capture/</code>).</label></li>
 <li><label><input type="checkbox" checked>M1 PCRE2 in the build: system PCRE2 (Rtools, <code>pkg-config</code>) or a vendored 10.48 fallback with hidden symbols; a build-modes job for the symbol-collision setting.</label></li>
 <li><label><input type="checkbox" checked>M2 C capture loop: columns filled in place; differential test against <code>regexec(perl = TRUE)</code>; sanitizers clean.</label></li>
-<li><label><input type="checkbox">M3 R API: <code>hs_capture(pattern, x, proto)</code> like <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code>, at least 10× faster; docs, a “Parsing logs” article, benchmarks.</label></li>
+<li><label><input type="checkbox" checked>M3 R API: <code>hs_capture(pattern, x, proto)</code> like <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code>, at least 10× faster; docs, a “Parsing logs” article, benchmarks.</label></li>
 <li><label><input type="checkbox">M4 Vectorscan prefilter and rule sets: route lines to formats with <code><a href="reference/hs_verbs.html">hs_match()</a></code>, capture with PCRE2.</label></li>
 <li><label><input type="checkbox">M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.</label></li>
-</ul><p><em>Exit criteria: <code>hs_capture()</code> on all platforms, sanitizer-clean, identical to <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code> on its tests and at least 10× faster.</em></p>
+</ul><p><em>Exit criteria: <code><a href="reference/hs_capture.html">hs_capture()</a></code> on all platforms, sanitizer-clean, identical to <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code> on its tests and at least 10× faster.</em></p>
 </div>
 <div class="section level2">
 <h2 id="stage-3--performance-parallelism-and-scale">Stage 3 — Performance, parallelism, and scale<a class="anchor" aria-label="anchor" href="#stage-3--performance-parallelism-and-scale"></a></h2>

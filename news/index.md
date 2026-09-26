@@ -2,8 +2,20 @@
 
 ## vectorscan 0.0.0.9000
 
-- PCRE2 is now part of the build, for the upcoming `hs_capture()`: a
-  system PCRE2 (\>= 10.34) when available, else a bundled PCRE2 10.48
+- New
+  [`hs_capture()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+  turns text into a data frame with one regular expression: one row per
+  element, one column per capture group, named after named groups or
+  typed by a `proto` as in
+  [`utils::strcapture()`](https://rdrr.io/r/utils/strcapture.html). It
+  returns the same data frame as `strcapture(perl = TRUE)` about 20-27
+  times faster on a million log lines, by matching with PCRE2 (with JIT)
+  and filling the columns in C.
+  [`hs_capture_compile()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+  compiles a pattern once for reuse. See the “Parsing logs” article.
+- PCRE2 is now part of the build, for the upcoming
+  [`hs_capture()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md):
+  a system PCRE2 (\>= 10.34) when available, else a bundled PCRE2 10.48
   compiled with its symbols hidden so it cannot clash with the PCRE2 R
   itself loads. `VECTORSCAN_PCRE2` selects the route.
 - New vectorized verbs scan a whole character vector in one call:

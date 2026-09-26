@@ -36,7 +36,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/benchmarks.html">Benchmarking vectorscan against R's regex engines</a></li>
+<li><a class="dropdown-item" href="articles/parsing-logs.html">Parsing logs</a></li>
+    <li><a class="dropdown-item" href="articles/benchmarks.html">Benchmarking vectorscan against R's regex engines</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -136,10 +137,24 @@
 <span><span class="co">#&gt; [1]  TRUE FALSE</span></span></code></pre></div>
 <p>Offsets are zero-based byte offsets into the UTF-8 encoding of each string.</p>
 <div class="section level3">
+<h3 id="capture-groups">Capture groups<a class="anchor" aria-label="anchor" href="#capture-groups"></a>
+</h3>
+<p><code><a href="reference/hs_capture.html">hs_capture()</a></code> turns text into columns with one regular expression, like <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code> but much faster on large inputs:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2026-09-26 10:15:02 [INFO] api.server:42 - listening"</span>,</span>
+<span>           <span class="st">"2026-09-26 10:16:00 [ERROR] auth.jwt:77 - token expired"</span><span class="op">)</span></span>
+<span><span class="va">fmt</span> <span class="op">&lt;-</span> <span class="st">"^(?&lt;time&gt;\\S+ \\S+) \\[(?&lt;level&gt;\\w+)\\] (?&lt;location&gt;[^:]+):(?&lt;line&gt;\\d+) - (?&lt;text&gt;.*)$"</span></span>
+<span><span class="fu"><a href="reference/hs_capture.html">hs_capture</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">lines</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                  time level   location line          text</span></span>
+<span><span class="co">#&gt; 1 2026-09-26 10:15:02  INFO api.server   42     listening</span></span>
+<span><span class="co">#&gt; 2 2026-09-26 10:16:00 ERROR   auth.jwt   77 token expired</span></span></code></pre></div>
+<p>It runs on PCRE2 rather than Vectorscan, whose engine cannot report groups.</p>
+</div>
+<div class="section level3">
 <h3 id="low-level-interface">Low-level interface<a class="anchor" aria-label="anchor" href="#low-level-interface"></a>
 </h3>
 <p>The <code>hs_*</code> scanning functions map one to one onto the Vectorscan API: compile a database in a chosen mode, then scan single blocks, vectored blocks or streams, with the flags and extended parameters Vectorscan offers.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="va">HS_MODE_BLOCK</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span></span>
 <span>  <span class="va">db</span>,</span>
@@ -158,7 +173,7 @@
 <span><span class="co">#&gt; 2  2    3  6     0</span></span>
 <span><span class="co">#&gt; 3  1   NA  6     0</span></span></code></pre></div>
 <p>Use a callback to handle matches as they are reported by Vectorscan. Return <code>TRUE</code> from the callback to terminate scanning early.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/hs_scan.html">hs_scan</a></span><span class="op">(</span></span>
 <span>  <span class="va">db</span>,</span>
 <span>  <span class="st">"foobar"</span>,</span>
@@ -169,12 +184,12 @@
 <span>  context <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>source <span class="op">=</span> <span class="st">"example"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Vectored mode scans adjacent buffers as one logical input:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="va">HS_MODE_VECTORED</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foobar"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_scan_vector.html">hs_scan_vector</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foo"</span>, <span class="st">"bar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Streaming mode keeps scan state across chunks:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="va">HS_MODE_STREAM</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foo.*bar"</span><span class="op">)</span></span>
 <span></span>
@@ -183,7 +198,7 @@
 <span><span class="fu"><a href="reference/hs_stream_scan.html">hs_stream_scan</a></span><span class="op">(</span><span class="va">stream</span>, <span class="st">" and then bar"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_stream_close.html">hs_stream_close</a></span><span class="op">(</span><span class="va">stream</span><span class="op">)</span></span></code></pre></div>
 <p>Compiled databases can be serialized:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foo"</span><span class="op">)</span></span>
 <span></span>
@@ -225,11 +240,11 @@
 <h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
 </h2>
 <p>Useful package checks:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">air</span> format .</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::document()"</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::test()"</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"pkgdown::check_pkgdown()"</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::check()"</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="ex">air</span> format .</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::document()"</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::test()"</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"pkgdown::check_pkgdown()"</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::check()"</span></span></code></pre></div>
 <p>The native extension uses <code>.Call</code> and external pointers to manage <code>hs_database_t</code>, <code>hs_scratch_t</code>, and <code>hs_stream_t</code> objects. Native calls check <code>hs_error_t</code> values and convert failures to typed R conditions.</p>
 </div>
 </div>

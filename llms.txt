@@ -129,6 +129,27 @@ hs_detect(db, c("banana", "kiwi"))
 Offsets are zero-based byte offsets into the UTF-8 encoding of each
 string.
 
+### Capture groups
+
+[`hs_capture()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+turns text into columns with one regular expression, like
+[`utils::strcapture()`](https://rdrr.io/r/utils/strcapture.html) but
+much faster on large inputs:
+
+``` r
+
+lines <- c("2026-09-26 10:15:02 [INFO] api.server:42 - listening",
+           "2026-09-26 10:16:00 [ERROR] auth.jwt:77 - token expired")
+fmt <- "^(?<time>\\S+ \\S+) \\[(?<level>\\w+)\\] (?<location>[^:]+):(?<line>\\d+) - (?<text>.*)$"
+hs_capture(fmt, lines)
+#>                  time level   location line          text
+#> 1 2026-09-26 10:15:02  INFO api.server   42     listening
+#> 2 2026-09-26 10:16:00 ERROR   auth.jwt   77 token expired
+```
+
+It runs on PCRE2 rather than Vectorscan, whose engine cannot report
+groups.
+
 ### Low-level interface
 
 The `hs_*` scanning functions map one to one onto the Vectorscan API:
@@ -275,6 +296,12 @@ check `hs_error_t` values and convert failures to typed R conditions.
   [`hs_extract()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
   : Vectorized matching over a character vector
 
+## Capture groups
+
+- [`hs_capture()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+  [`hs_capture_compile()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+  : Capture groups into a data frame
+
 ## Database lifecycle
 
 - [`hs_database()`](https://pedrobtz.github.io/vectorscan/reference/hs_database.md)
@@ -338,9 +365,11 @@ check `hs_error_t` values and convert failures to typed R conditions.
 
 # Articles
 
-### All vignettes
+### Guides
 
-- [Benchmarking vectorscan against R's regex
-  engines](https://pedrobtz.github.io/vectorscan/articles/benchmarks.md):
 - [Getting started with
   vectorscan](https://pedrobtz.github.io/vectorscan/articles/vectorscan.md):
+- [Parsing
+  logs](https://pedrobtz.github.io/vectorscan/articles/parsing-logs.md):
+- [Benchmarking vectorscan against R's regex
+  engines](https://pedrobtz.github.io/vectorscan/articles/benchmarks.md):

@@ -8,6 +8,12 @@
   [`hs_extract()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
   : Vectorized matching over a character vector
 
+## Capture groups
+
+- [`hs_capture()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+  [`hs_capture_compile()`](https://pedrobtz.github.io/vectorscan/reference/hs_capture.md)
+  : Capture groups into a data frame
+
 ## Database lifecycle
 
 - [`hs_database()`](https://pedrobtz.github.io/vectorscan/reference/hs_database.md)
