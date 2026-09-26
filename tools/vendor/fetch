@@ -3,7 +3,7 @@
 #
 #   tools/vendor/fetch [source ...]      (default: every source in the manifest)
 #
-# Network and Ragel 6 are required. This is a maintainer script; it is never
+# Network is required, and Ragel 6 for sources with generated files. This is a maintainer script; it is never
 # run during R CMD INSTALL or R CMD check, which download nothing and need no
 # Ragel. Afterwards `tools/vendor/verify` re-checks the result offline.
 set -eu
@@ -13,10 +13,6 @@ cd "$ROOT"
 MANIFEST=tools/vendor/manifest.tsv
 . tools/vendor/common.sh
 
-if ! command -v ragel >/dev/null 2>&1; then
-    echo "ragel is required to generate the parser sources" >&2
-    exit 1
-fi
 
 sources=${*:-$(manifest_sources)}
 
@@ -47,6 +43,7 @@ for src in $sources; do
     mkdir -p "$tmp/x"
     case "$url" in
         *.tar.gz|*.tgz) tar -xzf "$archive" -C "$tmp/x" --strip-components=1 ;;
+        *.tar.bz2) tar -xjf "$archive" -C "$tmp/x" --strip-components=1 ;;
         *) echo "    unknown archive type: $url" >&2; exit 1 ;;
     esac
 
@@ -83,6 +80,10 @@ for src in $sources; do
     # upstream's cmake/ragel.cmake runs Ragel, plus -L so the output carries
     # no #line paths. Run from inside the tree so nothing absolute leaks in.
     for g in $(split_field "$generated"); do
+        if ! command -v ragel >/dev/null 2>&1; then
+            echo "    ragel is required to generate $g" >&2
+            exit 1
+        fi
         rl=${g%.cpp}
         printf '    generating %s\n' "$g"
         (cd "$dest" && ragel "$rl" -o "$g" -G0 -L)

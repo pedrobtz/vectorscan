@@ -102,6 +102,105 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_ALLOW_STUBS" != "true" ] && [ "$VECTOR
   exit 1
 fi
 
+# -- PCRE2, for hs_capture() -------------------------------------------------
+#
+# Same routes as configure (VECTORSCAN_PCRE2 = auto, system, vendored, none).
+# The system PCRE2 on Windows is the one Rtools ships, as a static library:
+# found through Rtools' pkg-config, else by linking -lpcre2-8 directly.
+# PCRE2_STATIC stops pcre2.h from declaring the API as DLL imports.
+
+FOUND_PCRE2=no
+PCRE2_SOURCE_DIR="src/vendor/pcre2"
+PCRE2_BUILD_DIR="${TMPDIR:-/tmp}/vectorscan-pcre2-build-$$"
+PCRE2_INSTALL_DIR="src/vendor/pcre2-install"
+R_EXE="${R_HOME}/bin${R_ARCH_BIN}/R.exe"
+
+find_system_pcre2_win() {
+  if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists libpcre2-8 2>/dev/null; then
+    PCRE2_CPPFLAGS="-DPCRE2_STATIC $(pkg-config --cflags libpcre2-8)"
+    PCRE2_LIBS="$(pkg-config --libs --static libpcre2-8)"
+    PCRE2_VERSION="$(pkg-config --modversion libpcre2-8)"
+    FOUND_PCRE2=system
+    return 0
+  fi
+  cc="$("$R_EXE" CMD config CC)"
+  probe="${TMPDIR:-/tmp}/vectorscan-pcre2-probe-$$"
+  printf '%s\n' '#define PCRE2_CODE_UNIT_WIDTH 8' '#define PCRE2_STATIC' \
+    '#include <pcre2.h>' \
+    'int main(void) { return pcre2_config(PCRE2_CONFIG_UNICODE, 0) < 0; }' > "$probe.c"
+  # shellcheck disable=SC2086
+  if $cc "$probe.c" -lpcre2-8 -o "$probe.exe" >/dev/null 2>&1; then
+    rm -f "$probe.c" "$probe.exe"
+    PCRE2_CPPFLAGS="-DPCRE2_STATIC"
+    PCRE2_LIBS="-lpcre2-8"
+    PCRE2_VERSION="Rtools"
+    FOUND_PCRE2=system
+    return 0
+  fi
+  rm -f "$probe.c" "$probe.exe"
+  return 1
+}
+
+build_vendored_pcre2_win() {
+  if [ ! -f "$PCRE2_SOURCE_DIR/CMakeLists.txt" ] || ! command -v cmake >/dev/null 2>&1; then
+    return 1
+  fi
+  rm -rf "$PCRE2_BUILD_DIR" "$PCRE2_INSTALL_DIR"
+  echo "configure.win: building vendored PCRE2"
+  cc_bin="$("$R_EXE" CMD config CC | cut -d' ' -f1)"
+  (
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+    cmake -S "$PCRE2_SOURCE_DIR" -B "$PCRE2_BUILD_DIR" -G "Unix Makefiles" \
+      ${cc_bin:+"-DCMAKE_C_COMPILER=$cc_bin"} \
+      -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON \
+      -DPCRE2_STATIC_PIC=ON -DPCRE2_BUILD_PCRE2GREP=OFF -DPCRE2_BUILD_TESTS=OFF \
+      -DPCRE2_SUPPORT_JIT=ON -DPCRE2_SUPPORT_UNICODE=ON -DHAVE_VISIBILITY=OFF &&
+      cmake --build "$PCRE2_BUILD_DIR" --target pcre2-8-static --config Release \
+        -j "${VECTORSCAN_BUILD_JOBS:-2}" &&
+      mkdir -p "$PCRE2_INSTALL_DIR/lib" "$PCRE2_INSTALL_DIR/include" &&
+      cp "$PCRE2_BUILD_DIR/libpcre2-8.a" "$PCRE2_INSTALL_DIR/lib/" &&
+      cp "$PCRE2_BUILD_DIR/interface/pcre2.h" "$PCRE2_INSTALL_DIR/include/"
+  ) || { rm -rf "$PCRE2_BUILD_DIR"; return 1; }
+  rm -rf "$PCRE2_BUILD_DIR"
+  PCRE2_CPPFLAGS="-DPCRE2_STATIC -Ivendor/pcre2-install/include"
+  PCRE2_LIBS="vendor/pcre2-install/lib/libpcre2-8.a"
+  PCRE2_VERSION="vendored"
+  FOUND_PCRE2=vendored
+  return 0
+}
+
+case "${VECTORSCAN_PCRE2:-auto}" in
+  auto) find_system_pcre2_win || build_vendored_pcre2_win || true ;;
+  system)
+    if ! find_system_pcre2_win; then
+      echo "configure.win: VECTORSCAN_PCRE2=system but Rtools' PCRE2 was not found"
+      exit 1
+    fi
+    ;;
+  vendored)
+    if ! build_vendored_pcre2_win; then
+      echo "configure.win: VECTORSCAN_PCRE2=vendored but the vendored PCRE2 did not build"
+      exit 1
+    fi
+    ;;
+  none) ;;
+  *)
+    echo "configure.win: VECTORSCAN_PCRE2 must be auto, system, vendored or none"
+    exit 1
+    ;;
+esac
+
+if [ "$FOUND_PCRE2" != no ]; then
+  PKG_CPPFLAGS="$PKG_CPPFLAGS -DHAVE_PCRE2 -DPCRE2_CODE_UNIT_WIDTH=8 $PCRE2_CPPFLAGS"
+  if [ "$FOUND_PCRE2" = vendored ]; then
+    PKG_CPPFLAGS="$PKG_CPPFLAGS -DVCTRSN_PCRE2_VENDORED"
+  fi
+  PKG_LIBS="$PKG_LIBS $PCRE2_LIBS"
+  echo "configure.win: PCRE2 $PCRE2_VERSION ($FOUND_PCRE2)"
+else
+  echo "configure.win: PCRE2 not available; hs_capture() will be unavailable"
+fi
+
 cat > src/Makevars.win <<EOF
 CXX_STD = CXX17
 PKG_CPPFLAGS = $PKG_CPPFLAGS

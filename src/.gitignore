@@ -4,3 +4,4 @@
 Makevars
 Makevars.win
 vendor/vectorscan-install/
+vendor/pcre2-install/

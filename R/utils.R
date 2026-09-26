@@ -92,3 +92,9 @@ as_hs_raw_list <- function(data, name = "data") {
     sprintf("`%s` must be a raw vector, character vector, or list.", name)
   )
 }
+
+# The PCRE2 behind hs_capture(): list(version, jit, source), or NULL when the
+# package was built without one. Internal until hs_capture() exists (M3).
+pcre2_info <- function() {
+  .Call(vctrsn_pcre2_info)
+}

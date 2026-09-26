@@ -12,3 +12,4 @@
 ^CRAN-SUBMISSION$
 ^tools$
 ^\.agents$
+^src/vendor/pcre2-install$

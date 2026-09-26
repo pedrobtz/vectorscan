@@ -1,5 +1,6 @@
-# The two build modes R-CMD-check.yaml does not reach: linking a system libhs
-# (VECTORSCAN_USE_SYSTEM) and the runtime-stub build (VECTORSCAN_ALLOW_STUBS).
+# The build modes R-CMD-check.yaml does not reach: linking a system libhs
+# (VECTORSCAN_USE_SYSTEM), the runtime-stub build (VECTORSCAN_ALLOW_STUBS), and
+# the two PCRE2 routes for hs_capture() (VECTORSCAN_PCRE2=system|vendored).
 #
 # Both are development conveniences, and both rot silently if nothing builds
 # them: the system path is what a distribution packager would use, and the
@@ -37,20 +38,50 @@ jobs:
             apt: libhyperscan-dev pkg-config
             use-system: "true"
             allow-stubs: ""
+            pcre2: auto
             expect: "Vectorscan/Hyperscan support enabled"
+            forbid: "building bundled Vectorscan"
+            hs-available: "TRUE"
           # No libhs anywhere and stubs allowed: the package must install,
           # report hs_available() == FALSE, and skip the native tests.
           - mode: stubs
             apt: ""
             use-system: "true"
             allow-stubs: "true"
+            pcre2: auto
             expect: "runtime stubs because VECTORSCAN_ALLOW_STUBS is set"
+            forbid: "building bundled Vectorscan"
+            hs-available: "FALSE"
+          # PCRE2 for hs_capture(), from the system: Ubuntu's libpcre2-dev,
+          # the same library R loads.
+          - mode: pcre2-system
+            apt: libpcre2-dev pkg-config
+            use-system: ""
+            allow-stubs: ""
+            pcre2: system
+            expect: "(system)"
+            forbid: "building vendored PCRE2"
+            hs-available: "TRUE"
+            pcre2-source: system
+          # The vendored PCRE2 in the setting where a clash could happen: a
+          # system PCRE2 is installed and loaded by R. The package's .so must
+          # export no pcre2_* symbol, so nothing can resolve to R's copy.
+          - mode: pcre2-vendored
+            apt: libpcre2-dev pkg-config
+            use-system: ""
+            allow-stubs: ""
+            pcre2: vendored
+            expect: "(vendored)"
+            forbid: ""
+            hs-available: "TRUE"
+            pcre2-source: vendored
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       VECTORSCAN_USE_SYSTEM: ${{ matrix.use-system }}
       VECTORSCAN_ALLOW_STUBS: ${{ matrix.allow-stubs }}
+      VECTORSCAN_PCRE2: ${{ matrix.pcre2 }}
 
     steps:
       - uses: actions/checkout@v6
@@ -84,18 +115,33 @@ jobs:
       - name: Confirm the build mode
         env:
           EXPECT: ${{ matrix.expect }}
+          FORBID: ${{ matrix.forbid }}
           MODE: ${{ matrix.mode }}
+          WANT_HS: ${{ matrix.hs-available }}
+          WANT_PCRE2: ${{ matrix.pcre2-source }}
         run: |
           set -eu
           log=check/vectorscan.Rcheck/00install.out
           grep -F "configure:" "$log"
           grep -qF "$EXPECT" "$log"
-          if grep -qF "building bundled Vectorscan" "$log"; then
-            echo "::error::the bundled source was built in the $MODE job"
+          if [ -n "$FORBID" ] && grep -qF "$FORBID" "$log"; then
+            echo "::error::'$FORBID' happened in the $MODE job"
             exit 1
           fi
-          want=$([ "$MODE" = system ] && echo TRUE || echo FALSE)
           # rcmdcheck installs the package into the check directory only.
-          got=$(R_LIBS="check/vectorscan.Rcheck" Rscript -e 'cat(vectorscan::hs_available())')
-          echo "hs_available() = $got (expected $want)"
-          [ "$got" = "$want" ]
+          export R_LIBS="check/vectorscan.Rcheck"
+          got=$(Rscript -e 'cat(vectorscan::hs_available())')
+          echo "hs_available() = $got (expected $WANT_HS)"
+          [ "$got" = "$WANT_HS" ]
+          if [ -n "$WANT_PCRE2" ]; then
+            src=$(Rscript -e 'cat(vectorscan:::pcre2_info()$source)')
+            echo "PCRE2 source = $src (expected $WANT_PCRE2)"
+            [ "$src" = "$WANT_PCRE2" ]
+            so=check/vectorscan.Rcheck/vectorscan/libs/vectorscan.so
+            exported=$(nm -D --defined-only "$so" | awk '$3 ~ /^pcre2_/' | wc -l)
+            echo "pcre2_* symbols exported by vectorscan.so: $exported"
+            if [ "$WANT_PCRE2" = vendored ] && [ "$exported" -ne 0 ]; then
+              echo "::error::the vendored PCRE2 leaks symbols; they could bind to R's PCRE2"
+              exit 1
+            fi
+          fi

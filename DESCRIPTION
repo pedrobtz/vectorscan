@@ -9,7 +9,13 @@ Authors@R: c(
     person("VectorCamp PC", role = "cph",
            comment = "Vectorscan, bundled in src/vendor/vectorscan"),
     person("Arm Limited", role = "cph",
-           comment = "Vectorscan, bundled in src/vendor/vectorscan")
+           comment = "Vectorscan, bundled in src/vendor/vectorscan"),
+    person("University of Cambridge", role = "cph",
+           comment = "PCRE2, bundled in src/vendor/pcre2"),
+    person("Philip", "Hazel", role = "cph",
+           comment = "PCRE2, bundled in src/vendor/pcre2"),
+    person("Zoltan", "Herczeg", role = "cph",
+           comment = "PCRE2 just-in-time compiler, bundled in src/vendor/pcre2")
   )
 Description: Compile and scan high-performance regular expression databases
     using Vectorscan or Hyperscan from R. The package exposes block, vectored,
@@ -19,7 +25,7 @@ Copyright: See inst/COPYRIGHTS.
 URL: https://pedrobtz.github.io/vectorscan/,
     https://github.com/pedrobtz/vectorscan
 BugReports: https://github.com/pedrobtz/vectorscan/issues
-SystemRequirements: cmake
+SystemRequirements: cmake; PCRE2 (>= 10.34, optional: a copy is bundled)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
