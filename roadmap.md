@@ -66,7 +66,7 @@ performance story with reproducible benchmarks.
 *Goal: a repo a stranger can trust and contribute to. Everything later
 builds on this.*
 
-- [ ] Fix package identity: real maintainer in `DESCRIPTION`, correct
+- [x] Fix package identity: real maintainer in `DESCRIPTION`, correct
       `URL`/`BugReports` (repo is `pedrobtz/vectorscan`), align `_pkgdown.yml`
       URL.
 - [ ] Add `.gitignore` / clean tree: remove committed `src/*.o`,

@@ -18,7 +18,19 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: pkg-vectorscan contributors \email{maintainer@example.com}
+\strong{Maintainer}: Pedro Baltazar \email{pedrobtz@gmail.com} [copyright holder]
+
+Authors:
+\itemize{
+  \item Pedro Baltazar \email{pedrobtz@gmail.com} [copyright holder]
+}
+
+Other contributors:
+\itemize{
+  \item Intel Corporation (Hyperscan, bundled in src/vendor/vectorscan) [copyright holder]
+  \item VectorCamp PC (Vectorscan, bundled in src/vendor/vectorscan) [copyright holder]
+  \item Arm Limited (Vectorscan, bundled in src/vendor/vectorscan) [copyright holder]
+}
 
 }
 \keyword{internal}
