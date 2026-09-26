@@ -25,7 +25,8 @@ SEXP vctrsn_hs_compile(SEXP expressions,
                         SEXP ids,
                         SEXP flags,
                         SEXP mode,
-                        SEXP ext) {
+                        SEXP ext,
+                        SEXP literal) {
   return unavailable();
 }
 
@@ -400,9 +401,12 @@ SEXP vctrsn_hs_compile(SEXP expressions,
                         SEXP ids,
                         SEXP flags,
                         SEXP mode,
-                        SEXP ext) {
+                        SEXP ext,
+                        SEXP literal) {
   R_xlen_t n = XLENGTH(expressions);
+  int is_literal = Rf_asLogical(literal) == TRUE;
   const char **exprs = R_Calloc(n, const char *);
+  size_t *lens = R_Calloc(n, size_t);
   unsigned int *ids_c = R_Calloc(n, unsigned int);
   unsigned int *flags_c = R_Calloc(n, unsigned int);
 
@@ -410,7 +414,9 @@ SEXP vctrsn_hs_compile(SEXP expressions,
   const hs_expr_ext_t **ext_ptrs = NULL;
 
   for (R_xlen_t i = 0; i < n; ++i) {
-    exprs[i] = CHAR(STRING_ELT(expressions, i));
+    SEXP expression = STRING_ELT(expressions, i);
+    exprs[i] = CHAR(expression);
+    lens[i] = (size_t)LENGTH(expression);
     ids_c[i] = (unsigned int)INTEGER(ids)[i];
     flags_c[i] = (unsigned int)INTEGER(flags)[i];
   }
@@ -426,11 +432,20 @@ SEXP vctrsn_hs_compile(SEXP expressions,
 
   hs_database_t *database = NULL;
   hs_compile_error_t *compile_error = NULL;
-  hs_error_t hs_err = hs_compile_ext_multi(
-      exprs, flags_c, ids_c, ext_ptrs, (unsigned int)n,
-      (unsigned int)INTEGER(mode)[0], NULL, &database, &compile_error);
+  hs_error_t hs_err;
+  if (is_literal) {
+    hs_err = hs_compile_lit_multi(exprs, flags_c, ids_c, lens, (unsigned int)n,
+                                  (unsigned int)INTEGER(mode)[0], NULL,
+                                  &database, &compile_error);
+  } else {
+    hs_err = hs_compile_ext_multi(exprs, flags_c, ids_c, ext_ptrs,
+                                  (unsigned int)n,
+                                  (unsigned int)INTEGER(mode)[0], NULL,
+                                  &database, &compile_error);
+  }
 
   R_Free(exprs);
+  R_Free(lens);
   R_Free(ids_c);
   R_Free(flags_c);
   if (ext_c != NULL) {

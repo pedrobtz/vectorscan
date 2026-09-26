@@ -145,7 +145,7 @@ verb_database <- function(patterns, som) {
 
   rules <- normalize_rules(patterns, NULL, NULL)
   flags <- if (is.data.frame(patterns) && "flags" %in% names(patterns)) {
-    check_integerish(patterns$flags, "flags")
+    normalize_flags(patterns$flags)
   } else {
     HS_FLAG_NONE
   }

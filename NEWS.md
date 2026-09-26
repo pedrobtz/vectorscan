@@ -12,6 +12,17 @@
   offsets (`HS_FLAG_SOM_LEFTMOST`) in stream mode; a start beyond the horizon
   is `NA`.
 - New `hs_version()` and `hs_stream_size()`.
+- `hs_compile(literal = TRUE)` compiles plain strings instead of regular
+  expressions (Vectorscan's literal compiler): `"a.b"` matches only `"a.b"`.
+- Flags can be written as letters or names: `flags = "i"`,
+  `"caseless|dotall"`, also in a rules data frame's `flags` column.
+  `hs_flags()` does the conversion.
+- New `hs_read_patterns()` reads Hyperscan's pattern files
+  (`id:/regex/flags{ext}`, as used by `hsbench` and `hscollider`) into a
+  rules data frame, with an `ext` list column for extended parameters. Rules
+  data frames now take such an `ext` column.
+- `hs_ext()` keeps offsets beyond R's integer range, up to 2^53, instead of
+  turning them into `NA`.
 - New `hs_capture()` turns text into a data frame with one regular
   expression: one row per element, one column per capture group, named after
   named groups or typed by a `proto` as in `utils::strcapture()`. It returns

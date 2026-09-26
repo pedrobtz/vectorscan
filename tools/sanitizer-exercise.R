@@ -216,6 +216,17 @@ check("callback condition kept", identical(
   "mine"
 ))
 
+cat("-- literals, flag strings, pattern files --------------------------\n")
+
+lit <- hs_compile(c("a.b", "(x", "caf\u00e9"), flags = "iL", literal = TRUE)
+for (i in 1:20) m <- hs_match(lit, rep(c("A.B (X", "un caf\u00e9", ""), 200))
+check("literal matches", nrow(m) == 600)
+rules <- hs_read_patterns(textConnection(c(
+  "1:/foo(bar)?/i", "2:/abc/{edit_distance=1}",
+  "3:/x+/L{min_offset=2,max_offset=5000000000}"
+)))
+check("pattern file scan", sum(hs_detect(rules, c("FOO", "abd", "..xx", "q"))) == 3)
+
 cat("-- serialization -------------------------------------------------\n")
 
 bytes <- hs_serialize(db)
