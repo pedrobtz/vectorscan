@@ -5,6 +5,9 @@ reference:
 - title: Matching character vectors
   contents:
   - hs_verbs
+- title: Capture groups
+  contents:
+  - hs_capture
 - title: Database lifecycle
   contents:
   - hs_database
@@ -31,3 +34,10 @@ reference:
   - hs_ext
   - hs_available
   - vectorscan-constants
+articles:
+- title: Guides
+  navbar: ~
+  contents:
+  - vectorscan
+  - articles/parsing-logs
+  - benchmarks

@@ -30,6 +30,8 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends:
     R (>= 4.1)
+Imports:
+    methods
 LinkingTo:
     BH
 Suggests:

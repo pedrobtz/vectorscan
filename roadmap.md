@@ -190,7 +190,7 @@ uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers:
       symbol-collision setting.
 - [x] M2 C capture loop: columns filled in place; differential test against
       `regexec(perl = TRUE)`; sanitizers clean.
-- [ ] M3 R API: `hs_capture(pattern, x, proto)` like `strcapture()`, at least
+- [x] M3 R API: `hs_capture(pattern, x, proto)` like `strcapture()`, at least
       10× faster; docs, a "Parsing logs" article, benchmarks.
 - [ ] M4 Vectorscan prefilter and rule sets: route lines to formats with
       `hs_match()`, capture with PCRE2.
