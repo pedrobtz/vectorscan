@@ -1,0 +1,30 @@
+url: https://pedrobtz.github.io/vectorscan/
+template:
+  bootstrap: 5
+reference:
+- title: Database lifecycle
+  contents:
+  - hs_database
+  - hs_compile
+  - hs_info
+  - hs_database_size
+- title: Scanning
+  contents:
+  - hs_scan
+  - hs_scan_vector
+- title: Streaming
+  contents:
+  - hs_stream_open
+  - hs_stream_scan
+  - hs_stream_close
+- title: Serialization
+  contents:
+  - hs_serialize
+  - hs_deserialize
+  - hs_save
+  - hs_load
+- title: Helpers
+  contents:
+  - hs_ext
+  - hs_available
+  - vectorscan-constants

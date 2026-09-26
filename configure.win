@@ -1,0 +1,110 @@
+#!/bin/sh
+
+set -e
+
+mkdir -p src
+
+PKG_CPPFLAGS=""
+PKG_LIBS=""
+FOUND_HS=no
+BUNDLED_SOURCE_DIR="src/vendor/vectorscan"
+BUNDLED_BUILD_DIR="${TMPDIR:-/tmp}/vectorscan-build-$$"
+BUNDLED_INSTALL_DIR="src/vendor/vectorscan-install"
+
+if [ -n "$VECTORSCAN_INCLUDE_DIR" ] && [ -n "$VECTORSCAN_LIB_DIR" ]; then
+  if [ -f "$VECTORSCAN_INCLUDE_DIR/hs/hs.h" ]; then
+    PKG_CPPFLAGS="-DHAVE_HS -I$VECTORSCAN_INCLUDE_DIR"
+    PKG_LIBS="-L$VECTORSCAN_LIB_DIR -lhs"
+    FOUND_HS=yes
+  fi
+fi
+
+if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORSCAN_USE_SYSTEM" != "1" ]; then
+  if [ ! -f "$BUNDLED_SOURCE_DIR/src/hs.h" ]; then
+    echo "configure.win: bundled Vectorscan source is missing at $BUNDLED_SOURCE_DIR"
+  elif ! command -v cmake >/dev/null 2>&1; then
+    echo "configure.win: cmake is required to build bundled Vectorscan"
+  else
+    # ragel is optional: without it the vendored CMake uses the pre-generated
+    # src/parser/*.rl.cpp sources.
+    cmake_args="
+      -DCMAKE_BUILD_TYPE=Release
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+      -DBUILD_SHARED_LIBS=OFF
+      -DBUILD_STATIC_LIBS=ON
+      -DBUILD_UNIT=OFF
+      -DBUILD_TOOLS=OFF
+      -DBUILD_EXAMPLES=OFF
+      -DBUILD_BENCHMARKS=OFF
+      -DBUILD_DOC=OFF
+      -DHS_C_FLAGS=-Wno-error
+      -DHS_CXX_FLAGS=-Wno-error
+      -DNO_SIMDE_IN_FAT=ON
+    "
+
+    # Boost headers: an explicit root, else the BH package (LinkingTo).
+    boost_root="$VECTORSCAN_BOOST_ROOT"
+    if [ -z "$boost_root" ]; then
+      boost_root="$("${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e 'cat(system.file(package = "BH"))' 2>/dev/null || true)"
+    fi
+
+    # Build with R's (Rtools) compilers and make, never a Visual Studio
+    # generator: MSVC objects cannot be linked into the package.
+    cc_bin="$("${R_HOME}/bin${R_ARCH_BIN}/R.exe" CMD config CC | cut -d' ' -f1)"
+    cxx_bin="$("${R_HOME}/bin${R_ARCH_BIN}/R.exe" CMD config CXX17 | cut -d' ' -f1)"
+    if [ -n "$VECTORSCAN_CMAKE_ARGS" ]; then
+      cmake_args="$cmake_args $VECTORSCAN_CMAKE_ARGS"
+    fi
+
+    jobs="${VECTORSCAN_BUILD_JOBS:-2}"
+    install_prefix="$(pwd)/$BUNDLED_INSTALL_DIR"
+
+    rm -rf "$BUNDLED_BUILD_DIR" "$BUNDLED_INSTALL_DIR"
+
+    echo "configure.win: building bundled Vectorscan"
+    # shellcheck disable=SC2086
+    # R's package compile flags are for R code, not the vendored build (see
+    # configure); keep them away from CMake.
+    (
+      unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+      cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" -G "Unix Makefiles" $cmake_args \
+        ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
+        ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
+        ${cc_bin:+"-DCMAKE_C_COMPILER=$cc_bin"} \
+        ${cxx_bin:+"-DCMAKE_CXX_COMPILER=$cxx_bin"}
+    )
+    cmake --build "$BUNDLED_BUILD_DIR" --target hs --config Release -j "$jobs"
+    cmake --build "$BUNDLED_BUILD_DIR" --target hs_runtime --config Release -j "$jobs"
+    cmake --install "$BUNDLED_BUILD_DIR" --prefix "$install_prefix"
+    rm -rf "$BUNDLED_BUILD_DIR"
+
+    if [ -f "$BUNDLED_INSTALL_DIR/lib/libhs.a" ]; then
+      PKG_CPPFLAGS="-DHAVE_HS -Ivendor/vectorscan-install/include"
+      PKG_LIBS="vendor/vectorscan-install/lib/libhs.a vendor/vectorscan-install/lib/libhs_runtime.a"
+      FOUND_HS=yes
+    elif [ -f "$BUNDLED_INSTALL_DIR/lib/hs.lib" ]; then
+      PKG_CPPFLAGS="-DHAVE_HS -Ivendor/vectorscan-install/include"
+      PKG_LIBS="vendor/vectorscan-install/lib/hs.lib vendor/vectorscan-install/lib/hs_runtime.lib"
+      FOUND_HS=yes
+    fi
+  fi
+fi
+
+if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_ALLOW_STUBS" != "true" ] && [ "$VECTORSCAN_ALLOW_STUBS" != "1" ]; then
+  echo "configure.win: failed to build bundled Vectorscan"
+  echo "configure.win: install cmake, or set VECTORSCAN_USE_SYSTEM=true"
+  exit 1
+fi
+
+cat > src/Makevars.win <<EOF
+CXX_STD = CXX17
+PKG_CPPFLAGS = $PKG_CPPFLAGS
+PKG_LIBS = $PKG_LIBS
+EOF
+
+if [ "$FOUND_HS" = yes ]; then
+  echo "configure.win: Vectorscan/Hyperscan support enabled"
+else
+  echo "configure.win: Vectorscan/Hyperscan not found; building package with runtime stubs"
+  echo "configure.win: set VECTORSCAN_ALLOW_STUBS only for wrapper development"
+fi

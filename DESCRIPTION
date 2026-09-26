@@ -1,13 +1,35 @@
 Package: vectorscan
-Title: What the Package Does (One Line, Title Case)
+Title: R Bindings to Vectorscan and Hyperscan
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: c(
+    person("Pedro", "Baltazar", , "pedrobtz@gmail.com",
+           role = c("aut", "cre", "cph")),
+    person("Intel Corporation", role = "cph",
+           comment = "Hyperscan, bundled in src/vendor/vectorscan"),
+    person("VectorCamp PC", role = "cph",
+           comment = "Vectorscan, bundled in src/vendor/vectorscan"),
+    person("Arm Limited", role = "cph",
+           comment = "Vectorscan, bundled in src/vendor/vectorscan")
+  )
+Description: Compile and scan high-performance regular expression databases
+    using Vectorscan or Hyperscan from R. The package exposes block, vectored,
+    and streaming scans with R-friendly match results and callback support.
 License: MIT + file LICENSE
+Copyright: See inst/COPYRIGHTS.
+URL: https://pedrobtz.github.io/vectorscan/,
+    https://github.com/pedrobtz/vectorscan
+BugReports: https://github.com/pedrobtz/vectorscan/issues
+SystemRequirements: cmake
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.0.0
-Suggests: 
+Depends:
+    R (>= 4.1)
+LinkingTo:
+    BH
+Suggests:
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

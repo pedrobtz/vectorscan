@@ -1,2 +1,13 @@
 ^LICENSE\.md$
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^CLAUDE\.md$
+^roadmap\.md$
+^src/vendor/vectorscan-install$
+^vectorscan\.Rproj$
+^\.Rproj\.user$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^tools$
