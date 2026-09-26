@@ -155,6 +155,15 @@ build_bundled_vectorscan() {
     cxx_flags="$(compiler_flags "$cxx_line")"
   fi
 
+  # The x86-64 fat runtime (one build per microarchitecture, chosen at run
+  # time) relies on ELF ifunc and ELF symbol renaming, so upstream supports it
+  # on Linux and FreeBSD only. Elsewhere -- macOS on Intel, in particular --
+  # build a single x86-64-v2 (SSE4.2) library instead.
+  case "$(uname -s)" in
+    Linux|FreeBSD) ;;
+    *) cmake_args="$cmake_args -DFAT_RUNTIME=OFF" ;;
+  esac
+
   if [ -n "$VECTORSCAN_CMAKE_ARGS" ]; then
     cmake_args="$cmake_args $VECTORSCAN_CMAKE_ARGS"
   fi
