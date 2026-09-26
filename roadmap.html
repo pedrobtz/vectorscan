@@ -97,6 +97,18 @@
 </ul><p><em>Exit criteria: a user can replace <code>grepl(paste(pats, collapse="|"), x)</code> with two lines of vectorscan and get pattern-level attribution, matched text, and a 10–100× speedup on large pattern sets.</em></p>
 </div>
 <div class="section level2">
+<h2 id="stage-2b--capture-groups">Stage 2b — Capture groups<a class="anchor" aria-label="anchor" href="#stage-2b--capture-groups"></a></h2>
+<p><em>Goal: turn text into columns with one regex, at least 10× faster than <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code>. The motivating case is reading a log file into a data frame (timestamp, level, location, text).</em></p>
+<p>M0 (done 2026-09-26) measured where base R’s time goes. On 1M log lines, <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code> takes 12.5 s, but PCRE2 matches the same lines in 0.23 s: the rest is building R objects. A C loop over PCRE2 with JIT that writes the columns directly takes 0.13 s. Chimera was 7.5× slower than that when every line matches, so <code>hs_capture()</code> runs on PCRE2 directly (preferably the one R uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers: <code>.agents/capture-groups.md</code>.</p>
+<ul class="task-list"><li><label><input type="checkbox" checked>M0 Benchmark gate: base R, PCRE2 + JIT and Chimera on 1M lines (<code>tools/bench-capture/</code>).</label></li>
+<li><label><input type="checkbox">M1 PCRE2 in the build: system PCRE2 (Rtools, <code>pkg-config</code>) or a vendored 10.48 fallback with hidden symbols; a build-modes job for the symbol-collision setting.</label></li>
+<li><label><input type="checkbox">M2 C capture loop: columns filled in place; differential test against <code>regexec(perl = TRUE)</code>; sanitizers clean.</label></li>
+<li><label><input type="checkbox">M3 R API: <code>hs_capture(pattern, x, proto)</code> like <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code>, at least 10× faster; docs, a “Parsing logs” article, benchmarks.</label></li>
+<li><label><input type="checkbox">M4 Vectorscan prefilter and rule sets: route lines to formats with <code><a href="reference/hs_verbs.html">hs_match()</a></code>, capture with PCRE2.</label></li>
+<li><label><input type="checkbox">M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.</label></li>
+</ul><p><em>Exit criteria: <code>hs_capture()</code> on all platforms, sanitizer-clean, identical to <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code> on its tests and at least 10× faster.</em></p>
+</div>
+<div class="section level2">
 <h2 id="stage-3--performance-parallelism-and-scale">Stage 3 — Performance, parallelism, and scale<a class="anchor" aria-label="anchor" href="#stage-3--performance-parallelism-and-scale"></a></h2>
 <p><em>Goal: own the “fast” claim with receipts, and handle data that doesn’t fit in memory.</em></p>
 <ul class="task-list"><li><label><input type="checkbox">Scratch management for parallelism: expose <code>hs_scratch_clone()</code> semantics so databases can be shared across threads/processes; document (and test) the one-scratch-per-thread rule.</label></li>
@@ -126,7 +138,7 @@
 <p><em>Goal: be the obvious answer when someone asks “how do I match 10,000 patterns fast in R?”</em></p>
 <ul class="task-list"><li><label><input type="checkbox">Use-case vignettes / pkgdown articles, each targeting a searchable problem: - “Scanning logs for secrets and PII” (expand the benchmark vignette’s rule set into a worked example). - “Matching IOC / threat-intel feeds against network logs.” - “Dictionary and motif scanning for text mining / bioinformatics.”</label></li>
 <li><label><input type="checkbox">Interop sugar: examples (not hard dependencies) for <code>data.table</code>, <code>dplyr</code>/<code>tidyr</code> list-column workflows, and <code>arrow</code>/duckdb pipelines feeding <code>hs_scan_file()</code>.</label></li>
-<li><label><input type="checkbox">Evaluate a <strong>Chimera</strong> add-on (Hyperscan’s PCRE hybrid, currently excluded from the vendored tree): would bring capture groups and full PCRE semantics — decide based on user demand, as it roughly doubles build complexity.</label></li>
+<li><label><input type="checkbox" checked>Evaluate a <strong>Chimera</strong> add-on (Hyperscan’s PCRE hybrid): measured 2026-09-26 and not chosen. PCRE2 with JIT is 7.5× faster for capture groups when every line matches (Stage 2b). Revisit if Vectorscan 5.5 moves Chimera to PCRE2.</label></li>
 <li><label><input type="checkbox">Community scaffolding: <code>CONTRIBUTING.md</code>, issue templates, <code>NEWS.md</code> discipline per release, lifecycle badges.</label></li>
 <li><label><input type="checkbox">Announce: r-universe listing, R Weekly submission, a blog post built around the benchmark story, rOpenSci soft-review consideration.</label></li>
 <li><label><input type="checkbox">Track adoption: CRAN downloads, GitHub issues by theme — feed back into roadmap re-prioritization.</label></li>
