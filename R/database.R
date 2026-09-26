@@ -143,8 +143,11 @@ hs_compile <- function(
   ext = NULL,
   literal = FALSE
 ) {
-  if (!is_hs_database(database) && missing(expressions) &&
-    (is.character(database) || is.data.frame(database))) {
+  if (
+    !is_hs_database(database) &&
+      missing(expressions) &&
+      (is.character(database) || is.data.frame(database))
+  ) {
     expressions <- database
     database <- hs_database()
   }

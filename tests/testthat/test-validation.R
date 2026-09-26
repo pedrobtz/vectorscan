@@ -1,5 +1,8 @@
 test_that("typed errors have their own classes", {
-  expect_error(hs_database(platform = list()), class = "vectorscan_error_platform")
+  expect_error(
+    hs_database(platform = list()),
+    class = "vectorscan_error_platform"
+  )
   expect_error(hs_database(0L), class = "vectorscan_error_mode")
   expect_error(
     hs_database(bitwOr(HS_MODE_BLOCK, HS_MODE_VECTORED)),

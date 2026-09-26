@@ -40,8 +40,16 @@ test_that("closed streams cannot be scanned or closed again", {
   hs_stream_close(stream)
 
   expect_output(print(stream), "closed")
-  expect_error(hs_stream_scan(stream, "foo"), "already closed", class = "vectorscan_error")
-  expect_error(hs_stream_close(stream), "already closed", class = "vectorscan_error")
+  expect_error(
+    hs_stream_scan(stream, "foo"),
+    "already closed",
+    class = "vectorscan_error"
+  )
+  expect_error(
+    hs_stream_close(stream),
+    "already closed",
+    class = "vectorscan_error"
+  )
 })
 
 test_that("a stream keeps its database alive", {

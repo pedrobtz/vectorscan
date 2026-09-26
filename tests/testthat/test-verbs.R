@@ -4,7 +4,9 @@ test_that("hs_detect() agrees with grepl() on random data", {
   set.seed(1)
   x <- vapply(
     1:500,
-    function(i) paste(sample(c(letters[1:6], " "), sample(0:40, 1), TRUE), collapse = ""),
+    function(i) {
+      paste(sample(c(letters[1:6], " "), sample(0:40, 1), TRUE), collapse = "")
+    },
     character(1)
   )
   patterns <- c("abc", "f+e", "^a", "d$", "b.d", "[ef]{3}")
@@ -15,7 +17,11 @@ test_that("hs_detect() agrees with grepl() on random data", {
   per <- hs_detect(patterns, x, per_pattern = TRUE)
   expect_identical(dim(per), c(length(x), length(patterns)))
   for (j in seq_along(patterns)) {
-    expect_identical(unname(per[, j]), grepl(patterns[[j]], x), info = patterns[[j]])
+    expect_identical(
+      unname(per[, j]),
+      grepl(patterns[[j]], x),
+      info = patterns[[j]]
+    )
   }
 })
 
@@ -49,7 +55,10 @@ test_that("hs_match() returns every match with text and names", {
 
   expect_named(m, c("input", "id", "pattern", "from", "to", "match"))
   expect_identical(m$input, c(1L, 1L, 1L, 4L, 4L))
-  expect_identical(m$pattern, c("greeting", "number", "number", "number", "greeting"))
+  expect_identical(
+    m$pattern,
+    c("greeting", "number", "number", "number", "greeting")
+  )
   expect_identical(m$match, c("hello", "4", "42", "7", "hello"))
   expect_identical(m$from, c(0, 6, 6, 0, 2))
 })
@@ -117,8 +126,15 @@ test_that("rules data frames carry ids, flags and names", {
 
   db <- hs_compile(rules)
   expect_identical(db$pattern_ids, c(10L, 20L))
-  expect_error(hs_compile(hs_database(), rules, ids = 1:2), class = "vectorscan_error")
-  expect_error(hs_compile(data.frame(x = "a")), "pattern", class = "vectorscan_error")
+  expect_error(
+    hs_compile(hs_database(), rules, ids = 1:2),
+    class = "vectorscan_error"
+  )
+  expect_error(
+    hs_compile(data.frame(x = "a")),
+    "pattern",
+    class = "vectorscan_error"
+  )
 })
 
 test_that("deserialized databases label patterns by id", {

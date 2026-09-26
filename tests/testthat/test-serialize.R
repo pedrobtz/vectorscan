@@ -74,7 +74,12 @@ test_that("serialized bytes are plain Vectorscan bytes plus metadata", {
   skip_if_not(hs_available())
 
   db <- hs_database()
-  hs_compile(db, c("foo", "bar"), ids = c(5L, 6L), flags = c(0L, HS_FLAG_SOM_LEFTMOST))
+  hs_compile(
+    db,
+    c("foo", "bar"),
+    ids = c(5L, 6L),
+    flags = c(0L, HS_FLAG_SOM_LEFTMOST)
+  )
   bytes <- hs_serialize(db)
 
   expect_equal(attr(bytes, "hs_pattern_ids"), c(5L, 6L))
@@ -130,8 +135,16 @@ test_that("damaged hs_save() files are rejected", {
   huge_count <- good
   huge_count[13:16] <- as.raw(c(255, 255, 255, 127))
 
-  expect_error(write_and_load(version_2), "unsupported version", class = "vectorscan_error")
-  expect_error(write_and_load(huge_count), "truncated", class = "vectorscan_error")
+  expect_error(
+    write_and_load(version_2),
+    "unsupported version",
+    class = "vectorscan_error"
+  )
+  expect_error(
+    write_and_load(huge_count),
+    "truncated",
+    class = "vectorscan_error"
+  )
   expect_error(write_and_load(good[1:14]), class = "vectorscan_error")
   expect_error(write_and_load(good[1:30]))
 })

@@ -35,9 +35,17 @@ hs_flags <- function(x) {
 }
 
 flag_letters <- c(
-  i = "CASELESS", s = "DOTALL", m = "MULTILINE", H = "SINGLEMATCH",
-  V = "ALLOWEMPTY", "8" = "UTF8", W = "UCP", P = "PREFILTER",
-  L = "SOM_LEFTMOST", C = "COMBINATION", Q = "QUIET"
+  i = "CASELESS",
+  s = "DOTALL",
+  m = "MULTILINE",
+  H = "SINGLEMATCH",
+  V = "ALLOWEMPTY",
+  "8" = "UTF8",
+  W = "UCP",
+  P = "PREFILTER",
+  L = "SOM_LEFTMOST",
+  C = "COMBINATION",
+  Q = "QUIET"
 )
 
 flag_value <- function(name) {

@@ -92,8 +92,13 @@
 #'   http = "^(?<method>[A-Z]+) (?<path>\\S+) (?<status>\\d{3})$",
 #'   audit = "^user=(?<user>\\w+) action=(?<action>\\w+)$"
 #' ), mixed)
-hs_capture <- function(pattern, x, proto = NULL, match_limit = NULL,
-                       depth_limit = NULL) {
+hs_capture <- function(
+  pattern,
+  x,
+  proto = NULL,
+  match_limit = NULL,
+  depth_limit = NULL
+) {
   if (!inherits(pattern, c("hs_capture_pattern", "hs_capture_rules"))) {
     pattern <- hs_capture_compile(pattern)
   }
@@ -112,15 +117,20 @@ hs_capture <- function(pattern, x, proto = NULL, match_limit = NULL,
     if (length(proto) != ncap) {
       stop_vectorscan(sprintf(
         "`pattern` has %d capture group%s but `proto` has %d column%s.",
-        ncap, if (ncap == 1L) "" else "s",
-        length(proto), if (length(proto) == 1L) "" else "s"
+        ncap,
+        if (ncap == 1L) "" else "s",
+        length(proto),
+        if (length(proto) == 1L) "" else "s"
       ))
     }
   }
 
   out <- .Call(
-    vctrsn_pcre2_capture_many, pattern$ptr, x,
-    limits$match_limit, limits$depth_limit
+    vctrsn_pcre2_capture_many,
+    pattern$ptr,
+    x,
+    limits$match_limit,
+    limits$depth_limit
   )
   warn_capture_errors(sum(out$errors != 0L), out$errors[out$errors != 0L][1])
 
@@ -155,7 +165,8 @@ print.hs_capture_pattern <- function(x, ...) {
   n <- length(x$names)
   cat(sprintf(
     "<hs_capture_pattern: %d group%s%s, %s>\n",
-    n, if (n == 1L) "" else "s",
+    n,
+    if (n == 1L) "" else "s",
     if (any(nzchar(x$names))) {
       paste0(" (", paste(capture_column_names(x$names), collapse = ", "), ")")
     } else {
@@ -205,7 +216,9 @@ compile_capture_rules <- function(patterns, jit = TRUE) {
   if (is.null(labels)) {
     labels <- patterns
   } else {
-    labels[is.na(labels) | labels == ""] <- patterns[is.na(labels) | labels == ""]
+    labels[is.na(labels) | labels == ""] <- patterns[
+      is.na(labels) | labels == ""
+    ]
   }
   patterns <- unname(patterns)
 
@@ -216,16 +229,30 @@ compile_capture_rules <- function(patterns, jit = TRUE) {
     stop_vectorscan("A capture group cannot be called `pattern` in a rule set.")
   }
 
-  prefilter_flags <- Reduce(bitwOr, c(
-    HS_FLAG_PREFILTER, HS_FLAG_SINGLEMATCH, HS_FLAG_UTF8, HS_FLAG_ALLOWEMPTY
-  ))
-  prefiltered <- vapply(patterns, function(p) {
-    ok <- tryCatch({
-      hs_compile(hs_database(), p, flags = prefilter_flags)
-      TRUE
-    }, error = function(e) FALSE)
-    ok
-  }, logical(1), USE.NAMES = FALSE)
+  prefilter_flags <- Reduce(
+    bitwOr,
+    c(
+      HS_FLAG_PREFILTER,
+      HS_FLAG_SINGLEMATCH,
+      HS_FLAG_UTF8,
+      HS_FLAG_ALLOWEMPTY
+    )
+  )
+  prefiltered <- vapply(
+    patterns,
+    function(p) {
+      ok <- tryCatch(
+        {
+          hs_compile(hs_database(), p, flags = prefilter_flags)
+          TRUE
+        },
+        error = function(e) FALSE
+      )
+      ok
+    },
+    logical(1),
+    USE.NAMES = FALSE
+  )
 
   prefilter <- NULL
   if (any(prefiltered) && isTRUE(hs_available())) {
@@ -255,7 +282,10 @@ compile_capture_rules <- function(patterns, jit = TRUE) {
 capture_rules <- function(rules, x, proto, limits) {
   n <- length(x)
   if (!is.null(proto)) {
-    if (!setequal(names(proto), rules$columns) || length(proto) != length(rules$columns)) {
+    if (
+      !setequal(names(proto), rules$columns) ||
+        length(proto) != length(rules$columns)
+    ) {
       stop_vectorscan(sprintf(
         "`proto` must have one column per group name in the rules: %s.",
         paste(rules$columns, collapse = ", ")
@@ -276,7 +306,10 @@ capture_rules <- function(rules, x, proto, limits) {
   candidates <- vector("list", length(rules$patterns))
   if (!is.null(rules$prefilter)) {
     hits <- scan_many(rules$prefilter, x, first_only = FALSE)
-    candidates <- split(hits$input, factor(hits$id + 1L, levels = seq_along(rules$patterns)))
+    candidates <- split(
+      hits$input,
+      factor(hits$id + 1L, levels = seq_along(rules$patterns))
+    )
   }
 
   # Each rule touches only its own candidates, so the cost follows the
@@ -296,8 +329,11 @@ capture_rules <- function(rules, x, proto, limits) {
     }
 
     out <- .Call(
-      vctrsn_pcre2_capture_many, rules$compiled[[r]]$ptr, x[idx],
-      limits$match_limit, limits$depth_limit
+      vctrsn_pcre2_capture_many,
+      rules$compiled[[r]]$ptr,
+      x[idx],
+      limits$match_limit,
+      limits$depth_limit
     )
     bad <- out$errors != 0L
     if (any(bad)) {
@@ -335,7 +371,9 @@ capture_rules <- function(rules, x, proto, limits) {
 print.hs_capture_rules <- function(x, ...) {
   cat(sprintf(
     "<hs_capture_rules: %d rules, %d columns (%s), %d prefiltered by Vectorscan>\n",
-    length(x$patterns), length(x$columns), paste(x$columns, collapse = ", "),
+    length(x$patterns),
+    length(x$columns),
+    paste(x$columns, collapse = ", "),
     sum(x$prefiltered)
   ))
   invisible(x)
@@ -373,12 +411,16 @@ warn_capture_errors <- function(failed, first_error) {
   if (failed == 0L) {
     return(invisible())
   }
-  warning(sprintf(
-    "%d element%s could not be matched (%s); %s NA.",
-    failed, if (failed == 1L) "" else "s",
-    .Call(vctrsn_pcre2_error_message, first_error),
-    if (failed == 1L) "its row is" else "their rows are"
-  ), call. = FALSE)
+  warning(
+    sprintf(
+      "%d element%s could not be matched (%s); %s NA.",
+      failed,
+      if (failed == 1L) "" else "s",
+      .Call(vctrsn_pcre2_error_message, first_error),
+      if (failed == 1L) "its row is" else "their rows are"
+    ),
+    call. = FALSE
+  )
 }
 
 # list(matched, groups, errors) for every element of `x`: see
@@ -388,7 +430,13 @@ capture_many <- function(pattern, x) {
     stop_vectorscan("`x` must be a character vector.")
   }
   compiled <- pcre2_compile_pattern(pattern)
-  out <- .Call(vctrsn_pcre2_capture_many, compiled$ptr, x, NA_integer_, NA_integer_)
+  out <- .Call(
+    vctrsn_pcre2_capture_many,
+    compiled$ptr,
+    x,
+    NA_integer_,
+    NA_integer_
+  )
   names(out$groups) <- compiled$names
   out
 }

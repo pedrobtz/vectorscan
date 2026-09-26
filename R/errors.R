@@ -57,9 +57,19 @@ stop_unavailable <- function() {
 native_errors <- data.frame(
   code = -(1:13),
   class = c(
-    "invalid", "nomem", "scan_terminated", "compiler", "db_version",
-    "db_platform", "db_mode", "bad_align", "bad_alloc", "scratch_in_use",
-    "arch", "insufficient_space", "unknown"
+    "invalid",
+    "nomem",
+    "scan_terminated",
+    "compiler",
+    "db_version",
+    "db_platform",
+    "db_mode",
+    "bad_align",
+    "bad_alloc",
+    "scratch_in_use",
+    "arch",
+    "insufficient_space",
+    "unknown"
   ),
   text = c(
     "a parameter was invalid",
@@ -83,17 +93,29 @@ native_errors <- data.frame(
 stop_native_error <- function(code, operation) {
   row <- match(code, native_errors$code)
   class <- if (is.na(row)) "unknown" else native_errors$class[[row]]
-  text <- if (is.na(row)) "an unknown error occurred" else native_errors$text[[row]]
+  text <- if (is.na(row)) {
+    "an unknown error occurred"
+  } else {
+    native_errors$text[[row]]
+  }
   condition <- structure(
     list(
-      message = sprintf("Vectorscan %s failed: %s (error %d).", operation, text, code),
+      message = sprintf(
+        "Vectorscan %s failed: %s (error %d).",
+        operation,
+        text,
+        code
+      ),
       call = NULL,
       code = code,
       operation = operation
     ),
     class = c(
-      paste0("vectorscan_error_", class), "vectorscan_error_native",
-      "vectorscan_error", "error", "condition"
+      paste0("vectorscan_error_", class),
+      "vectorscan_error_native",
+      "vectorscan_error",
+      "error",
+      "condition"
     )
   )
   stop(condition)
@@ -103,12 +125,21 @@ stop_native_error <- function(code, operation) {
 stop_compile_error <- function(expression, reason) {
   condition <- structure(
     list(
-      message = sprintf("Vectorscan compile error at expression %d: %s", expression, reason),
+      message = sprintf(
+        "Vectorscan compile error at expression %d: %s",
+        expression,
+        reason
+      ),
       call = NULL,
       expression = expression,
       reason = reason
     ),
-    class = c("vectorscan_error_compile", "vectorscan_error", "error", "condition")
+    class = c(
+      "vectorscan_error_compile",
+      "vectorscan_error",
+      "error",
+      "condition"
+    )
   )
   stop(condition)
 }

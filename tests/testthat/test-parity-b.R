@@ -6,12 +6,22 @@ test_that("hs_flags() reads letters and names", {
   )
   expect_identical(
     hs_flags("smHV8WPLCQi"),
-    Reduce(bitwOr, c(
-      HS_FLAG_CASELESS, HS_FLAG_DOTALL, HS_FLAG_MULTILINE,
-      HS_FLAG_SINGLEMATCH, HS_FLAG_ALLOWEMPTY, HS_FLAG_UTF8, HS_FLAG_UCP,
-      HS_FLAG_PREFILTER, HS_FLAG_SOM_LEFTMOST, HS_FLAG_COMBINATION,
-      HS_FLAG_QUIET
-    ))
+    Reduce(
+      bitwOr,
+      c(
+        HS_FLAG_CASELESS,
+        HS_FLAG_DOTALL,
+        HS_FLAG_MULTILINE,
+        HS_FLAG_SINGLEMATCH,
+        HS_FLAG_ALLOWEMPTY,
+        HS_FLAG_UTF8,
+        HS_FLAG_UCP,
+        HS_FLAG_PREFILTER,
+        HS_FLAG_SOM_LEFTMOST,
+        HS_FLAG_COMBINATION,
+        HS_FLAG_QUIET
+      )
+    )
   )
   expect_identical(hs_flags(c("ucp", "none", "ii")), c(64L, 0L, 1L))
   expect_error(hs_flags("x"), class = "vectorscan_error_flags")
@@ -25,7 +35,10 @@ test_that("hs_compile() takes flags as strings", {
 
   db <- hs_compile(c("abc", "x.y"), flags = c("i", "s"))
   expect_identical(db$pattern_flags, c(HS_FLAG_CASELESS, HS_FLAG_DOTALL))
-  expect_identical(hs_detect(db, c("ABC", "x\ny", "none")), c(TRUE, TRUE, FALSE))
+  expect_identical(
+    hs_detect(db, c("ABC", "x\ny", "none")),
+    c(TRUE, TRUE, FALSE)
+  )
 
   rules <- data.frame(pattern = c("abc", "def"), flags = c("i", ""))
   expect_identical(hs_detect(rules, c("ABC", "DEF")), c(TRUE, FALSE))
@@ -49,7 +62,10 @@ test_that("literal = TRUE matches the strings as written", {
   expect_true(hs_detect(caseless, "ERROR"))
 
   # Multibyte UTF-8 literals are compiled by bytes
-  expect_true(hs_detect(hs_compile("caf\u00e9", literal = TRUE), "un caf\u00e9"))
+  expect_true(hs_detect(
+    hs_compile("caf\u00e9", literal = TRUE),
+    "un caf\u00e9"
+  ))
 
   # Streams too
   sdb <- hs_database(HS_MODE_STREAM)
@@ -60,8 +76,10 @@ test_that("literal = TRUE matches the strings as written", {
   hs_stream_close(s)
   expect_identical(out$to, 4)
 
-  expect_error(hs_compile("a", ext = hs_ext(min_length = 1), literal = TRUE),
-               "literal")
+  expect_error(
+    hs_compile("a", ext = hs_ext(min_length = 1), literal = TRUE),
+    "literal"
+  )
   expect_error(hs_compile("a", literal = NA), "TRUE or FALSE")
   expect_error(
     hs_compile("a", flags = HS_FLAG_UCP, literal = TRUE),
@@ -89,8 +107,13 @@ test_that("hs_read_patterns() reads Hyperscan pattern files", {
   )
   expect_identical(
     rules$flags,
-    c(HS_FLAG_CASELESS, bitwOr(HS_FLAG_DOTALL, HS_FLAG_MULTILINE), 0L,
-      HS_FLAG_SOM_LEFTMOST, 0L)
+    c(
+      HS_FLAG_CASELESS,
+      bitwOr(HS_FLAG_DOTALL, HS_FLAG_MULTILINE),
+      0L,
+      HS_FLAG_SOM_LEFTMOST,
+      0L
+    )
   )
   expect_null(rules$ext[[1]])
   expect_identical(rules$ext[[3]], hs_ext(edit_distance = 1))

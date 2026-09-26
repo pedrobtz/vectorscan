@@ -124,7 +124,10 @@ parse_pattern_line <- function(line, line_no) {
 
 parse_ext_params <- function(text, fail) {
   keys <- c(
-    "min_offset", "max_offset", "min_length", "edit_distance",
+    "min_offset",
+    "max_offset",
+    "min_length",
+    "edit_distance",
     "hamming_distance"
   )
   params <- list()

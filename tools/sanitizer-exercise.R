@@ -41,14 +41,27 @@ check <- function(label, expr) {
 # An R error is expected on these paths; a crash is not, and the sanitizer
 # reports memory problems independently of what this returns.
 raises <- function(expr) {
-  tryCatch({ force(expr); FALSE }, error = function(e) TRUE)
+  tryCatch(
+    {
+      force(expr)
+      FALSE
+    },
+    error = function(e) TRUE
+  )
 }
 
 cat("-- compile, including every error path ---------------------------\n")
 
 good <- list(
-  "foo", c("foo", "bar", "baz"), "^foobar$", "a.*b", "[a-z]+[0-9]{2,4}",
-  "(foo|bar)+baz", paste0("w", 1:200), "\\bword\\b", "café"
+  "foo",
+  c("foo", "bar", "baz"),
+  "^foobar$",
+  "a.*b",
+  "[a-z]+[0-9]{2,4}",
+  "(foo|bar)+baz",
+  paste0("w", 1:200),
+  "\\bword\\b",
+  "café"
 )
 for (expr in good) {
   db <- hs_database()
@@ -74,8 +87,13 @@ hs_compile(
   flags = c(HS_FLAG_NONE, HS_FLAG_SOM_LEFTMOST, HS_FLAG_NONE, HS_FLAG_CASELESS)
 )
 inputs <- list(
-  "", "foobar", "FOOBAR", strrep("foo", 10000), charToRaw("foobar"),
-  as.raw(0:255), "日本語 foo"
+  "",
+  "foobar",
+  "FOOBAR",
+  strrep("foo", 10000),
+  charToRaw("foobar"),
+  as.raw(0:255),
+  "日本語 foo"
 )
 for (x in inputs) {
   check("scan returns a data frame", is.data.frame(hs_scan(db, x)))
@@ -93,10 +111,14 @@ check("callback terminates", {
   hs_scan(db, "foobar", callback = function(...) TRUE) == 1L
 })
 for (i in 1:50) {
-  check("callback error", raises(hs_scan(
-    db, strrep("foobar", 100),
-    callback = function(...) stop("boom")
-  )))
+  check(
+    "callback error",
+    raises(hs_scan(
+      db,
+      strrep("foobar", 100),
+      callback = function(...) stop("boom")
+    ))
+  )
   check("scan after callback error", is.data.frame(hs_scan(db, "foobar")))
 }
 # Whether a non-logical return is an error is the R layer's business; the
@@ -104,10 +126,15 @@ for (i in 1:50) {
 invisible(raises(hs_scan(db, "foobar", callback = function(...) list(1, 2))))
 check("callback context", {
   seen <- NULL
-  hs_scan(db, "foo", callback = function(id, from, to, flags, ctx) {
-    seen <<- ctx$tag
-    FALSE
-  }, context = list(tag = "x"))
+  hs_scan(
+    db,
+    "foo",
+    callback = function(id, from, to, flags, ctx) {
+      seen <<- ctx$tag
+      FALSE
+    },
+    context = list(tag = "x")
+  )
   identical(seen, "x")
 })
 
@@ -116,18 +143,30 @@ cat("-- vectored and streaming ----------------------------------------\n")
 vdb <- hs_database(HS_MODE_VECTORED)
 hs_compile(vdb, c("foobar", "o+b"))
 check("vectored", is.data.frame(hs_scan_vector(vdb, c("foo", "bar"))))
-check("vectored empty blocks", is.data.frame(hs_scan_vector(vdb, c("", "", "x"))))
-check("vectored callback error", raises(hs_scan_vector(
-  vdb, c("foo", "bar"),
-  callback = function(...) stop("boom")
-)))
+check(
+  "vectored empty blocks",
+  is.data.frame(hs_scan_vector(vdb, c("", "", "x")))
+)
+check(
+  "vectored callback error",
+  raises(hs_scan_vector(
+    vdb,
+    c("foo", "bar"),
+    callback = function(...) stop("boom")
+  ))
+)
 
 # SOM in stream mode needs a SOM horizon mode, which the package does not
 # expose, so this is a compile error -- the path that once read Vectorscan's
 # message after freeing it.
-check("stream SOM compile error", raises(hs_compile(
-  hs_database(HS_MODE_STREAM), "foo.*bar", flags = HS_FLAG_SOM_LEFTMOST
-)))
+check(
+  "stream SOM compile error",
+  raises(hs_compile(
+    hs_database(HS_MODE_STREAM),
+    "foo.*bar",
+    flags = HS_FLAG_SOM_LEFTMOST
+  ))
+)
 
 sdb <- hs_database(HS_MODE_STREAM)
 hs_compile(sdb, c("foo.*bar", "baz"))
@@ -136,10 +175,14 @@ for (i in 1:20) {
   hs_stream_scan(s, "foo and ")
   hs_stream_scan(s, strrep("x", 1000))
   check("stream match across chunks", nrow(hs_stream_scan(s, " then bar")) >= 1)
-  check("stream callback error", raises(hs_stream_scan(
-    s, "baz",
-    callback = function(...) stop("boom")
-  )))
+  check(
+    "stream callback error",
+    raises(hs_stream_scan(
+      s,
+      "baz",
+      callback = function(...) stop("boom")
+    ))
+  )
   hs_stream_close(s)
   check("closed stream rejects scans", raises(hs_stream_scan(s, "foo")))
 }
@@ -158,7 +201,10 @@ cat("-- vectorized verbs ----------------------------------------------\n")
 words <- c("foo", "bar", NA, "", strrep("foobar ", 2000), "caf\u00e9 foo")
 rules <- c(a = "foo", b = "o+b", c = "\\w+")
 check("detect", identical(length(hs_detect(rules, words)), length(words)))
-check("detect per pattern", is.matrix(hs_detect(rules, words, per_pattern = TRUE)))
+check(
+  "detect per pattern",
+  is.matrix(hs_detect(rules, words, per_pattern = TRUE))
+)
 check("count", is.integer(hs_count(rules, words)))
 check("match", is.data.frame(hs_match(rules, words)))
 check("extract", is.list(hs_extract(rules, words)))
@@ -172,26 +218,55 @@ cat("-- PCRE2 capture loop --------------------------------------------\n")
 # R_alloc(), unset groups and errors per element.
 if (!is.null(vectorscan:::pcre2_info())) {
   cap <- vectorscan:::capture_many
-  lines <- c("a=1", NA, "", "bad \xff utf", "caf\u00e9=\u00e9t\u00e9", strrep("k=v;", 3000))
+  lines <- c(
+    "a=1",
+    NA,
+    "",
+    "bad \xff utf",
+    "caf\u00e9=\u00e9t\u00e9",
+    strrep("k=v;", 3000)
+  )
   check("capture", is.list(cap("^(\\w+)=(\\S*)(;)?", lines)))
   check("capture no groups", is.list(cap("=", lines)))
-  check("capture many elements", sum(cap("(k)=(v)", rep(lines, 400))$matched, na.rm = TRUE) > 0)
+  check(
+    "capture many elements",
+    sum(cap("(k)=(v)", rep(lines, 400))$matched, na.rm = TRUE) > 0
+  )
   check("capture bad pattern", raises(cap("(", "x")))
-  check("hs_capture typed", is.data.frame(suppressWarnings(hs_capture(
-    "^(\\w+)=(\\d+)", lines, data.frame(k = character(), v = integer())
-  ))))
-  for (i in 1:50) cap("(a)(b)?(c)", c("abc", "ac", NA))
-  check("hs_capture match limit", is.data.frame(suppressWarnings(hs_capture(
-    "^(a+)+$", c(paste0(strrep("a", 26), "!"), "aa"), match_limit = 5000
-  ))))
-  check("hs_capture depth limit, interpreter", is.data.frame(suppressWarnings(hs_capture(
-    hs_capture_compile("^(a(?1)?b)$", jit = FALSE),
-    paste0(strrep("a", 2000), strrep("b", 2000)), depth_limit = 20
-  ))))
-  check("hs_capture rules", is.data.frame(suppressWarnings(hs_capture(
-    c(kv = "^(?<k>\\w+)=(?<v>\\S*)", reset = "^(?|(\\d+)|([a-z]+))$", "(x)"),
-    rep(lines, 50)
-  ))))
+  check(
+    "hs_capture typed",
+    is.data.frame(suppressWarnings(hs_capture(
+      "^(\\w+)=(\\d+)",
+      lines,
+      data.frame(k = character(), v = integer())
+    )))
+  )
+  for (i in 1:50) {
+    cap("(a)(b)?(c)", c("abc", "ac", NA))
+  }
+  check(
+    "hs_capture match limit",
+    is.data.frame(suppressWarnings(hs_capture(
+      "^(a+)+$",
+      c(paste0(strrep("a", 26), "!"), "aa"),
+      match_limit = 5000
+    )))
+  )
+  check(
+    "hs_capture depth limit, interpreter",
+    is.data.frame(suppressWarnings(hs_capture(
+      hs_capture_compile("^(a(?1)?b)$", jit = FALSE),
+      paste0(strrep("a", 2000), strrep("b", 2000)),
+      depth_limit = 20
+    )))
+  )
+  check(
+    "hs_capture rules",
+    is.data.frame(suppressWarnings(hs_capture(
+      c(kv = "^(?<k>\\w+)=(?<v>\\S*)", reset = "^(?|(\\d+)|([a-z]+))$", "(x)"),
+      rep(lines, 50)
+    )))
+  )
   invisible(gc())
 }
 
@@ -206,26 +281,40 @@ for (i in 1:20) {
   hs_stream_scan(s, "bar")
   hs_stream_close(s)
 }
-check("typed native error", inherits(
-  tryCatch(hs_stream_open(hs_compile("a")), error = function(e) e),
-  "vectorscan_error_native"
-))
-check("callback condition kept", identical(
-  tryCatch(hs_scan(hs_compile("a"), "aa", callback = function(...) stop("mine")),
-           error = conditionMessage),
-  "mine"
-))
+check(
+  "typed native error",
+  inherits(
+    tryCatch(hs_stream_open(hs_compile("a")), error = function(e) e),
+    "vectorscan_error_native"
+  )
+)
+check(
+  "callback condition kept",
+  identical(
+    tryCatch(
+      hs_scan(hs_compile("a"), "aa", callback = function(...) stop("mine")),
+      error = conditionMessage
+    ),
+    "mine"
+  )
+)
 
 cat("-- literals, flag strings, pattern files --------------------------\n")
 
 lit <- hs_compile(c("a.b", "(x", "caf\u00e9"), flags = "iL", literal = TRUE)
-for (i in 1:20) m <- hs_match(lit, rep(c("A.B (X", "un caf\u00e9", ""), 200))
+for (i in 1:20) {
+  m <- hs_match(lit, rep(c("A.B (X", "un caf\u00e9", ""), 200))
+}
 check("literal matches", nrow(m) == 600)
 rules <- hs_read_patterns(textConnection(c(
-  "1:/foo(bar)?/i", "2:/abc/{edit_distance=1}",
+  "1:/foo(bar)?/i",
+  "2:/abc/{edit_distance=1}",
   "3:/x+/L{min_offset=2,max_offset=5000000000}"
 )))
-check("pattern file scan", sum(hs_detect(rules, c("FOO", "abd", "..xx", "q"))) == 3)
+check(
+  "pattern file scan",
+  sum(hs_detect(rules, c("FOO", "abd", "..xx", "q"))) == 3
+)
 
 cat("-- serialization -------------------------------------------------\n")
 
@@ -233,7 +322,10 @@ bytes <- hs_serialize(db)
 check("round trip", is.data.frame(hs_scan(hs_deserialize(bytes), "foobar")))
 check("empty bytes", raises(hs_deserialize(raw())))
 check("junk bytes", raises(hs_deserialize(as.raw(sample(0:255, 64, TRUE)))))
-check("truncated bytes", raises(hs_deserialize(bytes[seq_len(length(bytes) %/% 2)])))
+check(
+  "truncated bytes",
+  raises(hs_deserialize(bytes[seq_len(length(bytes) %/% 2)]))
+)
 path <- tempfile(fileext = ".hsdb")
 hs_save(db, path)
 check("save and load", is.data.frame(hs_scan(hs_load(path), "foo")))

@@ -64,7 +64,8 @@ normalize_ext_value <- function(x, name) {
   }
   if (x < 0 || x != floor(x) || x > 2^53) {
     stop_vectorscan(sprintf(
-      "`%s` must be a whole number between 0 and 2^53.", name
+      "`%s` must be a whole number between 0 and 2^53.",
+      name
     ))
   }
   x

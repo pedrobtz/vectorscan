@@ -30,16 +30,25 @@ test_that("a callback's own error comes out unchanged", {
 
   vdb <- hs_database(HS_MODE_VECTORED)
   hs_compile(vdb, "o")
-  expect_error(hs_scan_vector(vdb, "o", callback = function(...) stop("vec")), "vec")
+  expect_error(
+    hs_scan_vector(vdb, "o", callback = function(...) stop("vec")),
+    "vec"
+  )
 
   sdb <- hs_database(HS_MODE_STREAM)
   hs_compile(sdb, c("o", "x$"))
   s1 <- hs_stream_open(sdb)
-  expect_error(hs_stream_scan(s1, "o", callback = function(...) stop("streamed")), "streamed")
+  expect_error(
+    hs_stream_scan(s1, "o", callback = function(...) stop("streamed")),
+    "streamed"
+  )
   hs_stream_close(s1)
   s2 <- hs_stream_open(sdb)
   hs_stream_scan(s2, "x")
-  expect_error(hs_stream_close(s2, callback = function(...) stop("closing")), "closing")
+  expect_error(
+    hs_stream_close(s2, callback = function(...) stop("closing")),
+    "closing"
+  )
   expect_output(print(s2), "closed")
 })
 
@@ -47,7 +56,11 @@ test_that("SOM horizon modes give start offsets in stream mode", {
   skip_if_not(hs_available())
 
   expect_error(
-    hs_compile(hs_database(HS_MODE_STREAM), "foo.*bar", flags = HS_FLAG_SOM_LEFTMOST),
+    hs_compile(
+      hs_database(HS_MODE_STREAM),
+      "foo.*bar",
+      flags = HS_FLAG_SOM_LEFTMOST
+    ),
     class = "vectorscan_error_compile"
   )
 
@@ -68,7 +81,10 @@ test_that("hs_stream_size() reports stream state bytes", {
   sdb <- hs_database(HS_MODE_STREAM)
   hs_compile(sdb, c("foo.*bar", "baz"))
   expect_gt(hs_stream_size(sdb), 0)
-  expect_error(hs_stream_size(hs_compile("foo")), class = "vectorscan_error_db_mode")
+  expect_error(
+    hs_stream_size(hs_compile("foo")),
+    class = "vectorscan_error_db_mode"
+  )
 })
 
 test_that("native errors carry a class per Vectorscan error", {
@@ -84,6 +100,8 @@ test_that("native errors carry a class per Vectorscan error", {
   expect_s3_class(bad, "vectorscan_error_native")
   expect_true(is.integer(bad$code) && bad$code < 0L)
 
-  junk <- tryCatch(hs_deserialize(as.raw(rep(0x5a, 256))), error = function(e) e)
+  junk <- tryCatch(hs_deserialize(as.raw(rep(0x5a, 256))), error = function(e) {
+    e
+  })
   expect_s3_class(junk, "vectorscan_error_native")
 })
