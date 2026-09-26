@@ -301,7 +301,7 @@ vs_time["elapsed"]
 #>    0.01
 base_time["elapsed"]
 #> elapsed 
-#>   0.036
+#>   0.035
 ```
 
 The gap widens as you add more patterns. With a hundred rules (realistic

@@ -123,10 +123,10 @@ results <- do.call(rbind, lapply(n_extra_grid, function(n_extra) {
 
 results
 #>   n_patterns vectorscan base_pcre base_tre
-#> 1          7      0.002     0.009    0.023
+#> 1          7      0.002     0.009    0.024
 #> 2         32      0.002     0.010    0.074
-#> 3        107      0.002     0.011    0.224
-#> 4        507      0.002     0.015    1.029
+#> 3        107      0.002     0.011    0.225
+#> 4        507      0.002     0.015    1.027
 ```
 
 Compute throughput in MB/s so the columns are easy to read.
@@ -142,7 +142,7 @@ throughput <- data.frame(
 )
 throughput
 #>   n_patterns vectorscan_mb_s base_pcre_mb_s base_tre_mb_s
-#> 1          7            85.8           19.1           7.5
+#> 1          7            85.8           19.1           7.2
 #> 2         32            85.8           17.2           2.3
 #> 3        107            85.8           15.6           0.8
 #> 4        507            85.8           11.4           0.2
@@ -182,9 +182,9 @@ size_results <- do.call(rbind, lapply(sizes, function(mult) {
 size_results
 #>   corpus_kb vectorscan_s base_pcre_s
 #> 1     175.3        0.002       0.010
-#> 2     876.5        0.009       0.049
-#> 3    4382.3        0.052       0.245
-#> 4   17529.3        0.175       0.971
+#> 2     876.5        0.009       0.050
+#> 3    4382.3        0.051       0.250
+#> 4   17529.3        0.183       0.965
 ```
 
 ## Benchmark 3 — compile cost is amortizable
@@ -262,7 +262,7 @@ data.frame(
   seconds = round(c(cb_time, df_time), 4)
 )
 #>                        mode seconds
-#> 1    callback (counts only)   0.120
+#> 1    callback (counts only)   0.122
 #> 2 data frame (collects all)   0.002
 ```
 

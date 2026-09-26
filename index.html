@@ -56,6 +56,8 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="vectorscan">vectorscan<a class="anchor" aria-label="anchor" href="#vectorscan"></a>
 </h1></div>
+<!-- badges: start -->
+
 <p><code>vectorscan</code> is an R package that wraps <a href="https://github.com/VectorCamp/vectorscan" class="external-link">Vectorscan</a>, the portable fork of Intel Hyperscan, for high-performance multi-pattern regular expression matching from R.</p>
 <p>The package is self-contained: the Vectorscan source code is vendored under <code>src/vendor/vectorscan</code> and built during package installation. A system <code>libhs</code> can still be used explicitly for development, but the default install path builds the bundled source.</p>
 <div class="section level2">
@@ -223,7 +225,15 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://github.com/pedrobtz/vectorscan/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/pedrobtz/vectorscan/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/pedrobtz/vectorscan/actions/workflows/native-checks.yaml" class="external-link"><img src="https://github.com/pedrobtz/vectorscan/actions/workflows/native-checks.yaml/badge.svg" alt="native-checks"></a></li>
+<li><a href="https://github.com/pedrobtz/vectorscan/actions/workflows/coverage.yaml" class="external-link"><img src="https://raw.githubusercontent.com/pedrobtz/vectorscan/main/.github/badges/coverage.svg" alt="coverage"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
