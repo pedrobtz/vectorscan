@@ -35,6 +35,7 @@ jobs:
           # Ubuntu's libhyperscan-dev (Intel Hyperscan 5.4) found through
           # pkg-config libhs; the bundled source must not be built.
           - mode: system
+            pc-module: libhs
             apt: libhyperscan-dev pkg-config
             use-system: "true"
             allow-stubs: ""
@@ -55,6 +56,7 @@ jobs:
           # PCRE2 for hs_capture(), from the system: Ubuntu's libpcre2-dev,
           # the same library R loads.
           - mode: pcre2-system
+            pc-module: libpcre2-8
             apt: libpcre2-dev pkg-config
             use-system: ""
             allow-stubs: ""
@@ -67,6 +69,7 @@ jobs:
           # system PCRE2 is installed and loaded by R. The package's .so must
           # export no pcre2_* symbol, so nothing can resolve to R's copy.
           - mode: pcre2-vendored
+            pc-module: libpcre2-8
             apt: libpcre2-dev pkg-config
             use-system: ""
             allow-stubs: ""
@@ -91,7 +94,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ${{ matrix.apt }}
-          pkg-config --modversion libhs
+          pkg-config --modversion ${{ matrix.pc-module }}
 
       - uses: r-lib/actions/setup-pandoc@v2
 
