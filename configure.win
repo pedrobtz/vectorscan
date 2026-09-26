@@ -39,6 +39,7 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORS
       -DBUILD_DOC=OFF
       -DHS_C_FLAGS=-Wno-error
       -DHS_CXX_FLAGS=-Wno-error
+      -DNO_SIMDE_IN_FAT=ON
     "
 
     # Boost headers: an explicit root, else the BH package (LinkingTo).

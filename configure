@@ -109,6 +109,11 @@ build_bundled_vectorscan() {
 
   # ragel is optional: without it the vendored CMake uses the pre-generated
   # src/parser/*.rl.cpp sources.
+  #
+  # NO_SIMDE_IN_FAT: since 5.4.13 the x86-64 fat runtime also builds a SIMDe
+  # variant for CPUs without SSE4.2, which needs the SIMDe headers -- a git
+  # submodule that the release archive leaves empty and that is not vendored.
+  # Leaving it out gives the same variants as 5.4.12.
 
   cmake_args="
     -DCMAKE_BUILD_TYPE=Release
@@ -122,6 +127,7 @@ build_bundled_vectorscan() {
     -DBUILD_DOC=OFF
     -DHS_C_FLAGS=-Wno-error
     -DHS_CXX_FLAGS=-Wno-error
+    -DNO_SIMDE_IN_FAT=ON
   "
 
   # Boost headers: an explicit root, else the BH package (LinkingTo), else
