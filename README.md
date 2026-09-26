@@ -138,9 +138,9 @@ The following environment variables are available for development and CI:
 
 ## Vendored Source
 
-The vendored tree is Vectorscan 5.4.12 from:
+The vendored tree is Vectorscan 5.4.13 from:
 
-<https://github.com/VectorCamp/vectorscan/tree/vectorscan/5.4.12>
+<https://github.com/VectorCamp/vectorscan/tree/vectorscan/5.4.13>
 
 Only the source and CMake files needed to build `libhs` are included. Upstream
 unit tests, command-line tools, examples, benchmarks, documentation, and

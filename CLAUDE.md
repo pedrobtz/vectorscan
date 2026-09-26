@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `vectorscan` is an R package providing bindings to
 [Vectorscan](https://github.com/VectorCamp/vectorscan) (the portable fork of
 Intel Hyperscan) for high-performance multi-pattern regex matching. The
-Vectorscan C/C++ source is **vendored** under `src/vendor/vectorscan` (v5.4.12)
+Vectorscan C/C++ source is **vendored** under `src/vendor/vectorscan` (v5.4.13)
 and compiled into a private static `libhs` during package install; the runtime
 machine needs no system Vectorscan.
 

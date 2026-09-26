@@ -27,7 +27,7 @@ on Ubuntu (R release) and in R-hub's clang23 container (clang 23,
 
 ## Bundled sources
 
-src/vendor/vectorscan/ is Vectorscan 5.4.12 under the BSD-3-Clause licence,
+src/vendor/vectorscan/ is Vectorscan 5.4.13 under the BSD-3-Clause licence,
 trimmed to what is needed to build its library, with four small local
 patches (build without Ragel, build-flag and build-script fixes, and removal
 of diagnostic-suppressing pragmas). Intel Corporation, VectorCamp PC and Arm

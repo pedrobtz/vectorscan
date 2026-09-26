@@ -273,7 +273,7 @@ unichar readUtf8CodePoint4c(const char *s) {
 }
 
 
-/* #line 1910 "src/parser/Parser.rl" */
+/* #line 1916 "src/parser/Parser.rl" */
 
 
 
@@ -353,18 +353,18 @@ static const short _regex_actions[] = {
 	289, 1, 290, 1, 291, 1, 292, 1, 
 	293, 1, 294, 1, 295, 1, 296, 1, 
 	297, 1, 298, 1, 299, 1, 300, 1, 
-	301, 1, 302, 1, 303, 1, 307, 1, 
-	308, 1, 309, 1, 310, 1, 311, 1, 
+	301, 1, 302, 1, 303, 1, 304, 1, 
+	305, 1, 309, 1, 310, 1, 311, 1, 
 	312, 1, 313, 1, 314, 1, 315, 1, 
 	316, 1, 317, 1, 318, 1, 319, 1, 
 	320, 1, 321, 1, 322, 1, 323, 1, 
 	324, 1, 325, 1, 326, 1, 327, 1, 
 	328, 1, 329, 1, 330, 1, 331, 1, 
 	332, 1, 333, 1, 334, 1, 335, 1, 
-	336, 1, 337, 1, 338, 1, 342, 1, 
-	343, 1, 344, 1, 345, 1, 346, 1, 
+	336, 1, 337, 1, 338, 1, 339, 1, 
+	340, 1, 344, 1, 345, 1, 346, 1, 
 	347, 1, 348, 1, 349, 1, 350, 1, 
-	352, 1, 353, 1, 354, 1, 355, 1, 
+	351, 1, 352, 1, 354, 1, 355, 1, 
 	356, 1, 357, 1, 358, 1, 359, 1, 
 	360, 1, 361, 1, 362, 1, 363, 1, 
 	364, 1, 365, 1, 366, 1, 367, 1, 
@@ -385,17 +385,18 @@ static const short _regex_actions[] = {
 	424, 1, 425, 1, 426, 1, 427, 1, 
 	428, 1, 429, 1, 430, 1, 431, 1, 
 	432, 1, 433, 1, 434, 1, 435, 1, 
-	436, 2, 3, 0, 2, 4, 5, 2, 
-	5, 1, 2, 9, 10, 2, 9, 238, 
-	2, 9, 239, 2, 9, 339, 2, 10, 
-	1, 2, 10, 340, 2, 10, 341, 2, 
-	11, 241, 2, 11, 351, 2, 12, 241, 
-	2, 12, 351, 2, 13, 241, 2, 13, 
-	351, 2, 14, 375, 2, 14, 376, 2, 
-	25, 0, 2, 25, 3, 2, 25, 6, 
-	2, 25, 14, 3, 25, 5, 306, 3, 
-	25, 10, 305, 3, 25, 14, 15, 4, 
-	25, 9, 304, 10
+	436, 1, 437, 1, 438, 2, 3, 0, 
+	2, 4, 5, 2, 5, 1, 2, 9, 
+	10, 2, 9, 238, 2, 9, 239, 2, 
+	9, 341, 2, 10, 1, 2, 10, 342, 
+	2, 10, 343, 2, 11, 241, 2, 11, 
+	353, 2, 12, 241, 2, 12, 353, 2, 
+	13, 241, 2, 13, 353, 2, 14, 377, 
+	2, 14, 378, 2, 25, 0, 2, 25, 
+	3, 2, 25, 6, 2, 25, 14, 3, 
+	25, 5, 308, 3, 25, 10, 307, 3, 
+	25, 14, 15, 4, 25, 9, 306, 10
+	
 };
 
 static const short _regex_to_state_actions[] = {
@@ -503,9 +504,9 @@ static const short _regex_to_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 41, 41, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 41, 0, 41, 0, 
-	0, 0, 0, 41, 0, 0, 0, 0, 
-	41, 41
+	0, 0, 0, 0, 0, 41, 0, 41, 
+	0, 0, 0, 0, 41, 0, 0, 0, 
+	0, 41, 41
 };
 
 static const short _regex_from_state_actions[] = {
@@ -613,9 +614,9 @@ static const short _regex_from_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 43, 43, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 43, 0, 43, 0, 
-	0, 0, 0, 43, 0, 0, 0, 0, 
-	43, 43
+	0, 0, 0, 0, 0, 43, 0, 43, 
+	0, 0, 0, 0, 43, 0, 0, 0, 
+	0, 43, 43
 };
 
 static const short _regex_eof_actions[] = {
@@ -725,7 +726,7 @@ static const short _regex_eof_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0
+	0, 0, 0
 };
 
 static const int regex_start = 746;
@@ -736,15 +737,15 @@ static const int regex_en_readUCP = 790;
 static const int regex_en_readBracedUCP = 559;
 static const int regex_en_readUCPSingle = 818;
 static const int regex_en_charClassGuts = 819;
-static const int regex_en_readClass = 836;
-static const int regex_en_readQuotedLiteral = 838;
-static const int regex_en_readQuotedClass = 843;
-static const int regex_en_readComment = 848;
-static const int regex_en_readNewlineTerminatedComment = 849;
+static const int regex_en_readClass = 837;
+static const int regex_en_readQuotedLiteral = 839;
+static const int regex_en_readQuotedClass = 844;
+static const int regex_en_readComment = 849;
+static const int regex_en_readNewlineTerminatedComment = 850;
 static const int regex_en_main = 746;
 
 
-/* #line 1913 "src/parser/Parser.rl" */
+/* #line 1919 "src/parser/Parser.rl" */
 
 /** \brief Main parser call, returns root Component or nullptr. */
 unique_ptr<Component> parse(const char *ptr, ParseMode &globalMode) {
@@ -816,7 +817,7 @@ unique_ptr<Component> parse(const char *ptr, ParseMode &globalMode) {
     try {
         // Embed the Ragel machine here
         
-/* #line 820 "src/parser/Parser.rl.cpp" */
+/* #line 821 "src/parser/Parser.rl.cpp" */
 	{
 	cs = regex_start;
 	top = 0;
@@ -825,9 +826,9 @@ unique_ptr<Component> parse(const char *ptr, ParseMode &globalMode) {
 	act = 0;
 	}
 
-/* #line 1984 "src/parser/Parser.rl" */
+/* #line 1990 "src/parser/Parser.rl" */
         
-/* #line 831 "src/parser/Parser.rl.cpp" */
+/* #line 832 "src/parser/Parser.rl.cpp" */
 	{
 	const short *_acts;
 	unsigned int _nacts;
@@ -846,7 +847,7 @@ _resume:
 /* #line 1 "NONE" */
 	{ts = p;}
 	break;
-/* #line 850 "src/parser/Parser.rl.cpp" */
+/* #line 851 "src/parser/Parser.rl.cpp" */
 		}
 	}
 
@@ -4273,10 +4274,11 @@ case 819:
  mode.utf8  ) _widec += 256;
 	}
 	switch( _widec ) {
-		case 45: goto tr1158;
-		case 91: goto tr1159;
-		case 92: goto tr1160;
-		case 93: goto tr1161;
+		case 38: goto tr1158;
+		case 45: goto tr1159;
+		case 91: goto tr1160;
+		case 92: goto tr1161;
+		case 93: goto tr1162;
 	}
 	if ( _widec < 704 ) {
 		if ( _widec < 384 ) {
@@ -4284,28 +4286,32 @@ case 819:
 				goto tr1157;
 		} else if ( _widec > 511 ) {
 			if ( 640 <= _widec && _widec <= 703 )
-				goto tr1162;
+				goto tr1163;
 		} else
 			goto tr1157;
 	} else if ( _widec > 735 ) {
 		if ( _widec < 752 ) {
 			if ( 736 <= _widec && _widec <= 751 )
-				goto tr1164;
+				goto tr1165;
 		} else if ( _widec > 759 ) {
 			if ( 760 <= _widec && _widec <= 767 )
-				goto tr1162;
+				goto tr1163;
 		} else
-			goto tr1165;
+			goto tr1166;
 	} else
-		goto tr1163;
+		goto tr1164;
 	goto tr877;
 case 820:
+	if ( (*p) == 38u )
+		goto tr1168;
+	goto tr1167;
+case 821:
 	switch( (*p) ) {
 		case 46u: goto tr655;
-		case 58u: goto tr1167;
+		case 58u: goto tr1170;
 		case 61u: goto tr852;
 	}
-	goto tr1166;
+	goto tr1169;
 case 563:
 	switch( (*p) ) {
 		case 46u: goto tr656;
@@ -5633,78 +5639,78 @@ case 733:
 		case 92u: goto tr854;
 	}
 	goto tr852;
-case 821:
+case 822:
 	switch( (*p) ) {
-		case 48u: goto tr1169;
-		case 68u: goto tr1173;
-		case 69u: goto tr1174;
-		case 72u: goto tr1175;
-		case 76u: goto tr1176;
-		case 78u: goto tr1176;
-		case 80u: goto tr1177;
-		case 81u: goto tr1178;
-		case 83u: goto tr1179;
-		case 85u: goto tr1176;
-		case 86u: goto tr1180;
-		case 87u: goto tr1181;
-		case 97u: goto tr1182;
-		case 98u: goto tr1183;
-		case 99u: goto tr1184;
-		case 100u: goto tr1185;
-		case 101u: goto tr1186;
-		case 102u: goto tr1187;
-		case 103u: goto tr1188;
-		case 104u: goto tr1189;
-		case 108u: goto tr1176;
-		case 110u: goto tr1190;
-		case 111u: goto tr1191;
-		case 112u: goto tr1192;
-		case 114u: goto tr1193;
-		case 115u: goto tr1194;
-		case 116u: goto tr1195;
-		case 117u: goto tr1176;
-		case 118u: goto tr1196;
-		case 119u: goto tr1197;
-		case 120u: goto tr1198;
+		case 48u: goto tr1172;
+		case 68u: goto tr1176;
+		case 69u: goto tr1177;
+		case 72u: goto tr1178;
+		case 76u: goto tr1179;
+		case 78u: goto tr1179;
+		case 80u: goto tr1180;
+		case 81u: goto tr1181;
+		case 83u: goto tr1182;
+		case 85u: goto tr1179;
+		case 86u: goto tr1183;
+		case 87u: goto tr1184;
+		case 97u: goto tr1185;
+		case 98u: goto tr1186;
+		case 99u: goto tr1187;
+		case 100u: goto tr1188;
+		case 101u: goto tr1189;
+		case 102u: goto tr1190;
+		case 103u: goto tr1191;
+		case 104u: goto tr1192;
+		case 108u: goto tr1179;
+		case 110u: goto tr1193;
+		case 111u: goto tr1194;
+		case 112u: goto tr1195;
+		case 114u: goto tr1196;
+		case 115u: goto tr1197;
+		case 116u: goto tr1198;
+		case 117u: goto tr1179;
+		case 118u: goto tr1199;
+		case 119u: goto tr1200;
+		case 120u: goto tr1201;
 	}
 	if ( (*p) < 56u ) {
 		if ( 49u <= (*p) && (*p) <= 55u )
-			goto tr1170;
+			goto tr1173;
 	} else if ( (*p) > 57u ) {
 		if ( (*p) > 90u ) {
 			if ( 105u <= (*p) && (*p) <= 122u )
-				goto tr1172;
+				goto tr1175;
 		} else if ( (*p) >= 65u )
-			goto tr1172;
+			goto tr1175;
 	} else
-		goto tr1171;
-	goto tr1168;
-case 822:
-	if ( 48u <= (*p) && (*p) <= 55u )
-		goto tr1200;
-	goto tr1199;
+		goto tr1174;
+	goto tr1171;
 case 823:
-	if ( 48u <= (*p) && (*p) <= 55u )
-		goto tr1201;
-	goto tr1199;
-case 824:
 	if ( 48u <= (*p) && (*p) <= 55u )
 		goto tr1203;
 	goto tr1202;
-case 825:
+case 824:
 	if ( 48u <= (*p) && (*p) <= 55u )
 		goto tr1204;
 	goto tr1202;
+case 825:
+	if ( 48u <= (*p) && (*p) <= 55u )
+		goto tr1206;
+	goto tr1205;
 case 826:
-	if ( (*p) == 123u )
+	if ( 48u <= (*p) && (*p) <= 55u )
 		goto tr1207;
-	goto tr1206;
+	goto tr1205;
 case 827:
+	if ( (*p) == 123u )
+		goto tr1210;
 	goto tr1209;
 case 828:
+	goto tr1212;
+case 829:
 	if ( (*p) == 123u )
-		goto tr1211;
-	goto tr1210;
+		goto tr1214;
+	goto tr1213;
 case 734:
 	if ( 48u <= (*p) && (*p) <= 55u )
 		goto tr856;
@@ -5715,33 +5721,33 @@ case 735:
 	if ( 48u <= (*p) && (*p) <= 55u )
 		goto tr856;
 	goto tr855;
-case 829:
-	if ( (*p) == 123u )
-		goto tr1214;
-	goto tr1213;
 case 830:
 	if ( (*p) == 123u )
-		goto tr1219;
-	if ( (*p) < 65u ) {
-		if ( 48u <= (*p) && (*p) <= 57u )
-			goto tr1216;
-	} else if ( (*p) > 70u ) {
-		if ( 97u <= (*p) && (*p) <= 102u )
-			goto tr1218;
-	} else
 		goto tr1217;
-	goto tr1215;
+	goto tr1216;
 case 831:
+	if ( (*p) == 123u )
+		goto tr1222;
 	if ( (*p) < 65u ) {
 		if ( 48u <= (*p) && (*p) <= 57u )
-			goto tr1220;
+			goto tr1219;
 	} else if ( (*p) > 70u ) {
 		if ( 97u <= (*p) && (*p) <= 102u )
-			goto tr1222;
+			goto tr1221;
 	} else
-		goto tr1221;
-	goto tr1215;
+		goto tr1220;
+	goto tr1218;
 case 832:
+	if ( (*p) < 65u ) {
+		if ( 48u <= (*p) && (*p) <= 57u )
+			goto tr1223;
+	} else if ( (*p) > 70u ) {
+		if ( 97u <= (*p) && (*p) <= 102u )
+			goto tr1225;
+	} else
+		goto tr1224;
+	goto tr1218;
+case 833:
 	if ( (*p) < 65u ) {
 		if ( 48u <= (*p) && (*p) <= 57u )
 			goto tr859;
@@ -5750,7 +5756,7 @@ case 832:
 			goto tr859;
 	} else
 		goto tr859;
-	goto tr1223;
+	goto tr1226;
 case 736:
 	if ( (*p) == 125u )
 		goto tr860;
@@ -5763,17 +5769,6 @@ case 736:
 	} else
 		goto tr859;
 	goto tr858;
-case 833:
-	_widec = (*p);
-	if ( 128u <= (*p) && (*p) <= 191u ) {
-		_widec = (short)(256u + ((*p) - 0u));
-		if ( 
-/* #line 476 "src/parser/Parser.rl" */
- mode.utf8  ) _widec += 256;
-	}
-	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1225;
-	goto tr1224;
 case 834:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -5783,8 +5778,19 @@ case 834:
  mode.utf8  ) _widec += 256;
 	}
 	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1226;
-	goto tr1224;
+		goto tr1228;
+	goto tr1227;
+case 835:
+	_widec = (*p);
+	if ( 128u <= (*p) && (*p) <= 191u ) {
+		_widec = (short)(256u + ((*p) - 0u));
+		if ( 
+/* #line 476 "src/parser/Parser.rl" */
+ mode.utf8  ) _widec += 256;
+	}
+	if ( 640 <= _widec && _widec <= 703 )
+		goto tr1229;
+	goto tr1227;
 case 737:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -5796,7 +5802,7 @@ case 737:
 	if ( 640 <= _widec && _widec <= 703 )
 		goto tr862;
 	goto tr861;
-case 835:
+case 836:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
 		_widec = (short)(256u + ((*p) - 0u));
@@ -5805,8 +5811,8 @@ case 835:
  mode.utf8  ) _widec += 256;
 	}
 	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1227;
-	goto tr1224;
+		goto tr1230;
+	goto tr1227;
 case 738:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -5829,7 +5835,7 @@ case 739:
 	if ( 640 <= _widec && _widec <= 703 )
 		goto tr864;
 	goto tr861;
-case 836:
+case 837:
 	_widec = (*p);
 	if ( (*p) > 93u ) {
 		if ( 94u <= (*p) && (*p) <= 94u ) {
@@ -5845,26 +5851,26 @@ case 836:
  inCharClassEarly  ) _widec += 256;
 	}
 	switch( _widec ) {
-		case 92: goto tr1229;
-		case 1117: goto tr1230;
-		case 1118: goto tr1231;
+		case 92: goto tr1232;
+		case 1117: goto tr1233;
+		case 1118: goto tr1234;
 	}
 	if ( _widec < 95 ) {
 		if ( _widec <= 91 )
-			goto tr1228;
+			goto tr1231;
 	} else if ( _widec > 255 ) {
 		if ( 861 <= _widec && _widec <= 862 )
-			goto tr1228;
+			goto tr1231;
 	} else
-		goto tr1228;
+		goto tr1231;
 	goto tr877;
-case 837:
-	switch( (*p) ) {
-		case 69u: goto tr1233;
-		case 81u: goto tr1234;
-	}
-	goto tr1232;
 case 838:
+	switch( (*p) ) {
+		case 69u: goto tr1236;
+		case 81u: goto tr1237;
+	}
+	goto tr1235;
+case 839:
 	_widec = (*p);
 	if ( (*p) < 224u ) {
 		if ( (*p) > 191u ) {
@@ -5901,43 +5907,32 @@ case 838:
  mode.utf8  ) _widec += 256;
 	}
 	if ( _widec == 92 )
-		goto tr1236;
+		goto tr1239;
 	if ( _widec < 704 ) {
 		if ( _widec < 384 ) {
 			if ( _widec <= 127 )
-				goto tr1235;
+				goto tr1238;
 		} else if ( _widec > 511 ) {
 			if ( 640 <= _widec && _widec <= 703 )
-				goto tr1237;
+				goto tr1240;
 		} else
-			goto tr1235;
+			goto tr1238;
 	} else if ( _widec > 735 ) {
 		if ( _widec < 752 ) {
 			if ( 736 <= _widec && _widec <= 751 )
-				goto tr1239;
+				goto tr1242;
 		} else if ( _widec > 759 ) {
 			if ( 760 <= _widec && _widec <= 767 )
-				goto tr1237;
+				goto tr1240;
 		} else
-			goto tr1240;
+			goto tr1243;
 	} else
-		goto tr1238;
+		goto tr1241;
 	goto tr877;
-case 839:
-	if ( (*p) == 69u )
-		goto tr1242;
-	goto tr1241;
 case 840:
-	_widec = (*p);
-	if ( 128u <= (*p) && (*p) <= 191u ) {
-		_widec = (short)(256u + ((*p) - 0u));
-		if ( 
-/* #line 476 "src/parser/Parser.rl" */
- mode.utf8  ) _widec += 256;
-	}
-	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1244;
-	goto tr1243;
+	if ( (*p) == 69u )
+		goto tr1245;
+	goto tr1244;
 case 841:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -5947,8 +5942,19 @@ case 841:
  mode.utf8  ) _widec += 256;
 	}
 	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1245;
-	goto tr1243;
+		goto tr1247;
+	goto tr1246;
+case 842:
+	_widec = (*p);
+	if ( 128u <= (*p) && (*p) <= 191u ) {
+		_widec = (short)(256u + ((*p) - 0u));
+		if ( 
+/* #line 476 "src/parser/Parser.rl" */
+ mode.utf8  ) _widec += 256;
+	}
+	if ( 640 <= _widec && _widec <= 703 )
+		goto tr1248;
+	goto tr1246;
 case 740:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -5960,7 +5966,7 @@ case 740:
 	if ( 640 <= _widec && _widec <= 703 )
 		goto tr866;
 	goto tr865;
-case 842:
+case 843:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
 		_widec = (short)(256u + ((*p) - 0u));
@@ -5969,8 +5975,8 @@ case 842:
  mode.utf8  ) _widec += 256;
 	}
 	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1246;
-	goto tr1243;
+		goto tr1249;
+	goto tr1246;
 case 741:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -5993,7 +5999,7 @@ case 742:
 	if ( 640 <= _widec && _widec <= 703 )
 		goto tr868;
 	goto tr865;
-case 843:
+case 844:
 	_widec = (*p);
 	if ( (*p) < 224u ) {
 		if ( (*p) > 191u ) {
@@ -6030,43 +6036,32 @@ case 843:
  mode.utf8  ) _widec += 256;
 	}
 	if ( _widec == 92 )
-		goto tr1248;
+		goto tr1251;
 	if ( _widec < 704 ) {
 		if ( _widec < 384 ) {
 			if ( _widec <= 127 )
-				goto tr1247;
+				goto tr1250;
 		} else if ( _widec > 511 ) {
 			if ( 640 <= _widec && _widec <= 703 )
-				goto tr1249;
+				goto tr1252;
 		} else
-			goto tr1247;
+			goto tr1250;
 	} else if ( _widec > 735 ) {
 		if ( _widec < 752 ) {
 			if ( 736 <= _widec && _widec <= 751 )
-				goto tr1251;
+				goto tr1254;
 		} else if ( _widec > 759 ) {
 			if ( 760 <= _widec && _widec <= 767 )
-				goto tr1249;
+				goto tr1252;
 		} else
-			goto tr1252;
+			goto tr1255;
 	} else
-		goto tr1250;
+		goto tr1253;
 	goto tr877;
-case 844:
-	if ( (*p) == 69u )
-		goto tr1254;
-	goto tr1253;
 case 845:
-	_widec = (*p);
-	if ( 128u <= (*p) && (*p) <= 191u ) {
-		_widec = (short)(256u + ((*p) - 0u));
-		if ( 
-/* #line 476 "src/parser/Parser.rl" */
- mode.utf8  ) _widec += 256;
-	}
-	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1256;
-	goto tr1255;
+	if ( (*p) == 69u )
+		goto tr1257;
+	goto tr1256;
 case 846:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -6076,8 +6071,19 @@ case 846:
  mode.utf8  ) _widec += 256;
 	}
 	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1257;
-	goto tr1255;
+		goto tr1259;
+	goto tr1258;
+case 847:
+	_widec = (*p);
+	if ( 128u <= (*p) && (*p) <= 191u ) {
+		_widec = (short)(256u + ((*p) - 0u));
+		if ( 
+/* #line 476 "src/parser/Parser.rl" */
+ mode.utf8  ) _widec += 256;
+	}
+	if ( 640 <= _widec && _widec <= 703 )
+		goto tr1260;
+	goto tr1258;
 case 743:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -6089,7 +6095,7 @@ case 743:
 	if ( 640 <= _widec && _widec <= 703 )
 		goto tr870;
 	goto tr869;
-case 847:
+case 848:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
 		_widec = (short)(256u + ((*p) - 0u));
@@ -6098,8 +6104,8 @@ case 847:
  mode.utf8  ) _widec += 256;
 	}
 	if ( 640 <= _widec && _widec <= 703 )
-		goto tr1258;
-	goto tr1255;
+		goto tr1261;
+	goto tr1258;
 case 744:
 	_widec = (*p);
 	if ( 128u <= (*p) && (*p) <= 191u ) {
@@ -6122,14 +6128,14 @@ case 745:
 	if ( 640 <= _widec && _widec <= 703 )
 		goto tr872;
 	goto tr869;
-case 848:
-	if ( (*p) == 41u )
-		goto tr1260;
-	goto tr1259;
 case 849:
+	if ( (*p) == 41u )
+		goto tr1263;
+	goto tr1262;
+case 850:
 	if ( (*p) == 10u )
-		goto tr1262;
-	goto tr1261;
+		goto tr1265;
+	goto tr1264;
 	}
 
 	tr877: cs = 0; goto _again;
@@ -6699,7 +6705,7 @@ case 849:
 	tr655: cs = 563; goto _again;
 	tr656: cs = 564; goto _again;
 	tr657: cs = 565; goto _again;
-	tr1167: cs = 566; goto _again;
+	tr1170: cs = 566; goto _again;
 	tr659: cs = 567; goto _again;
 	tr660: cs = 568; goto _again;
 	tr661: cs = 569; goto _again;
@@ -6867,17 +6873,17 @@ case 849:
 	tr852: cs = 731; goto _again;
 	tr853: cs = 732; goto _again;
 	tr854: cs = 733; goto _again;
-	tr1211: cs = 734; goto _again;
+	tr1214: cs = 734; goto _again;
 	tr856: cs = 735; goto _again;
 	tr859: cs = 736; goto _again;
-	tr1226: cs = 737; goto _again;
-	tr1227: cs = 738; goto _again;
+	tr1229: cs = 737; goto _again;
+	tr1230: cs = 738; goto _again;
 	tr863: cs = 739; goto _again;
-	tr1245: cs = 740; goto _again;
-	tr1246: cs = 741; goto _again;
+	tr1248: cs = 740; goto _again;
+	tr1249: cs = 741; goto _again;
 	tr867: cs = 742; goto _again;
-	tr1257: cs = 743; goto _again;
-	tr1258: cs = 744; goto _again;
+	tr1260: cs = 743; goto _again;
+	tr1261: cs = 744; goto _again;
 	tr871: cs = 745; goto _again;
 	tr0: cs = 746; goto f0;
 	tr1: cs = 746; goto f1;
@@ -7292,115 +7298,118 @@ case 849:
 	tr862: cs = 819; goto f214;
 	tr864: cs = 819; goto f215;
 	tr1157: cs = 819; goto f378;
-	tr1158: cs = 819; goto f379;
-	tr1161: cs = 819; goto f380;
-	tr1162: cs = 819; goto f381;
-	tr1166: cs = 819; goto f382;
+	tr1159: cs = 819; goto f379;
+	tr1162: cs = 819; goto f380;
+	tr1163: cs = 819; goto f381;
+	tr1167: cs = 819; goto f382;
 	tr1168: cs = 819; goto f383;
+	tr1169: cs = 819; goto f384;
 	tr1171: cs = 819; goto f385;
-	tr1172: cs = 819; goto f386;
-	tr1173: cs = 819; goto f387;
-	tr1174: cs = 819; goto f388;
-	tr1175: cs = 819; goto f389;
-	tr1176: cs = 819; goto f390;
+	tr1174: cs = 819; goto f387;
+	tr1175: cs = 819; goto f388;
+	tr1176: cs = 819; goto f389;
+	tr1177: cs = 819; goto f390;
 	tr1178: cs = 819; goto f391;
 	tr1179: cs = 819; goto f392;
-	tr1180: cs = 819; goto f393;
-	tr1181: cs = 819; goto f394;
-	tr1182: cs = 819; goto f395;
-	tr1183: cs = 819; goto f396;
+	tr1181: cs = 819; goto f393;
+	tr1182: cs = 819; goto f394;
+	tr1183: cs = 819; goto f395;
+	tr1184: cs = 819; goto f396;
 	tr1185: cs = 819; goto f397;
 	tr1186: cs = 819; goto f398;
-	tr1187: cs = 819; goto f399;
-	tr1188: cs = 819; goto f400;
-	tr1189: cs = 819; goto f401;
-	tr1190: cs = 819; goto f402;
-	tr1193: cs = 819; goto f403;
-	tr1194: cs = 819; goto f404;
-	tr1195: cs = 819; goto f405;
-	tr1196: cs = 819; goto f406;
-	tr1197: cs = 819; goto f407;
+	tr1188: cs = 819; goto f399;
+	tr1189: cs = 819; goto f400;
+	tr1190: cs = 819; goto f401;
+	tr1191: cs = 819; goto f402;
+	tr1192: cs = 819; goto f403;
+	tr1193: cs = 819; goto f404;
+	tr1196: cs = 819; goto f405;
+	tr1197: cs = 819; goto f406;
+	tr1198: cs = 819; goto f407;
 	tr1199: cs = 819; goto f408;
-	tr1201: cs = 819; goto f409;
+	tr1200: cs = 819; goto f409;
 	tr1202: cs = 819; goto f410;
 	tr1204: cs = 819; goto f411;
 	tr1205: cs = 819; goto f412;
-	tr1206: cs = 819; goto f413;
-	tr1207: cs = 819; goto f414;
-	tr1208: cs = 819; goto f415;
-	tr1209: cs = 819; goto f416;
-	tr1210: cs = 819; goto f417;
+	tr1207: cs = 819; goto f413;
+	tr1208: cs = 819; goto f414;
+	tr1209: cs = 819; goto f415;
+	tr1210: cs = 819; goto f416;
+	tr1211: cs = 819; goto f417;
 	tr1212: cs = 819; goto f418;
 	tr1213: cs = 819; goto f419;
-	tr1214: cs = 819; goto f420;
-	tr1215: cs = 819; goto f421;
-	tr1220: cs = 819; goto f422;
-	tr1221: cs = 819; goto f423;
-	tr1222: cs = 819; goto f424;
-	tr1223: cs = 819; goto f425;
-	tr1224: cs = 819; goto f426;
-	tr1225: cs = 819; goto f427;
-	tr1159: cs = 820; goto f5;
-	tr1160: cs = 821; goto _again;
-	tr1169: cs = 822; goto f254;
-	tr1200: cs = 823; goto f288;
-	tr1170: cs = 824; goto f384;
-	tr1203: cs = 825; goto f288;
-	tr1177: cs = 826; goto _again;
-	tr1184: cs = 827; goto _again;
-	tr1191: cs = 828; goto f5;
-	tr1192: cs = 829; goto _again;
-	tr1198: cs = 830; goto f40;
-	tr1216: cs = 831; goto f313;
-	tr1217: cs = 831; goto f314;
-	tr1218: cs = 831; goto f315;
-	tr1219: cs = 832; goto f5;
-	tr1163: cs = 833; goto _again;
-	tr1164: cs = 834; goto f5;
+	tr1215: cs = 819; goto f420;
+	tr1216: cs = 819; goto f421;
+	tr1217: cs = 819; goto f422;
+	tr1218: cs = 819; goto f423;
+	tr1223: cs = 819; goto f424;
+	tr1224: cs = 819; goto f425;
+	tr1225: cs = 819; goto f426;
+	tr1226: cs = 819; goto f427;
+	tr1227: cs = 819; goto f428;
+	tr1228: cs = 819; goto f429;
+	tr1158: cs = 820; goto _again;
+	tr1160: cs = 821; goto f5;
+	tr1161: cs = 822; goto _again;
+	tr1172: cs = 823; goto f254;
+	tr1203: cs = 824; goto f288;
+	tr1173: cs = 825; goto f386;
+	tr1206: cs = 826; goto f288;
+	tr1180: cs = 827; goto _again;
+	tr1187: cs = 828; goto _again;
+	tr1194: cs = 829; goto f5;
+	tr1195: cs = 830; goto _again;
+	tr1201: cs = 831; goto f40;
+	tr1219: cs = 832; goto f313;
+	tr1220: cs = 832; goto f314;
+	tr1221: cs = 832; goto f315;
+	tr1222: cs = 833; goto f5;
+	tr1164: cs = 834; goto _again;
 	tr1165: cs = 835; goto f5;
-	tr1228: cs = 836; goto f428;
-	tr1230: cs = 836; goto f429;
-	tr1231: cs = 836; goto f430;
-	tr1232: cs = 836; goto f431;
-	tr1233: cs = 836; goto f432;
-	tr1234: cs = 836; goto f433;
-	tr1229: cs = 837; goto _again;
-	tr865: cs = 838; goto f216;
-	tr866: cs = 838; goto f217;
-	tr868: cs = 838; goto f218;
-	tr1235: cs = 838; goto f434;
-	tr1237: cs = 838; goto f435;
-	tr1241: cs = 838; goto f436;
-	tr1242: cs = 838; goto f437;
-	tr1243: cs = 838; goto f438;
-	tr1244: cs = 838; goto f439;
-	tr1236: cs = 839; goto _again;
-	tr1238: cs = 840; goto _again;
-	tr1239: cs = 841; goto f5;
-	tr1240: cs = 842; goto f5;
-	tr869: cs = 843; goto f219;
-	tr870: cs = 843; goto f220;
-	tr872: cs = 843; goto f221;
-	tr1247: cs = 843; goto f440;
-	tr1249: cs = 843; goto f441;
-	tr1253: cs = 843; goto f442;
-	tr1254: cs = 843; goto f443;
-	tr1255: cs = 843; goto f444;
-	tr1256: cs = 843; goto f445;
-	tr1248: cs = 844; goto _again;
-	tr1250: cs = 845; goto _again;
-	tr1251: cs = 846; goto f5;
-	tr1252: cs = 847; goto f5;
-	tr1259: cs = 848; goto f446;
-	tr1260: cs = 848; goto f447;
-	tr1261: cs = 849; goto f448;
-	tr1262: cs = 849; goto f449;
+	tr1166: cs = 836; goto f5;
+	tr1231: cs = 837; goto f430;
+	tr1233: cs = 837; goto f431;
+	tr1234: cs = 837; goto f432;
+	tr1235: cs = 837; goto f433;
+	tr1236: cs = 837; goto f434;
+	tr1237: cs = 837; goto f435;
+	tr1232: cs = 838; goto _again;
+	tr865: cs = 839; goto f216;
+	tr866: cs = 839; goto f217;
+	tr868: cs = 839; goto f218;
+	tr1238: cs = 839; goto f436;
+	tr1240: cs = 839; goto f437;
+	tr1244: cs = 839; goto f438;
+	tr1245: cs = 839; goto f439;
+	tr1246: cs = 839; goto f440;
+	tr1247: cs = 839; goto f441;
+	tr1239: cs = 840; goto _again;
+	tr1241: cs = 841; goto _again;
+	tr1242: cs = 842; goto f5;
+	tr1243: cs = 843; goto f5;
+	tr869: cs = 844; goto f219;
+	tr870: cs = 844; goto f220;
+	tr872: cs = 844; goto f221;
+	tr1250: cs = 844; goto f442;
+	tr1252: cs = 844; goto f443;
+	tr1256: cs = 844; goto f444;
+	tr1257: cs = 844; goto f445;
+	tr1258: cs = 844; goto f446;
+	tr1259: cs = 844; goto f447;
+	tr1251: cs = 845; goto _again;
+	tr1253: cs = 846; goto _again;
+	tr1254: cs = 847; goto f5;
+	tr1255: cs = 848; goto f5;
+	tr1262: cs = 849; goto f448;
+	tr1263: cs = 849; goto f449;
+	tr1264: cs = 850; goto f450;
+	tr1265: cs = 850; goto f451;
 
 	f237: _acts = _regex_actions + 1; goto execFuncs;
 	f17: _acts = _regex_actions + 3; goto execFuncs;
 	f254: _acts = _regex_actions + 5; goto execFuncs;
 	f40: _acts = _regex_actions + 7; goto execFuncs;
-	f384: _acts = _regex_actions + 9; goto execFuncs;
+	f386: _acts = _regex_actions + 9; goto execFuncs;
 	f53: _acts = _regex_actions + 11; goto execFuncs;
 	f55: _acts = _regex_actions + 13; goto execFuncs;
 	f288: _acts = _regex_actions + 15; goto execFuncs;
@@ -7612,238 +7621,240 @@ case 849:
 	f208: _acts = _regex_actions + 431; goto execFuncs;
 	f194: _acts = _regex_actions + 433; goto execFuncs;
 	f180: _acts = _regex_actions + 435; goto execFuncs;
-	f391: _acts = _regex_actions + 437; goto execFuncs;
-	f388: _acts = _regex_actions + 439; goto execFuncs;
-	f396: _acts = _regex_actions + 441; goto execFuncs;
-	f405: _acts = _regex_actions + 443; goto execFuncs;
-	f402: _acts = _regex_actions + 445; goto execFuncs;
-	f403: _acts = _regex_actions + 447; goto execFuncs;
-	f399: _acts = _regex_actions + 449; goto execFuncs;
-	f395: _acts = _regex_actions + 451; goto execFuncs;
-	f398: _acts = _regex_actions + 453; goto execFuncs;
-	f401: _acts = _regex_actions + 455; goto execFuncs;
-	f389: _acts = _regex_actions + 457; goto execFuncs;
-	f406: _acts = _regex_actions + 459; goto execFuncs;
-	f393: _acts = _regex_actions + 461; goto execFuncs;
-	f420: _acts = _regex_actions + 463; goto execFuncs;
-	f419: _acts = _regex_actions + 465; goto execFuncs;
-	f414: _acts = _regex_actions + 467; goto execFuncs;
-	f413: _acts = _regex_actions + 469; goto execFuncs;
+	f393: _acts = _regex_actions + 437; goto execFuncs;
+	f390: _acts = _regex_actions + 439; goto execFuncs;
+	f398: _acts = _regex_actions + 441; goto execFuncs;
+	f407: _acts = _regex_actions + 443; goto execFuncs;
+	f404: _acts = _regex_actions + 445; goto execFuncs;
+	f405: _acts = _regex_actions + 447; goto execFuncs;
+	f401: _acts = _regex_actions + 449; goto execFuncs;
+	f397: _acts = _regex_actions + 451; goto execFuncs;
+	f400: _acts = _regex_actions + 453; goto execFuncs;
+	f403: _acts = _regex_actions + 455; goto execFuncs;
+	f391: _acts = _regex_actions + 457; goto execFuncs;
+	f408: _acts = _regex_actions + 459; goto execFuncs;
+	f395: _acts = _regex_actions + 461; goto execFuncs;
+	f422: _acts = _regex_actions + 463; goto execFuncs;
+	f421: _acts = _regex_actions + 465; goto execFuncs;
+	f416: _acts = _regex_actions + 467; goto execFuncs;
+	f415: _acts = _regex_actions + 469; goto execFuncs;
 	f210: _acts = _regex_actions + 471; goto execFuncs;
-	f385: _acts = _regex_actions + 473; goto execFuncs;
+	f387: _acts = _regex_actions + 473; goto execFuncs;
 	f212: _acts = _regex_actions + 475; goto execFuncs;
-	f416: _acts = _regex_actions + 477; goto execFuncs;
-	f407: _acts = _regex_actions + 479; goto execFuncs;
-	f394: _acts = _regex_actions + 481; goto execFuncs;
-	f404: _acts = _regex_actions + 483; goto execFuncs;
-	f392: _acts = _regex_actions + 485; goto execFuncs;
-	f397: _acts = _regex_actions + 487; goto execFuncs;
-	f387: _acts = _regex_actions + 489; goto execFuncs;
+	f418: _acts = _regex_actions + 477; goto execFuncs;
+	f409: _acts = _regex_actions + 479; goto execFuncs;
+	f396: _acts = _regex_actions + 481; goto execFuncs;
+	f406: _acts = _regex_actions + 483; goto execFuncs;
+	f394: _acts = _regex_actions + 485; goto execFuncs;
+	f399: _acts = _regex_actions + 487; goto execFuncs;
+	f389: _acts = _regex_actions + 489; goto execFuncs;
 	f379: _acts = _regex_actions + 491; goto execFuncs;
-	f390: _acts = _regex_actions + 493; goto execFuncs;
-	f400: _acts = _regex_actions + 495; goto execFuncs;
-	f386: _acts = _regex_actions + 497; goto execFuncs;
-	f383: _acts = _regex_actions + 499; goto execFuncs;
-	f427: _acts = _regex_actions + 501; goto execFuncs;
+	f392: _acts = _regex_actions + 493; goto execFuncs;
+	f402: _acts = _regex_actions + 495; goto execFuncs;
+	f388: _acts = _regex_actions + 497; goto execFuncs;
+	f385: _acts = _regex_actions + 499; goto execFuncs;
+	f429: _acts = _regex_actions + 501; goto execFuncs;
 	f214: _acts = _regex_actions + 503; goto execFuncs;
 	f215: _acts = _regex_actions + 505; goto execFuncs;
 	f381: _acts = _regex_actions + 507; goto execFuncs;
-	f378: _acts = _regex_actions + 509; goto execFuncs;
-	f380: _acts = _regex_actions + 511; goto execFuncs;
-	f412: _acts = _regex_actions + 513; goto execFuncs;
-	f418: _acts = _regex_actions + 515; goto execFuncs;
-	f408: _acts = _regex_actions + 517; goto execFuncs;
+	f383: _acts = _regex_actions + 509; goto execFuncs;
+	f378: _acts = _regex_actions + 511; goto execFuncs;
+	f380: _acts = _regex_actions + 513; goto execFuncs;
+	f414: _acts = _regex_actions + 515; goto execFuncs;
+	f420: _acts = _regex_actions + 517; goto execFuncs;
 	f410: _acts = _regex_actions + 519; goto execFuncs;
-	f417: _acts = _regex_actions + 521; goto execFuncs;
-	f421: _acts = _regex_actions + 523; goto execFuncs;
-	f425: _acts = _regex_actions + 525; goto execFuncs;
-	f415: _acts = _regex_actions + 527; goto execFuncs;
-	f426: _acts = _regex_actions + 529; goto execFuncs;
-	f382: _acts = _regex_actions + 531; goto execFuncs;
-	f209: _acts = _regex_actions + 533; goto execFuncs;
-	f211: _acts = _regex_actions + 535; goto execFuncs;
-	f213: _acts = _regex_actions + 537; goto execFuncs;
-	f178: _acts = _regex_actions + 539; goto execFuncs;
-	f430: _acts = _regex_actions + 541; goto execFuncs;
-	f429: _acts = _regex_actions + 543; goto execFuncs;
-	f433: _acts = _regex_actions + 545; goto execFuncs;
-	f432: _acts = _regex_actions + 547; goto execFuncs;
-	f428: _acts = _regex_actions + 549; goto execFuncs;
-	f431: _acts = _regex_actions + 551; goto execFuncs;
-	f437: _acts = _regex_actions + 553; goto execFuncs;
-	f439: _acts = _regex_actions + 555; goto execFuncs;
-	f217: _acts = _regex_actions + 557; goto execFuncs;
-	f218: _acts = _regex_actions + 559; goto execFuncs;
-	f435: _acts = _regex_actions + 561; goto execFuncs;
-	f434: _acts = _regex_actions + 563; goto execFuncs;
-	f438: _acts = _regex_actions + 565; goto execFuncs;
+	f412: _acts = _regex_actions + 521; goto execFuncs;
+	f419: _acts = _regex_actions + 523; goto execFuncs;
+	f423: _acts = _regex_actions + 525; goto execFuncs;
+	f427: _acts = _regex_actions + 527; goto execFuncs;
+	f417: _acts = _regex_actions + 529; goto execFuncs;
+	f428: _acts = _regex_actions + 531; goto execFuncs;
+	f384: _acts = _regex_actions + 533; goto execFuncs;
+	f382: _acts = _regex_actions + 535; goto execFuncs;
+	f209: _acts = _regex_actions + 537; goto execFuncs;
+	f211: _acts = _regex_actions + 539; goto execFuncs;
+	f213: _acts = _regex_actions + 541; goto execFuncs;
+	f178: _acts = _regex_actions + 543; goto execFuncs;
+	f432: _acts = _regex_actions + 545; goto execFuncs;
+	f431: _acts = _regex_actions + 547; goto execFuncs;
+	f435: _acts = _regex_actions + 549; goto execFuncs;
+	f434: _acts = _regex_actions + 551; goto execFuncs;
+	f430: _acts = _regex_actions + 553; goto execFuncs;
+	f433: _acts = _regex_actions + 555; goto execFuncs;
+	f439: _acts = _regex_actions + 557; goto execFuncs;
+	f441: _acts = _regex_actions + 559; goto execFuncs;
+	f217: _acts = _regex_actions + 561; goto execFuncs;
+	f218: _acts = _regex_actions + 563; goto execFuncs;
+	f437: _acts = _regex_actions + 565; goto execFuncs;
 	f436: _acts = _regex_actions + 567; goto execFuncs;
-	f216: _acts = _regex_actions + 569; goto execFuncs;
-	f443: _acts = _regex_actions + 571; goto execFuncs;
-	f445: _acts = _regex_actions + 573; goto execFuncs;
-	f220: _acts = _regex_actions + 575; goto execFuncs;
-	f221: _acts = _regex_actions + 577; goto execFuncs;
-	f441: _acts = _regex_actions + 579; goto execFuncs;
-	f440: _acts = _regex_actions + 581; goto execFuncs;
-	f444: _acts = _regex_actions + 583; goto execFuncs;
+	f440: _acts = _regex_actions + 569; goto execFuncs;
+	f438: _acts = _regex_actions + 571; goto execFuncs;
+	f216: _acts = _regex_actions + 573; goto execFuncs;
+	f445: _acts = _regex_actions + 575; goto execFuncs;
+	f447: _acts = _regex_actions + 577; goto execFuncs;
+	f220: _acts = _regex_actions + 579; goto execFuncs;
+	f221: _acts = _regex_actions + 581; goto execFuncs;
+	f443: _acts = _regex_actions + 583; goto execFuncs;
 	f442: _acts = _regex_actions + 585; goto execFuncs;
-	f219: _acts = _regex_actions + 587; goto execFuncs;
-	f447: _acts = _regex_actions + 589; goto execFuncs;
-	f446: _acts = _regex_actions + 591; goto execFuncs;
+	f446: _acts = _regex_actions + 587; goto execFuncs;
+	f444: _acts = _regex_actions + 589; goto execFuncs;
+	f219: _acts = _regex_actions + 591; goto execFuncs;
 	f449: _acts = _regex_actions + 593; goto execFuncs;
 	f448: _acts = _regex_actions + 595; goto execFuncs;
-	f227: _acts = _regex_actions + 597; goto execFuncs;
-	f231: _acts = _regex_actions + 599; goto execFuncs;
-	f36: _acts = _regex_actions + 601; goto execFuncs;
-	f35: _acts = _regex_actions + 603; goto execFuncs;
-	f266: _acts = _regex_actions + 605; goto execFuncs;
-	f261: _acts = _regex_actions + 607; goto execFuncs;
-	f228: _acts = _regex_actions + 609; goto execFuncs;
-	f259: _acts = _regex_actions + 611; goto execFuncs;
-	f244: _acts = _regex_actions + 613; goto execFuncs;
-	f243: _acts = _regex_actions + 615; goto execFuncs;
-	f247: _acts = _regex_actions + 617; goto execFuncs;
-	f246: _acts = _regex_actions + 619; goto execFuncs;
-	f250: _acts = _regex_actions + 621; goto execFuncs;
-	f249: _acts = _regex_actions + 623; goto execFuncs;
-	f323: _acts = _regex_actions + 625; goto execFuncs;
-	f322: _acts = _regex_actions + 627; goto execFuncs;
-	f233: _acts = _regex_actions + 629; goto execFuncs;
-	f1: _acts = _regex_actions + 631; goto execFuncs;
-	f223: _acts = _regex_actions + 633; goto execFuncs;
-	f229: _acts = _regex_actions + 635; goto execFuncs;
-	f226: _acts = _regex_actions + 637; goto execFuncs;
-	f257: _acts = _regex_actions + 639; goto execFuncs;
-	f272: _acts = _regex_actions + 641; goto execFuncs;
-	f286: _acts = _regex_actions + 643; goto execFuncs;
-	f274: _acts = _regex_actions + 645; goto execFuncs;
-	f258: _acts = _regex_actions + 647; goto execFuncs;
-	f283: _acts = _regex_actions + 649; goto execFuncs;
-	f280: _acts = _regex_actions + 651; goto execFuncs;
-	f281: _acts = _regex_actions + 653; goto execFuncs;
-	f277: _acts = _regex_actions + 655; goto execFuncs;
-	f273: _acts = _regex_actions + 657; goto execFuncs;
-	f276: _acts = _regex_actions + 659; goto execFuncs;
-	f42: _acts = _regex_actions + 661; goto execFuncs;
-	f41: _acts = _regex_actions + 663; goto execFuncs;
-	f43: _acts = _regex_actions + 665; goto execFuncs;
-	f47: _acts = _regex_actions + 667; goto execFuncs;
-	f46: _acts = _regex_actions + 669; goto execFuncs;
-	f45: _acts = _regex_actions + 671; goto execFuncs;
-	f32: _acts = _regex_actions + 673; goto execFuncs;
-	f38: _acts = _regex_actions + 675; goto execFuncs;
-	f49: _acts = _regex_actions + 677; goto execFuncs;
-	f51: _acts = _regex_actions + 679; goto execFuncs;
-	f300: _acts = _regex_actions + 681; goto execFuncs;
-	f265: _acts = _regex_actions + 683; goto execFuncs;
-	f285: _acts = _regex_actions + 685; goto execFuncs;
-	f270: _acts = _regex_actions + 687; goto execFuncs;
-	f282: _acts = _regex_actions + 689; goto execFuncs;
-	f268: _acts = _regex_actions + 691; goto execFuncs;
-	f275: _acts = _regex_actions + 693; goto execFuncs;
-	f260: _acts = _regex_actions + 695; goto execFuncs;
-	f279: _acts = _regex_actions + 697; goto execFuncs;
-	f263: _acts = _regex_actions + 699; goto execFuncs;
-	f284: _acts = _regex_actions + 701; goto execFuncs;
-	f269: _acts = _regex_actions + 703; goto execFuncs;
-	f311: _acts = _regex_actions + 705; goto execFuncs;
-	f310: _acts = _regex_actions + 707; goto execFuncs;
-	f298: _acts = _regex_actions + 709; goto execFuncs;
-	f297: _acts = _regex_actions + 711; goto execFuncs;
-	f267: _acts = _regex_actions + 713; goto execFuncs;
-	f264: _acts = _regex_actions + 715; goto execFuncs;
-	f262: _acts = _regex_actions + 717; goto execFuncs;
-	f271: _acts = _regex_actions + 719; goto execFuncs;
-	f253: _acts = _regex_actions + 721; goto execFuncs;
-	f4: _acts = _regex_actions + 723; goto execFuncs;
-	f28: _acts = _regex_actions + 725; goto execFuncs;
-	f29: _acts = _regex_actions + 727; goto execFuncs;
-	f10: _acts = _regex_actions + 729; goto execFuncs;
-	f3: _acts = _regex_actions + 731; goto execFuncs;
-	f240: _acts = _regex_actions + 733; goto execFuncs;
-	f239: _acts = _regex_actions + 735; goto execFuncs;
-	f13: _acts = _regex_actions + 737; goto execFuncs;
-	f241: _acts = _regex_actions + 739; goto execFuncs;
-	f11: _acts = _regex_actions + 741; goto execFuncs;
-	f16: _acts = _regex_actions + 743; goto execFuncs;
-	f27: _acts = _regex_actions + 745; goto execFuncs;
-	f15: _acts = _regex_actions + 747; goto execFuncs;
-	f23: _acts = _regex_actions + 749; goto execFuncs;
-	f22: _acts = _regex_actions + 751; goto execFuncs;
-	f25: _acts = _regex_actions + 753; goto execFuncs;
-	f24: _acts = _regex_actions + 755; goto execFuncs;
-	f26: _acts = _regex_actions + 757; goto execFuncs;
-	f20: _acts = _regex_actions + 759; goto execFuncs;
-	f19: _acts = _regex_actions + 761; goto execFuncs;
-	f31: _acts = _regex_actions + 763; goto execFuncs;
-	f2: _acts = _regex_actions + 765; goto execFuncs;
-	f325: _acts = _regex_actions + 767; goto execFuncs;
-	f58: _acts = _regex_actions + 769; goto execFuncs;
-	f59: _acts = _regex_actions + 771; goto execFuncs;
-	f232: _acts = _regex_actions + 773; goto execFuncs;
-	f225: _acts = _regex_actions + 775; goto execFuncs;
-	f224: _acts = _regex_actions + 777; goto execFuncs;
-	f234: _acts = _regex_actions + 779; goto execFuncs;
-	f251: _acts = _regex_actions + 781; goto execFuncs;
-	f242: _acts = _regex_actions + 783; goto execFuncs;
-	f245: _acts = _regex_actions + 785; goto execFuncs;
-	f248: _acts = _regex_actions + 787; goto execFuncs;
-	f321: _acts = _regex_actions + 789; goto execFuncs;
-	f287: _acts = _regex_actions + 791; goto execFuncs;
-	f293: _acts = _regex_actions + 793; goto execFuncs;
-	f290: _acts = _regex_actions + 795; goto execFuncs;
-	f305: _acts = _regex_actions + 797; goto execFuncs;
-	f303: _acts = _regex_actions + 799; goto execFuncs;
-	f301: _acts = _regex_actions + 801; goto execFuncs;
-	f308: _acts = _regex_actions + 803; goto execFuncs;
-	f312: _acts = _regex_actions + 805; goto execFuncs;
-	f319: _acts = _regex_actions + 807; goto execFuncs;
-	f299: _acts = _regex_actions + 809; goto execFuncs;
-	f296: _acts = _regex_actions + 811; goto execFuncs;
-	f309: _acts = _regex_actions + 813; goto execFuncs;
-	f307: _acts = _regex_actions + 815; goto execFuncs;
-	f252: _acts = _regex_actions + 817; goto execFuncs;
-	f236: _acts = _regex_actions + 819; goto execFuncs;
-	f235: _acts = _regex_actions + 821; goto execFuncs;
-	f324: _acts = _regex_actions + 823; goto execFuncs;
-	f320: _acts = _regex_actions + 825; goto execFuncs;
-	f0: _acts = _regex_actions + 827; goto execFuncs;
-	f34: _acts = _regex_actions + 829; goto execFuncs;
-	f37: _acts = _regex_actions + 831; goto execFuncs;
-	f48: _acts = _regex_actions + 833; goto execFuncs;
-	f50: _acts = _regex_actions + 835; goto execFuncs;
-	f44: _acts = _regex_actions + 837; goto execFuncs;
-	f18: _acts = _regex_actions + 839; goto execFuncs;
-	f14: _acts = _regex_actions + 841; goto execFuncs;
-	f57: _acts = _regex_actions + 843; goto execFuncs;
-	f52: _acts = _regex_actions + 845; goto execFuncs;
-	f295: _acts = _regex_actions + 847; goto execFuncs;
-	f302: _acts = _regex_actions + 849; goto execFuncs;
-	f255: _acts = _regex_actions + 852; goto execFuncs;
-	f238: _acts = _regex_actions + 855; goto execFuncs;
-	f291: _acts = _regex_actions + 858; goto execFuncs;
-	f409: _acts = _regex_actions + 861; goto execFuncs;
-	f411: _acts = _regex_actions + 864; goto execFuncs;
-	f289: _acts = _regex_actions + 867; goto execFuncs;
-	f21: _acts = _regex_actions + 870; goto execFuncs;
-	f306: _acts = _regex_actions + 873; goto execFuncs;
-	f304: _acts = _regex_actions + 876; goto execFuncs;
-	f422: _acts = _regex_actions + 879; goto execFuncs;
-	f316: _acts = _regex_actions + 882; goto execFuncs;
-	f424: _acts = _regex_actions + 885; goto execFuncs;
-	f318: _acts = _regex_actions + 888; goto execFuncs;
-	f423: _acts = _regex_actions + 891; goto execFuncs;
-	f317: _acts = _regex_actions + 894; goto execFuncs;
-	f7: _acts = _regex_actions + 897; goto execFuncs;
-	f9: _acts = _regex_actions + 900; goto execFuncs;
-	f6: _acts = _regex_actions + 903; goto execFuncs;
-	f278: _acts = _regex_actions + 906; goto execFuncs;
-	f230: _acts = _regex_actions + 909; goto execFuncs;
-	f8: _acts = _regex_actions + 912; goto execFuncs;
-	f256: _acts = _regex_actions + 915; goto execFuncs;
-	f292: _acts = _regex_actions + 919; goto execFuncs;
-	f12: _acts = _regex_actions + 923; goto execFuncs;
-	f294: _acts = _regex_actions + 927; goto execFuncs;
+	f451: _acts = _regex_actions + 597; goto execFuncs;
+	f450: _acts = _regex_actions + 599; goto execFuncs;
+	f227: _acts = _regex_actions + 601; goto execFuncs;
+	f231: _acts = _regex_actions + 603; goto execFuncs;
+	f36: _acts = _regex_actions + 605; goto execFuncs;
+	f35: _acts = _regex_actions + 607; goto execFuncs;
+	f266: _acts = _regex_actions + 609; goto execFuncs;
+	f261: _acts = _regex_actions + 611; goto execFuncs;
+	f228: _acts = _regex_actions + 613; goto execFuncs;
+	f259: _acts = _regex_actions + 615; goto execFuncs;
+	f244: _acts = _regex_actions + 617; goto execFuncs;
+	f243: _acts = _regex_actions + 619; goto execFuncs;
+	f247: _acts = _regex_actions + 621; goto execFuncs;
+	f246: _acts = _regex_actions + 623; goto execFuncs;
+	f250: _acts = _regex_actions + 625; goto execFuncs;
+	f249: _acts = _regex_actions + 627; goto execFuncs;
+	f323: _acts = _regex_actions + 629; goto execFuncs;
+	f322: _acts = _regex_actions + 631; goto execFuncs;
+	f233: _acts = _regex_actions + 633; goto execFuncs;
+	f1: _acts = _regex_actions + 635; goto execFuncs;
+	f223: _acts = _regex_actions + 637; goto execFuncs;
+	f229: _acts = _regex_actions + 639; goto execFuncs;
+	f226: _acts = _regex_actions + 641; goto execFuncs;
+	f257: _acts = _regex_actions + 643; goto execFuncs;
+	f272: _acts = _regex_actions + 645; goto execFuncs;
+	f286: _acts = _regex_actions + 647; goto execFuncs;
+	f274: _acts = _regex_actions + 649; goto execFuncs;
+	f258: _acts = _regex_actions + 651; goto execFuncs;
+	f283: _acts = _regex_actions + 653; goto execFuncs;
+	f280: _acts = _regex_actions + 655; goto execFuncs;
+	f281: _acts = _regex_actions + 657; goto execFuncs;
+	f277: _acts = _regex_actions + 659; goto execFuncs;
+	f273: _acts = _regex_actions + 661; goto execFuncs;
+	f276: _acts = _regex_actions + 663; goto execFuncs;
+	f42: _acts = _regex_actions + 665; goto execFuncs;
+	f41: _acts = _regex_actions + 667; goto execFuncs;
+	f43: _acts = _regex_actions + 669; goto execFuncs;
+	f47: _acts = _regex_actions + 671; goto execFuncs;
+	f46: _acts = _regex_actions + 673; goto execFuncs;
+	f45: _acts = _regex_actions + 675; goto execFuncs;
+	f32: _acts = _regex_actions + 677; goto execFuncs;
+	f38: _acts = _regex_actions + 679; goto execFuncs;
+	f49: _acts = _regex_actions + 681; goto execFuncs;
+	f51: _acts = _regex_actions + 683; goto execFuncs;
+	f300: _acts = _regex_actions + 685; goto execFuncs;
+	f265: _acts = _regex_actions + 687; goto execFuncs;
+	f285: _acts = _regex_actions + 689; goto execFuncs;
+	f270: _acts = _regex_actions + 691; goto execFuncs;
+	f282: _acts = _regex_actions + 693; goto execFuncs;
+	f268: _acts = _regex_actions + 695; goto execFuncs;
+	f275: _acts = _regex_actions + 697; goto execFuncs;
+	f260: _acts = _regex_actions + 699; goto execFuncs;
+	f279: _acts = _regex_actions + 701; goto execFuncs;
+	f263: _acts = _regex_actions + 703; goto execFuncs;
+	f284: _acts = _regex_actions + 705; goto execFuncs;
+	f269: _acts = _regex_actions + 707; goto execFuncs;
+	f311: _acts = _regex_actions + 709; goto execFuncs;
+	f310: _acts = _regex_actions + 711; goto execFuncs;
+	f298: _acts = _regex_actions + 713; goto execFuncs;
+	f297: _acts = _regex_actions + 715; goto execFuncs;
+	f267: _acts = _regex_actions + 717; goto execFuncs;
+	f264: _acts = _regex_actions + 719; goto execFuncs;
+	f262: _acts = _regex_actions + 721; goto execFuncs;
+	f271: _acts = _regex_actions + 723; goto execFuncs;
+	f253: _acts = _regex_actions + 725; goto execFuncs;
+	f4: _acts = _regex_actions + 727; goto execFuncs;
+	f28: _acts = _regex_actions + 729; goto execFuncs;
+	f29: _acts = _regex_actions + 731; goto execFuncs;
+	f10: _acts = _regex_actions + 733; goto execFuncs;
+	f3: _acts = _regex_actions + 735; goto execFuncs;
+	f240: _acts = _regex_actions + 737; goto execFuncs;
+	f239: _acts = _regex_actions + 739; goto execFuncs;
+	f13: _acts = _regex_actions + 741; goto execFuncs;
+	f241: _acts = _regex_actions + 743; goto execFuncs;
+	f11: _acts = _regex_actions + 745; goto execFuncs;
+	f16: _acts = _regex_actions + 747; goto execFuncs;
+	f27: _acts = _regex_actions + 749; goto execFuncs;
+	f15: _acts = _regex_actions + 751; goto execFuncs;
+	f23: _acts = _regex_actions + 753; goto execFuncs;
+	f22: _acts = _regex_actions + 755; goto execFuncs;
+	f25: _acts = _regex_actions + 757; goto execFuncs;
+	f24: _acts = _regex_actions + 759; goto execFuncs;
+	f26: _acts = _regex_actions + 761; goto execFuncs;
+	f20: _acts = _regex_actions + 763; goto execFuncs;
+	f19: _acts = _regex_actions + 765; goto execFuncs;
+	f31: _acts = _regex_actions + 767; goto execFuncs;
+	f2: _acts = _regex_actions + 769; goto execFuncs;
+	f325: _acts = _regex_actions + 771; goto execFuncs;
+	f58: _acts = _regex_actions + 773; goto execFuncs;
+	f59: _acts = _regex_actions + 775; goto execFuncs;
+	f232: _acts = _regex_actions + 777; goto execFuncs;
+	f225: _acts = _regex_actions + 779; goto execFuncs;
+	f224: _acts = _regex_actions + 781; goto execFuncs;
+	f234: _acts = _regex_actions + 783; goto execFuncs;
+	f251: _acts = _regex_actions + 785; goto execFuncs;
+	f242: _acts = _regex_actions + 787; goto execFuncs;
+	f245: _acts = _regex_actions + 789; goto execFuncs;
+	f248: _acts = _regex_actions + 791; goto execFuncs;
+	f321: _acts = _regex_actions + 793; goto execFuncs;
+	f287: _acts = _regex_actions + 795; goto execFuncs;
+	f293: _acts = _regex_actions + 797; goto execFuncs;
+	f290: _acts = _regex_actions + 799; goto execFuncs;
+	f305: _acts = _regex_actions + 801; goto execFuncs;
+	f303: _acts = _regex_actions + 803; goto execFuncs;
+	f301: _acts = _regex_actions + 805; goto execFuncs;
+	f308: _acts = _regex_actions + 807; goto execFuncs;
+	f312: _acts = _regex_actions + 809; goto execFuncs;
+	f319: _acts = _regex_actions + 811; goto execFuncs;
+	f299: _acts = _regex_actions + 813; goto execFuncs;
+	f296: _acts = _regex_actions + 815; goto execFuncs;
+	f309: _acts = _regex_actions + 817; goto execFuncs;
+	f307: _acts = _regex_actions + 819; goto execFuncs;
+	f252: _acts = _regex_actions + 821; goto execFuncs;
+	f236: _acts = _regex_actions + 823; goto execFuncs;
+	f235: _acts = _regex_actions + 825; goto execFuncs;
+	f324: _acts = _regex_actions + 827; goto execFuncs;
+	f320: _acts = _regex_actions + 829; goto execFuncs;
+	f0: _acts = _regex_actions + 831; goto execFuncs;
+	f34: _acts = _regex_actions + 833; goto execFuncs;
+	f37: _acts = _regex_actions + 835; goto execFuncs;
+	f48: _acts = _regex_actions + 837; goto execFuncs;
+	f50: _acts = _regex_actions + 839; goto execFuncs;
+	f44: _acts = _regex_actions + 841; goto execFuncs;
+	f18: _acts = _regex_actions + 843; goto execFuncs;
+	f14: _acts = _regex_actions + 845; goto execFuncs;
+	f57: _acts = _regex_actions + 847; goto execFuncs;
+	f52: _acts = _regex_actions + 849; goto execFuncs;
+	f295: _acts = _regex_actions + 851; goto execFuncs;
+	f302: _acts = _regex_actions + 853; goto execFuncs;
+	f255: _acts = _regex_actions + 856; goto execFuncs;
+	f238: _acts = _regex_actions + 859; goto execFuncs;
+	f291: _acts = _regex_actions + 862; goto execFuncs;
+	f411: _acts = _regex_actions + 865; goto execFuncs;
+	f413: _acts = _regex_actions + 868; goto execFuncs;
+	f289: _acts = _regex_actions + 871; goto execFuncs;
+	f21: _acts = _regex_actions + 874; goto execFuncs;
+	f306: _acts = _regex_actions + 877; goto execFuncs;
+	f304: _acts = _regex_actions + 880; goto execFuncs;
+	f424: _acts = _regex_actions + 883; goto execFuncs;
+	f316: _acts = _regex_actions + 886; goto execFuncs;
+	f426: _acts = _regex_actions + 889; goto execFuncs;
+	f318: _acts = _regex_actions + 892; goto execFuncs;
+	f425: _acts = _regex_actions + 895; goto execFuncs;
+	f317: _acts = _regex_actions + 898; goto execFuncs;
+	f7: _acts = _regex_actions + 901; goto execFuncs;
+	f9: _acts = _regex_actions + 904; goto execFuncs;
+	f6: _acts = _regex_actions + 907; goto execFuncs;
+	f278: _acts = _regex_actions + 910; goto execFuncs;
+	f230: _acts = _regex_actions + 913; goto execFuncs;
+	f8: _acts = _regex_actions + 916; goto execFuncs;
+	f256: _acts = _regex_actions + 919; goto execFuncs;
+	f292: _acts = _regex_actions + 923; goto execFuncs;
+	f12: _acts = _regex_actions + 927; goto execFuncs;
+	f294: _acts = _regex_actions + 931; goto execFuncs;
 
 execFuncs:
 	_nacts = *_acts++;
@@ -8927,7 +8938,7 @@ execFuncs:
         if ((int)stack.size() == top) {
             stack.resize(2 * (top + 1));
         }
-    {stack[top++] = cs; cs = 843;goto _again;}}
+    {stack[top++] = cs; cs = 844;goto _again;}}
               }}
 	break;
 	case 222:
@@ -9227,13 +9238,17 @@ execFuncs:
               }}
 	break;
 	case 260:
-/* #line 1103 "src/parser/Parser.rl" */
+/* #line 1106 "src/parser/Parser.rl" */
+	{te = p+1;{ throw LocatedParseError("Character class intersection/subtraction is not supported"); }}
+	break;
+	case 261:
+/* #line 1109 "src/parser/Parser.rl" */
 	{te = p+1;{
                   currentCls->add((u8)*ts);
               }}
 	break;
-	case 261:
-/* #line 1107 "src/parser/Parser.rl" */
+	case 262:
+/* #line 1113 "src/parser/Parser.rl" */
 	{te = p+1;{
                   currentCls->finalize();
                   currentSeq->addComponent(std::move(currentCls));
@@ -9241,45 +9256,45 @@ execFuncs:
                   {cs = 746;goto _again;}
               }}
 	break;
-	case 262:
+	case 263:
 /* #line 967 "src/parser/Parser.rl" */
 	{te = p;p--;{ throw LocatedParseError("Malformed property"); }}
 	break;
-	case 263:
+	case 264:
 /* #line 968 "src/parser/Parser.rl" */
 	{te = p;p--;{ throw LocatedParseError("Malformed property"); }}
 	break;
-	case 264:
+	case 265:
 /* #line 971 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   currentCls->add(octAccumulator);
               }}
 	break;
-	case 265:
+	case 266:
 /* #line 974 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   currentCls->add(octAccumulator);
               }}
 	break;
-	case 266:
+	case 267:
 /* #line 993 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   throw LocatedParseError("Value in \\o{...} sequence is non-octal or missing braces");
               }}
 	break;
-	case 267:
+	case 268:
 /* #line 998 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   currentCls->add(accumulator);
               }}
 	break;
-	case 268:
+	case 269:
 /* #line 1022 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   throw LocatedParseError("Value in \\x{...} sequence is non-hex or missing }");
               }}
 	break;
-	case 269:
+	case 270:
 /* #line 1026 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   if (te - ts < 3) {
@@ -9291,46 +9306,48 @@ execFuncs:
                   }
               }}
 	break;
-	case 270:
+	case 271:
 /* #line 1097 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
-	case 271:
+	case 272:
 /* #line 1103 "src/parser/Parser.rl" */
+	{te = p;p--;{ throw LocatedParseError("Nested character classes are not supported"); }}
+	break;
+	case 273:
+/* #line 1109 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   currentCls->add((u8)*ts);
               }}
 	break;
-	case 272:
+	case 274:
 /* #line 993 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   throw LocatedParseError("Value in \\o{...} sequence is non-octal or missing braces");
               }}
 	break;
-	case 273:
+	case 275:
 /* #line 1022 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   throw LocatedParseError("Value in \\x{...} sequence is non-hex or missing }");
               }}
 	break;
-	case 274:
+	case 276:
 /* #line 1097 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
-	case 275:
+	case 277:
 /* #line 1103 "src/parser/Parser.rl" */
-	{{p = ((te))-1;}{
-                  currentCls->add((u8)*ts);
-              }}
+	{{p = ((te))-1;}{ throw LocatedParseError("Nested character classes are not supported"); }}
 	break;
-	case 276:
-/* #line 1121 "src/parser/Parser.rl" */
+	case 278:
+/* #line 1127 "src/parser/Parser.rl" */
 	{te = p+1;{
             if (currentCls->isNegated()) {
                 // Already seen a caret; the second one is not a meta-character.
@@ -9343,50 +9360,50 @@ execFuncs:
             }
         }}
 	break;
-	case 277:
-/* #line 1134 "src/parser/Parser.rl" */
+	case 279:
+/* #line 1140 "src/parser/Parser.rl" */
 	{te = p+1;{
             currentCls->add(']');
             inCharClassEarly = false;
         }}
 	break;
-	case 278:
-/* #line 1139 "src/parser/Parser.rl" */
+	case 280:
+/* #line 1145 "src/parser/Parser.rl" */
 	{te = p+1;{ {
         DEBUG_PRINTF("stack %zu top %d\n", stack.size(), top);
         if ((int)stack.size() == top) {
             stack.resize(2 * (top + 1));
         }
-    {stack[top++] = cs; cs = 843;goto _again;}} }}
+    {stack[top++] = cs; cs = 844;goto _again;}} }}
 	break;
-	case 279:
-/* #line 1140 "src/parser/Parser.rl" */
+	case 281:
+/* #line 1146 "src/parser/Parser.rl" */
 	{te = p+1;{ /*noop*/}}
 	break;
-	case 280:
-/* #line 1143 "src/parser/Parser.rl" */
+	case 282:
+/* #line 1149 "src/parser/Parser.rl" */
 	{te = p+1;{
             inCharClassEarly = false;
             p--;
             {cs = 819;goto _again;}
         }}
 	break;
-	case 281:
-/* #line 1143 "src/parser/Parser.rl" */
+	case 283:
+/* #line 1149 "src/parser/Parser.rl" */
 	{te = p;p--;{
             inCharClassEarly = false;
             p--;
             {cs = 819;goto _again;}
         }}
 	break;
-	case 282:
-/* #line 1155 "src/parser/Parser.rl" */
+	case 284:
+/* #line 1161 "src/parser/Parser.rl" */
 	{te = p+1;{
                   {cs = 746;goto _again;}
               }}
 	break;
-	case 283:
-/* #line 1160 "src/parser/Parser.rl" */
+	case 285:
+/* #line 1166 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   /* leverage ComponentClass to generate the vertices */
@@ -9396,8 +9413,8 @@ execFuncs:
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 284:
-/* #line 1169 "src/parser/Parser.rl" */
+	case 286:
+/* #line 1175 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   /* leverage ComponentClass to generate the vertices */
@@ -9407,8 +9424,8 @@ execFuncs:
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 285:
-/* #line 1178 "src/parser/Parser.rl" */
+	case 287:
+/* #line 1184 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   /* leverage ComponentClass to generate the vertices */
@@ -9418,133 +9435,133 @@ execFuncs:
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 286:
-/* #line 1187 "src/parser/Parser.rl" */
-	{te = p+1;{
-                  assert(mode.utf8);
-                  throwInvalidUtf8();
-              }}
-	break;
-	case 287:
+	case 288:
 /* #line 1193 "src/parser/Parser.rl" */
 	{te = p+1;{
-                  addLiteral(currentSeq, *ts, mode);
-              }}
-	break;
-	case 288:
-/* #line 1187 "src/parser/Parser.rl" */
-	{te = p;p--;{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
 	case 289:
-/* #line 1193 "src/parser/Parser.rl" */
-	{te = p;p--;{
+/* #line 1199 "src/parser/Parser.rl" */
+	{te = p+1;{
                   addLiteral(currentSeq, *ts, mode);
               }}
 	break;
 	case 290:
-/* #line 1187 "src/parser/Parser.rl" */
-	{{p = ((te))-1;}{
+/* #line 1193 "src/parser/Parser.rl" */
+	{te = p;p--;{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
 	case 291:
-/* #line 1203 "src/parser/Parser.rl" */
+/* #line 1199 "src/parser/Parser.rl" */
+	{te = p;p--;{
+                  addLiteral(currentSeq, *ts, mode);
+              }}
+	break;
+	case 292:
+/* #line 1193 "src/parser/Parser.rl" */
+	{{p = ((te))-1;}{
+                  assert(mode.utf8);
+                  throwInvalidUtf8();
+              }}
+	break;
+	case 293:
+/* #line 1209 "src/parser/Parser.rl" */
 	{te = p+1;{
                   {cs = stack[--top];goto _again;}
               }}
 	break;
-	case 292:
-/* #line 1208 "src/parser/Parser.rl" */
+	case 294:
+/* #line 1214 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   currentCls->add(readUtf8CodePoint2c(ts));
                   inCharClassEarly = false;
               }}
 	break;
-	case 293:
-/* #line 1214 "src/parser/Parser.rl" */
+	case 295:
+/* #line 1220 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   currentCls->add(readUtf8CodePoint3c(ts));
                   inCharClassEarly = false;
               }}
 	break;
-	case 294:
-/* #line 1220 "src/parser/Parser.rl" */
+	case 296:
+/* #line 1226 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   currentCls->add(readUtf8CodePoint4c(ts));
                   inCharClassEarly = false;
               }}
 	break;
-	case 295:
-/* #line 1226 "src/parser/Parser.rl" */
-	{te = p+1;{
-                  assert(mode.utf8);
-                  throwInvalidUtf8();
-              }}
-	break;
-	case 296:
+	case 297:
 /* #line 1232 "src/parser/Parser.rl" */
 	{te = p+1;{
-                  currentCls->add(*ts);
-                  inCharClassEarly = false;
-              }}
-	break;
-	case 297:
-/* #line 1226 "src/parser/Parser.rl" */
-	{te = p;p--;{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
 	case 298:
-/* #line 1232 "src/parser/Parser.rl" */
-	{te = p;p--;{
+/* #line 1238 "src/parser/Parser.rl" */
+	{te = p+1;{
                   currentCls->add(*ts);
                   inCharClassEarly = false;
               }}
 	break;
 	case 299:
-/* #line 1226 "src/parser/Parser.rl" */
-	{{p = ((te))-1;}{
+/* #line 1232 "src/parser/Parser.rl" */
+	{te = p;p--;{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
 	case 300:
-/* #line 1244 "src/parser/Parser.rl" */
-	{te = p+1;{ inComment = false; {cs = 746;goto _again;} }}
+/* #line 1238 "src/parser/Parser.rl" */
+	{te = p;p--;{
+                  currentCls->add(*ts);
+                  inCharClassEarly = false;
+              }}
 	break;
 	case 301:
-/* #line 1248 "src/parser/Parser.rl" */
-	{te = p+1;}
+/* #line 1232 "src/parser/Parser.rl" */
+	{{p = ((te))-1;}{
+                  assert(mode.utf8);
+                  throwInvalidUtf8();
+              }}
 	break;
 	case 302:
-/* #line 1256 "src/parser/Parser.rl" */
+/* #line 1250 "src/parser/Parser.rl" */
 	{te = p+1;{ inComment = false; {cs = 746;goto _again;} }}
 	break;
 	case 303:
-/* #line 1260 "src/parser/Parser.rl" */
+/* #line 1254 "src/parser/Parser.rl" */
 	{te = p+1;}
 	break;
 	case 304:
-/* #line 1492 "src/parser/Parser.rl" */
-	{act = 288;}
+/* #line 1262 "src/parser/Parser.rl" */
+	{te = p+1;{ inComment = false; {cs = 746;goto _again;} }}
 	break;
 	case 305:
-/* #line 1509 "src/parser/Parser.rl" */
-	{act = 290;}
+/* #line 1266 "src/parser/Parser.rl" */
+	{te = p+1;}
 	break;
 	case 306:
-/* #line 1738 "src/parser/Parser.rl" */
-	{act = 330;}
+/* #line 1498 "src/parser/Parser.rl" */
+	{act = 290;}
 	break;
 	case 307:
+/* #line 1515 "src/parser/Parser.rl" */
+	{act = 292;}
+	break;
+	case 308:
+/* #line 1744 "src/parser/Parser.rl" */
+	{act = 332;}
+	break;
+	case 309:
 /* #line 363 "src/parser/Parser.rl" */
 	{te = p+1;{
         if (sequences.empty()) {
@@ -9554,44 +9571,44 @@ execFuncs:
         POP_SEQUENCE;
     }}
 	break;
-	case 308:
-/* #line 1275 "src/parser/Parser.rl" */
+	case 310:
+/* #line 1281 "src/parser/Parser.rl" */
 	{te = p+1;{
                   currentSeq->addAlternation();
               }}
 	break;
-	case 309:
-/* #line 1280 "src/parser/Parser.rl" */
+	case 311:
+/* #line 1286 "src/parser/Parser.rl" */
 	{te = p+1;{
                   throw LocatedParseError("POSIX named classes are only "
                                           "supported inside a class");
               }}
 	break;
-	case 310:
-/* #line 1287 "src/parser/Parser.rl" */
+	case 312:
+/* #line 1293 "src/parser/Parser.rl" */
 	{te = p+1;{
                   throw LocatedParseError("Unsupported POSIX collating "
                                           "element");
               }}
 	break;
-	case 311:
-/* #line 1294 "src/parser/Parser.rl" */
-	{te = p+1;{
-                  {cs = 838;goto _again;}
-              }}
-	break;
-	case 312:
-/* #line 1298 "src/parser/Parser.rl" */
-	{te = p+1;{ /* noop */ }}
-	break;
 	case 313:
 /* #line 1300 "src/parser/Parser.rl" */
 	{te = p+1;{
-                  currentSeq->addComponent(generateComponent(CLASS_ANY, false, mode));
+                  {cs = 839;goto _again;}
               }}
 	break;
 	case 314:
 /* #line 1304 "src/parser/Parser.rl" */
+	{te = p+1;{ /* noop */ }}
+	break;
+	case 315:
+/* #line 1306 "src/parser/Parser.rl" */
+	{te = p+1;{
+                  currentSeq->addComponent(generateComponent(CLASS_ANY, false, mode));
+              }}
+	break;
+	case 316:
+/* #line 1310 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (mode.utf8) {
                       throw LocatedParseError("\\C is unsupported in UTF8");
@@ -9599,35 +9616,35 @@ execFuncs:
                   currentSeq->addComponent(std::make_unique<ComponentByte>());
               }}
 	break;
-	case 315:
-/* #line 1318 "src/parser/Parser.rl" */
-	{te = p+1;{
-                  if (!currentSeq->addRepeat(0, ComponentRepeat::NoLimit,
-                                        ComponentRepeat::REPEAT_NONGREEDY)) {
-                      throwInvalidRepeat();
-                  }
-              }}
-	break;
-	case 316:
-/* #line 1325 "src/parser/Parser.rl" */
-	{te = p+1;{
-                  if (!currentSeq->addRepeat(0, ComponentRepeat::NoLimit,
-                                        ComponentRepeat::REPEAT_POSSESSIVE)) {
-                      throwInvalidRepeat();
-                  }
-              }}
-	break;
 	case 317:
-/* #line 1339 "src/parser/Parser.rl" */
+/* #line 1324 "src/parser/Parser.rl" */
 	{te = p+1;{
-                  if (!currentSeq->addRepeat(1, ComponentRepeat::NoLimit,
+                  if (!currentSeq->addRepeat(0, ComponentRepeat::NoLimit,
                                         ComponentRepeat::REPEAT_NONGREEDY)) {
                       throwInvalidRepeat();
                   }
               }}
 	break;
 	case 318:
-/* #line 1346 "src/parser/Parser.rl" */
+/* #line 1331 "src/parser/Parser.rl" */
+	{te = p+1;{
+                  if (!currentSeq->addRepeat(0, ComponentRepeat::NoLimit,
+                                        ComponentRepeat::REPEAT_POSSESSIVE)) {
+                      throwInvalidRepeat();
+                  }
+              }}
+	break;
+	case 319:
+/* #line 1345 "src/parser/Parser.rl" */
+	{te = p+1;{
+                  if (!currentSeq->addRepeat(1, ComponentRepeat::NoLimit,
+                                        ComponentRepeat::REPEAT_NONGREEDY)) {
+                      throwInvalidRepeat();
+                  }
+              }}
+	break;
+	case 320:
+/* #line 1352 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (!currentSeq->addRepeat(1, ComponentRepeat::NoLimit,
                                         ComponentRepeat::REPEAT_POSSESSIVE)) {
@@ -9635,8 +9652,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 319:
-/* #line 1360 "src/parser/Parser.rl" */
+	case 321:
+/* #line 1366 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (!currentSeq->addRepeat(
                            0, 1, ComponentRepeat::REPEAT_NONGREEDY)) {
@@ -9644,8 +9661,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 320:
-/* #line 1367 "src/parser/Parser.rl" */
+	case 322:
+/* #line 1373 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (!currentSeq->addRepeat(
                            0, 1, ComponentRepeat::REPEAT_POSSESSIVE)) {
@@ -9653,8 +9670,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 321:
-/* #line 1384 "src/parser/Parser.rl" */
+	case 323:
+/* #line 1390 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (repeatN > repeatM || repeatM == 0) {
                       throwInvalidRepeat();
@@ -9665,8 +9682,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 322:
-/* #line 1394 "src/parser/Parser.rl" */
+	case 324:
+/* #line 1400 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (repeatN > repeatM || repeatM == 0) {
                       throwInvalidRepeat();
@@ -9677,15 +9694,15 @@ execFuncs:
                   }
               }}
 	break;
-	case 323:
+	case 325:
 /* #line 323 "src/parser/Parser.rl" */
 	{te = p+1;{
         inComment = true;
-        {cs = 849;goto _again;}
+        {cs = 850;goto _again;}
     }}
 	break;
-	case 324:
-/* #line 1411 "src/parser/Parser.rl" */
+	case 326:
+/* #line 1417 "src/parser/Parser.rl" */
 	{te = p+1;{ p--; {
         DEBUG_PRINTF("stack %zu top %d\n", stack.size(), top);
         if ((int)stack.size() == top) {
@@ -9693,125 +9710,102 @@ execFuncs:
         }
     {stack[top++] = cs; cs = 787;goto _again;}} }}
 	break;
-	case 325:
-/* #line 1415 "src/parser/Parser.rl" */
+	case 327:
+/* #line 1421 "src/parser/Parser.rl" */
 	{te = p+1;{ assert(0); {p++; goto _out; } }}
 	break;
-	case 326:
-/* #line 1422 "src/parser/Parser.rl" */
+	case 328:
+/* #line 1428 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto bound = mode.multiline ? ComponentBoundary::BEGIN_LINE
                                               : ComponentBoundary::BEGIN_STRING;
                   currentSeq->addComponent(std::make_unique<ComponentBoundary>(bound));
               }}
 	break;
-	case 327:
-/* #line 1429 "src/parser/Parser.rl" */
+	case 329:
+/* #line 1435 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto bound = mode.multiline ? ComponentBoundary::END_LINE
                                               : ComponentBoundary::END_STRING_OPTIONAL_LF;
                   currentSeq->addComponent(std::make_unique<ComponentBoundary>(bound));
               }}
 	break;
-	case 328:
-/* #line 1435 "src/parser/Parser.rl" */
+	case 330:
+/* #line 1441 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto bound = ComponentBoundary::BEGIN_STRING;
                   currentSeq->addComponent(std::make_unique<ComponentBoundary>(bound));
               }}
 	break;
-	case 329:
-/* #line 1440 "src/parser/Parser.rl" */
+	case 331:
+/* #line 1446 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto bound = ComponentBoundary::END_STRING_OPTIONAL_LF;
                   currentSeq->addComponent(std::make_unique<ComponentBoundary>(bound));
               }}
 	break;
-	case 330:
-/* #line 1445 "src/parser/Parser.rl" */
+	case 332:
+/* #line 1451 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto bound = ComponentBoundary::END_STRING;
                   currentSeq->addComponent(std::make_unique<ComponentBoundary>(bound));
               }}
 	break;
-	case 331:
-/* #line 1450 "src/parser/Parser.rl" */
+	case 333:
+/* #line 1456 "src/parser/Parser.rl" */
 	{te = p+1;{
                   currentSeq->addComponent(
                       std::make_unique<ComponentWordBoundary>(ts - ptr, false, mode));
               }}
 	break;
-	case 332:
-/* #line 1455 "src/parser/Parser.rl" */
+	case 334:
+/* #line 1461 "src/parser/Parser.rl" */
 	{te = p+1;{
                   currentSeq->addComponent(
                       std::make_unique<ComponentWordBoundary>(ts - ptr, true, mode));
               }}
 	break;
-	case 333:
-/* #line 1465 "src/parser/Parser.rl" */
+	case 335:
+/* #line 1471 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, '\x09', mode);
               }}
 	break;
-	case 334:
-/* #line 1469 "src/parser/Parser.rl" */
+	case 336:
+/* #line 1475 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, '\x0a', mode);
               }}
 	break;
-	case 335:
-/* #line 1473 "src/parser/Parser.rl" */
+	case 337:
+/* #line 1479 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, '\x0d', mode);
               }}
 	break;
-	case 336:
-/* #line 1477 "src/parser/Parser.rl" */
+	case 338:
+/* #line 1483 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, '\x0c', mode);
               }}
 	break;
-	case 337:
-/* #line 1481 "src/parser/Parser.rl" */
+	case 339:
+/* #line 1487 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, '\x07', mode);
               }}
 	break;
-	case 338:
-/* #line 1485 "src/parser/Parser.rl" */
+	case 340:
+/* #line 1491 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, '\x1b', mode);
               }}
 	break;
-	case 339:
-/* #line 1489 "src/parser/Parser.rl" */
+	case 341:
+/* #line 1495 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, octAccumulator, mode);
               }}
-	break;
-	case 340:
-/* #line 480 "src/parser/Parser.rl" */
-	{te = p+1;{
-        if (accumulator == 0) {
-            throw LocatedParseError("Numbered reference cannot be zero");
-        }
-        currentSeq->addComponent(std::make_unique<ComponentBackReference>(accumulator));
-    }}
-	break;
-	case 341:
-/* #line 487 "src/parser/Parser.rl" */
-	{te = p+1;{
-        // Accumulator is a negative offset.
-        if (accumulator == 0) {
-            throw LocatedParseError("Numbered reference cannot be zero");
-        }
-        if (accumulator >= groupIndex) {
-            throw LocatedParseError("Invalid reference");
-        }
-        unsigned idx = groupIndex - accumulator;
-        currentSeq->addComponent(std::make_unique<ComponentBackReference>(idx));
-    }}
 	break;
 	case 342:
 /* #line 480 "src/parser/Parser.rl" */
@@ -9837,15 +9831,26 @@ execFuncs:
     }}
 	break;
 	case 344:
-/* #line 499 "src/parser/Parser.rl" */
+/* #line 480 "src/parser/Parser.rl" */
 	{te = p+1;{
-        currentSeq->addComponent(std::make_unique<ComponentBackReference>(label));
+        if (accumulator == 0) {
+            throw LocatedParseError("Numbered reference cannot be zero");
+        }
+        currentSeq->addComponent(std::make_unique<ComponentBackReference>(accumulator));
     }}
 	break;
 	case 345:
-/* #line 499 "src/parser/Parser.rl" */
+/* #line 487 "src/parser/Parser.rl" */
 	{te = p+1;{
-        currentSeq->addComponent(std::make_unique<ComponentBackReference>(label));
+        // Accumulator is a negative offset.
+        if (accumulator == 0) {
+            throw LocatedParseError("Numbered reference cannot be zero");
+        }
+        if (accumulator >= groupIndex) {
+            throw LocatedParseError("Invalid reference");
+        }
+        unsigned idx = groupIndex - accumulator;
+        currentSeq->addComponent(std::make_unique<ComponentBackReference>(idx));
     }}
 	break;
 	case 346:
@@ -9867,7 +9872,19 @@ execFuncs:
     }}
 	break;
 	case 349:
-/* #line 1550 "src/parser/Parser.rl" */
+/* #line 499 "src/parser/Parser.rl" */
+	{te = p+1;{
+        currentSeq->addComponent(std::make_unique<ComponentBackReference>(label));
+    }}
+	break;
+	case 350:
+/* #line 499 "src/parser/Parser.rl" */
+	{te = p+1;{
+        currentSeq->addComponent(std::make_unique<ComponentBackReference>(label));
+    }}
+	break;
+	case 351:
+/* #line 1556 "src/parser/Parser.rl" */
 	{te = p+1;{
                   ostringstream str;
                   str << "Onigiruma subroutine call at index " << ts - ptr <<
@@ -9875,8 +9892,8 @@ execFuncs:
                   throw ParseError(str.str());
               }}
 	break;
-	case 350:
-/* #line 1561 "src/parser/Parser.rl" */
+	case 352:
+/* #line 1567 "src/parser/Parser.rl" */
 	{te = p+1;{
                   string oct(ts + 3, te - ts - 4);
                   unsigned long val;
@@ -9891,14 +9908,14 @@ execFuncs:
                   addEscapedOctal(currentSeq, (unichar)val, mode);
               }}
 	break;
-	case 351:
-/* #line 1579 "src/parser/Parser.rl" */
+	case 353:
+/* #line 1585 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addEscapedHex(currentSeq, accumulator, mode);
               }}
 	break;
-	case 352:
-/* #line 1583 "src/parser/Parser.rl" */
+	case 354:
+/* #line 1589 "src/parser/Parser.rl" */
 	{te = p+1;{
                   string hex(ts + 3, te - ts - 4);
                   unsigned long val;
@@ -9913,8 +9930,8 @@ execFuncs:
                   addEscapedHex(currentSeq, (unichar)val, mode);
               }}
 	break;
-	case 353:
-/* #line 1601 "src/parser/Parser.rl" */
+	case 355:
+/* #line 1607 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (te - ts < 3) {
                       assert(te - ts == 2);
@@ -9925,8 +9942,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 354:
-/* #line 1611 "src/parser/Parser.rl" */
+	case 356:
+/* #line 1617 "src/parser/Parser.rl" */
 	{te = p+1;{
                   ostringstream str;
                   str << "'\\" << *(ts + 1) << "' at index " << ts - ptr
@@ -9934,112 +9951,82 @@ execFuncs:
                   throw ParseError(str.str());
               }}
 	break;
-	case 355:
-/* #line 1619 "src/parser/Parser.rl" */
+	case 357:
+/* #line 1625 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_WORD, false, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 356:
-/* #line 1624 "src/parser/Parser.rl" */
+	case 358:
+/* #line 1630 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_WORD, true, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 357:
-/* #line 1629 "src/parser/Parser.rl" */
+	case 359:
+/* #line 1635 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_SPACE, false, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 358:
-/* #line 1634 "src/parser/Parser.rl" */
+	case 360:
+/* #line 1640 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_SPACE, true, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 359:
-/* #line 1639 "src/parser/Parser.rl" */
+	case 361:
+/* #line 1645 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_DIGIT, false, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 360:
-/* #line 1644 "src/parser/Parser.rl" */
+	case 362:
+/* #line 1650 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_DIGIT, true, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 361:
-/* #line 1649 "src/parser/Parser.rl" */
+	case 363:
+/* #line 1655 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_HORZ, false, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 362:
-/* #line 1654 "src/parser/Parser.rl" */
+	case 364:
+/* #line 1660 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_HORZ, true, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 363:
-/* #line 1659 "src/parser/Parser.rl" */
+	case 365:
+/* #line 1665 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_VERT, false, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 364:
-/* #line 1664 "src/parser/Parser.rl" */
+	case 366:
+/* #line 1670 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto cc = generateComponent(CLASS_VERT, true, mode);
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 365:
-/* #line 1669 "src/parser/Parser.rl" */
-	{te = p+1;{
-                  assert(!currentCls && !inCharClass);
-                  currentCls = getComponentClass(mode);
-                  negated = false;
-                  p--;
-                  {
-        DEBUG_PRINTF("stack %zu top %d\n", stack.size(), top);
-        if ((int)stack.size() == top) {
-            stack.resize(2 * (top + 1));
-        }
-    {stack[top++] = cs; cs = 559;goto _again;}}
-              }}
-	break;
-	case 366:
-/* #line 1677 "src/parser/Parser.rl" */
-	{te = p+1;{
-                  assert(!currentCls && !inCharClass);
-                  currentCls = getComponentClass(mode);
-                  negated = false;
-                  p--;
-                  {
-        DEBUG_PRINTF("stack %zu top %d\n", stack.size(), top);
-        if ((int)stack.size() == top) {
-            stack.resize(2 * (top + 1));
-        }
-    {stack[top++] = cs; cs = 818;goto _again;}}
-              }}
-	break;
 	case 367:
-/* #line 1685 "src/parser/Parser.rl" */
+/* #line 1675 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(!currentCls && !inCharClass);
                   currentCls = getComponentClass(mode);
-                  negated = true;
+                  negated = false;
                   p--;
                   {
         DEBUG_PRINTF("stack %zu top %d\n", stack.size(), top);
@@ -10050,7 +10037,37 @@ execFuncs:
               }}
 	break;
 	case 368:
-/* #line 1693 "src/parser/Parser.rl" */
+/* #line 1683 "src/parser/Parser.rl" */
+	{te = p+1;{
+                  assert(!currentCls && !inCharClass);
+                  currentCls = getComponentClass(mode);
+                  negated = false;
+                  p--;
+                  {
+        DEBUG_PRINTF("stack %zu top %d\n", stack.size(), top);
+        if ((int)stack.size() == top) {
+            stack.resize(2 * (top + 1));
+        }
+    {stack[top++] = cs; cs = 818;goto _again;}}
+              }}
+	break;
+	case 369:
+/* #line 1691 "src/parser/Parser.rl" */
+	{te = p+1;{
+                  assert(!currentCls && !inCharClass);
+                  currentCls = getComponentClass(mode);
+                  negated = true;
+                  p--;
+                  {
+        DEBUG_PRINTF("stack %zu top %d\n", stack.size(), top);
+        if ((int)stack.size() == top) {
+            stack.resize(2 * (top + 1));
+        }
+    {stack[top++] = cs; cs = 559;goto _again;}}
+              }}
+	break;
+	case 370:
+/* #line 1699 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(!currentCls && !inCharClass);
                   currentCls = getComponentClass(mode);
@@ -10064,57 +10081,57 @@ execFuncs:
     {stack[top++] = cs; cs = 818;goto _again;}}
               }}
 	break;
-	case 369:
-/* #line 1705 "src/parser/Parser.rl" */
+	case 371:
+/* #line 1711 "src/parser/Parser.rl" */
 	{te = p+1;{
                   ostringstream str;
                   str << "\\R at index " << ts - ptr << " not supported.";
                   throw ParseError(str.str());
               }}
 	break;
-	case 370:
-/* #line 1712 "src/parser/Parser.rl" */
+	case 372:
+/* #line 1718 "src/parser/Parser.rl" */
 	{te = p+1;{
                   ostringstream str;
                   str << "\\K at index " << ts - ptr << " not supported.";
                   throw ParseError(str.str());
               }}
 	break;
-	case 371:
-/* #line 1727 "src/parser/Parser.rl" */
+	case 373:
+/* #line 1733 "src/parser/Parser.rl" */
 	{te = p+1;{
                   ostringstream str;
                   str << "\\G at index " << ts - ptr << " not supported.";
                   throw ParseError(str.str());
               }}
 	break;
-	case 372:
-/* #line 1733 "src/parser/Parser.rl" */
+	case 374:
+/* #line 1739 "src/parser/Parser.rl" */
 	{te = p+1;{
                   currentSeq->addComponent(std::make_unique<ComponentEUS>(ts - ptr, mode));
               }}
 	break;
-	case 373:
-/* #line 1738 "src/parser/Parser.rl" */
+	case 375:
+/* #line 1744 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, *(ts + 1), mode);
               }}
 	break;
-	case 374:
+	case 376:
 /* #line 317 "src/parser/Parser.rl" */
 	{te = p+1;{ 
         inComment = true;
-        {cs = 848;goto _again;}
+        {cs = 849;goto _again;}
     }}
 	break;
-	case 375:
+	case 377:
 /* #line 434 "src/parser/Parser.rl" */
 	{te = p+1;{
         mode = newMode;
         currentSeq->addComponent(std::make_unique<ComponentEmpty>());
     }}
 	break;
-	case 376:
+	case 378:
 /* #line 356 "src/parser/Parser.rl" */
 	{te = p+1;{
         PUSH_SEQUENCE;
@@ -10123,7 +10140,7 @@ execFuncs:
             enterSequence(currentSeq, std::make_unique<ComponentSequence>());
     }}
 	break;
-	case 377:
+	case 379:
 /* #line 370 "src/parser/Parser.rl" */
 	{te = p+1;{
         PUSH_SEQUENCE;
@@ -10132,7 +10149,7 @@ execFuncs:
                                                  ComponentAssertion::POS));
     }}
 	break;
-	case 378:
+	case 380:
 /* #line 376 "src/parser/Parser.rl" */
 	{te = p+1;{
         PUSH_SEQUENCE;
@@ -10141,7 +10158,7 @@ execFuncs:
                                                  ComponentAssertion::NEG));
     }}
 	break;
-	case 379:
+	case 381:
 /* #line 382 "src/parser/Parser.rl" */
 	{te = p+1;{
         PUSH_SEQUENCE;
@@ -10150,7 +10167,7 @@ execFuncs:
                                                  ComponentAssertion::POS));
     }}
 	break;
-	case 380:
+	case 382:
 /* #line 388 "src/parser/Parser.rl" */
 	{te = p+1;{
         PUSH_SEQUENCE;
@@ -10159,19 +10176,19 @@ execFuncs:
                                                  ComponentAssertion::NEG));
     }}
 	break;
-	case 381:
-/* #line 394 "src/parser/Parser.rl" */
-	{te = p+1;{
-        throw LocatedParseError("Embedded code is not supported");
-    }}
-	break;
-	case 382:
-/* #line 394 "src/parser/Parser.rl" */
-	{te = p+1;{
-        throw LocatedParseError("Embedded code is not supported");
-    }}
-	break;
 	case 383:
+/* #line 394 "src/parser/Parser.rl" */
+	{te = p+1;{
+        throw LocatedParseError("Embedded code is not supported");
+    }}
+	break;
+	case 384:
+/* #line 394 "src/parser/Parser.rl" */
+	{te = p+1;{
+        throw LocatedParseError("Embedded code is not supported");
+    }}
+	break;
+	case 385:
 /* #line 417 "src/parser/Parser.rl" */
 	{te = p+1;{
         PUSH_SEQUENCE;
@@ -10179,7 +10196,7 @@ execFuncs:
                                    std::make_unique<ComponentAtomicGroup>());
     }}
 	break;
-	case 384:
+	case 386:
 /* #line 337 "src/parser/Parser.rl" */
 	{te = p+1;{
         assert(!label.empty()); // should be guaranteed by machine
@@ -10197,20 +10214,20 @@ execFuncs:
         currentSeq = enterSequence(currentSeq, std::move(seq));
     }}
 	break;
-	case 385:
-/* #line 400 "src/parser/Parser.rl" */
-	{te = p+1;{
-        throw LocatedParseError("Subpattern reference unsupported");
-    }}
-	break;
-	case 386:
-/* #line 400 "src/parser/Parser.rl" */
-	{te = p+1;{
-        throw LocatedParseError("Subpattern reference unsupported");
-    }}
-	break;
 	case 387:
-/* #line 1784 "src/parser/Parser.rl" */
+/* #line 400 "src/parser/Parser.rl" */
+	{te = p+1;{
+        throw LocatedParseError("Subpattern reference unsupported");
+    }}
+	break;
+	case 388:
+/* #line 400 "src/parser/Parser.rl" */
+	{te = p+1;{
+        throw LocatedParseError("Subpattern reference unsupported");
+    }}
+	break;
+	case 389:
+/* #line 1790 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto a = std::make_unique<ComponentAssertion>(
                         ComponentAssertion::LOOKAHEAD, ComponentAssertion::POS);
@@ -10222,8 +10239,8 @@ execFuncs:
                   currentSeq = a_seq;
               }}
 	break;
-	case 388:
-/* #line 1795 "src/parser/Parser.rl" */
+	case 390:
+/* #line 1801 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto a = std::make_unique<ComponentAssertion>(
                         ComponentAssertion::LOOKAHEAD, ComponentAssertion::NEG);
@@ -10235,8 +10252,8 @@ execFuncs:
                   currentSeq = a_seq;
               }}
 	break;
-	case 389:
-/* #line 1806 "src/parser/Parser.rl" */
+	case 391:
+/* #line 1812 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto a = std::make_unique<ComponentAssertion>(
                       ComponentAssertion::LOOKBEHIND, ComponentAssertion::POS);
@@ -10248,8 +10265,8 @@ execFuncs:
                   currentSeq = a_seq;
               }}
 	break;
-	case 390:
-/* #line 1817 "src/parser/Parser.rl" */
+	case 392:
+/* #line 1823 "src/parser/Parser.rl" */
 	{te = p+1;{
                   auto a = std::make_unique<ComponentAssertion>(
                       ComponentAssertion::LOOKBEHIND, ComponentAssertion::NEG);
@@ -10261,13 +10278,13 @@ execFuncs:
                   currentSeq = a_seq;
               }}
 	break;
-	case 391:
-/* #line 1829 "src/parser/Parser.rl" */
+	case 393:
+/* #line 1835 "src/parser/Parser.rl" */
 	{te = p+1;{
                   throw LocatedParseError("Pattern recursion not supported");
               }}
 	break;
-	case 392:
+	case 394:
 /* #line 403 "src/parser/Parser.rl" */
 	{te = p+1;{
         if (accumulator == 0) {
@@ -10278,7 +10295,7 @@ execFuncs:
                 std::make_unique<ComponentCondReference>(accumulator));
     }}
 	break;
-	case 393:
+	case 395:
 /* #line 411 "src/parser/Parser.rl" */
 	{te = p+1;{
         PUSH_SEQUENCE;
@@ -10287,22 +10304,22 @@ execFuncs:
                 std::make_unique<ComponentCondReference>(label));
     }}
 	break;
-	case 394:
-/* #line 1845 "src/parser/Parser.rl" */
+	case 396:
+/* #line 1851 "src/parser/Parser.rl" */
 	{te = p+1;{
                   ostringstream str;
                   str << "Callout at index " << ts - ptr << " not supported.";
                   throw ParseError(str.str());
               }}
 	break;
-	case 395:
-/* #line 1853 "src/parser/Parser.rl" */
+	case 397:
+/* #line 1859 "src/parser/Parser.rl" */
 	{te = p+1;{
                   throw LocatedParseError("Unrecognised character after (?");
               }}
 	break;
-	case 396:
-/* #line 1858 "src/parser/Parser.rl" */
+	case 398:
+/* #line 1864 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   /* leverage ComponentClass to generate the vertices */
@@ -10312,8 +10329,8 @@ execFuncs:
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 397:
-/* #line 1867 "src/parser/Parser.rl" */
+	case 399:
+/* #line 1873 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   /* leverage ComponentClass to generate the vertices */
@@ -10323,8 +10340,8 @@ execFuncs:
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 398:
-/* #line 1876 "src/parser/Parser.rl" */
+	case 400:
+/* #line 1882 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   /* leverage ComponentClass to generate the vertices */
@@ -10334,28 +10351,28 @@ execFuncs:
                   currentSeq->addComponent(std::move(cc));
               }}
 	break;
-	case 399:
-/* #line 1885 "src/parser/Parser.rl" */
+	case 401:
+/* #line 1891 "src/parser/Parser.rl" */
 	{te = p+1;{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
-	case 400:
-/* #line 1894 "src/parser/Parser.rl" */
+	case 402:
+/* #line 1900 "src/parser/Parser.rl" */
 	{te = p+1;{
                   if (mode.ignore_space == false) {
                       addLiteral(currentSeq, *ts, mode);
                   }
               }}
 	break;
-	case 401:
-/* #line 1899 "src/parser/Parser.rl" */
+	case 403:
+/* #line 1905 "src/parser/Parser.rl" */
 	{te = p+1;{
                   addLiteral(currentSeq, *ts, mode);
               }}
 	break;
-	case 402:
+	case 404:
 /* #line 329 "src/parser/Parser.rl" */
 	{te = p;p--;{
         PUSH_SEQUENCE;
@@ -10364,7 +10381,7 @@ execFuncs:
         currentSeq = enterSequence(currentSeq, std::move(seq));
     }}
 	break;
-	case 403:
+	case 405:
 /* #line 422 "src/parser/Parser.rl" */
 	{te = p;p--;{
         assert(!currentCls);
@@ -10373,11 +10390,11 @@ execFuncs:
         inCharClass = true;
         inCharClassEarly = true;
         currentClsBegin = ts;
-        {cs = 836;goto _again;}
+        {cs = 837;goto _again;}
     }}
 	break;
-	case 404:
-/* #line 1311 "src/parser/Parser.rl" */
+	case 406:
+/* #line 1317 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   if (!currentSeq->addRepeat(0, ComponentRepeat::NoLimit,
                                              ComponentRepeat::REPEAT_GREEDY)) {
@@ -10385,8 +10402,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 405:
-/* #line 1332 "src/parser/Parser.rl" */
+	case 407:
+/* #line 1338 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   if (!currentSeq->addRepeat(1, ComponentRepeat::NoLimit,
                                              ComponentRepeat::REPEAT_GREEDY)) {
@@ -10394,8 +10411,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 406:
-/* #line 1353 "src/parser/Parser.rl" */
+	case 408:
+/* #line 1359 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   if (!currentSeq->addRepeat(
                            0, 1, ComponentRepeat::REPEAT_GREEDY)) {
@@ -10403,8 +10420,8 @@ execFuncs:
                   }
               }}
 	break;
-	case 407:
-/* #line 1374 "src/parser/Parser.rl" */
+	case 409:
+/* #line 1380 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   if (repeatN > repeatM || repeatM == 0) {
                       throwInvalidRepeat();
@@ -10415,14 +10432,14 @@ execFuncs:
                   }
               }}
 	break;
-	case 408:
-/* #line 1489 "src/parser/Parser.rl" */
+	case 410:
+/* #line 1495 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   addLiteral(currentSeq, octAccumulator, mode);
               }}
 	break;
-	case 409:
-/* #line 1492 "src/parser/Parser.rl" */
+	case 411:
+/* #line 1498 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   // If there are enough capturing sub expressions, this may be
                   // a back reference
@@ -10434,25 +10451,25 @@ execFuncs:
                   }
               }}
 	break;
-	case 410:
-/* #line 480 "src/parser/Parser.rl" */
-	{te = p;p--;{
-        if (accumulator == 0) {
-            throw LocatedParseError("Numbered reference cannot be zero");
-        }
-        currentSeq->addComponent(std::make_unique<ComponentBackReference>(accumulator));
-    }}
-	break;
-	case 411:
-/* #line 480 "src/parser/Parser.rl" */
-	{te = p;p--;{
-        if (accumulator == 0) {
-            throw LocatedParseError("Numbered reference cannot be zero");
-        }
-        currentSeq->addComponent(std::make_unique<ComponentBackReference>(accumulator));
-    }}
-	break;
 	case 412:
+/* #line 480 "src/parser/Parser.rl" */
+	{te = p;p--;{
+        if (accumulator == 0) {
+            throw LocatedParseError("Numbered reference cannot be zero");
+        }
+        currentSeq->addComponent(std::make_unique<ComponentBackReference>(accumulator));
+    }}
+	break;
+	case 413:
+/* #line 480 "src/parser/Parser.rl" */
+	{te = p;p--;{
+        if (accumulator == 0) {
+            throw LocatedParseError("Numbered reference cannot be zero");
+        }
+        currentSeq->addComponent(std::make_unique<ComponentBackReference>(accumulator));
+    }}
+	break;
+	case 414:
 /* #line 487 "src/parser/Parser.rl" */
 	{te = p;p--;{
         // Accumulator is a negative offset.
@@ -10466,32 +10483,32 @@ execFuncs:
         currentSeq->addComponent(std::make_unique<ComponentBackReference>(idx));
     }}
 	break;
-	case 413:
-/* #line 1558 "src/parser/Parser.rl" */
+	case 415:
+/* #line 1564 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   throw LocatedParseError("Invalid reference after \\g");
               }}
 	break;
-	case 414:
-/* #line 1575 "src/parser/Parser.rl" */
+	case 416:
+/* #line 1581 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   throw LocatedParseError("Value in \\o{...} sequence is non-octal or missing braces");
               }}
 	break;
-	case 415:
-/* #line 1579 "src/parser/Parser.rl" */
+	case 417:
+/* #line 1585 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   addEscapedHex(currentSeq, accumulator, mode);
               }}
 	break;
-	case 416:
-/* #line 1597 "src/parser/Parser.rl" */
+	case 418:
+/* #line 1603 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   throw LocatedParseError("Value in \\x{...} sequence is non-hex or missing }");
               }}
 	break;
-	case 417:
-/* #line 1601 "src/parser/Parser.rl" */
+	case 419:
+/* #line 1607 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   if (te - ts < 3) {
                       assert(te - ts == 2);
@@ -10502,24 +10519,24 @@ execFuncs:
                   }
               }}
 	break;
-	case 418:
-/* #line 1701 "src/parser/Parser.rl" */
-	{te = p;p--;{ throw LocatedParseError("Malformed property"); }}
-	break;
-	case 419:
-/* #line 1702 "src/parser/Parser.rl" */
-	{te = p;p--;{ throw LocatedParseError("Malformed property"); }}
-	break;
 	case 420:
-/* #line 1720 "src/parser/Parser.rl" */
+/* #line 1707 "src/parser/Parser.rl" */
+	{te = p;p--;{ throw LocatedParseError("Malformed property"); }}
+	break;
+	case 421:
+/* #line 1708 "src/parser/Parser.rl" */
+	{te = p;p--;{ throw LocatedParseError("Malformed property"); }}
+	break;
+	case 422:
+/* #line 1726 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   ostringstream str;
                   str << "\\k at index " << ts - ptr << " not supported.";
                   throw ParseError(str.str());
               }}
 	break;
-	case 421:
-/* #line 1743 "src/parser/Parser.rl" */
+	case 423:
+/* #line 1749 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   assert(ts + 1 == pe);
                   ostringstream str;
@@ -10527,32 +10544,32 @@ execFuncs:
                   throw ParseError(str.str());
               }}
 	break;
-	case 422:
+	case 424:
 /* #line 397 "src/parser/Parser.rl" */
 	{te = p;p--;{
         throw LocatedParseError("Conditional subpattern unsupported");
     }}
 	break;
-	case 423:
-/* #line 1853 "src/parser/Parser.rl" */
+	case 425:
+/* #line 1859 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   throw LocatedParseError("Unrecognised character after (?");
               }}
 	break;
-	case 424:
-/* #line 1885 "src/parser/Parser.rl" */
+	case 426:
+/* #line 1891 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
-	case 425:
-/* #line 1899 "src/parser/Parser.rl" */
+	case 427:
+/* #line 1905 "src/parser/Parser.rl" */
 	{te = p;p--;{
                   addLiteral(currentSeq, *ts, mode);
               }}
 	break;
-	case 426:
+	case 428:
 /* #line 329 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
         PUSH_SEQUENCE;
@@ -10561,7 +10578,7 @@ execFuncs:
         currentSeq = enterSequence(currentSeq, std::move(seq));
     }}
 	break;
-	case 427:
+	case 429:
 /* #line 422 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
         assert(!currentCls);
@@ -10570,64 +10587,64 @@ execFuncs:
         inCharClass = true;
         inCharClassEarly = true;
         currentClsBegin = ts;
-        {cs = 836;goto _again;}
+        {cs = 837;goto _again;}
     }}
 	break;
-	case 428:
-/* #line 1558 "src/parser/Parser.rl" */
+	case 430:
+/* #line 1564 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   throw LocatedParseError("Invalid reference after \\g");
               }}
 	break;
-	case 429:
-/* #line 1575 "src/parser/Parser.rl" */
+	case 431:
+/* #line 1581 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   throw LocatedParseError("Value in \\o{...} sequence is non-octal or missing braces");
               }}
 	break;
-	case 430:
-/* #line 1597 "src/parser/Parser.rl" */
+	case 432:
+/* #line 1603 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   throw LocatedParseError("Value in \\x{...} sequence is non-hex or missing }");
               }}
 	break;
-	case 431:
-/* #line 1720 "src/parser/Parser.rl" */
+	case 433:
+/* #line 1726 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   ostringstream str;
                   str << "\\k at index " << ts - ptr << " not supported.";
                   throw ParseError(str.str());
               }}
 	break;
-	case 432:
+	case 434:
 /* #line 397 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
         throw LocatedParseError("Conditional subpattern unsupported");
     }}
 	break;
-	case 433:
-/* #line 1853 "src/parser/Parser.rl" */
+	case 435:
+/* #line 1859 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   throw LocatedParseError("Unrecognised character after (?");
               }}
 	break;
-	case 434:
-/* #line 1885 "src/parser/Parser.rl" */
+	case 436:
+/* #line 1891 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   assert(mode.utf8);
                   throwInvalidUtf8();
               }}
 	break;
-	case 435:
-/* #line 1899 "src/parser/Parser.rl" */
+	case 437:
+/* #line 1905 "src/parser/Parser.rl" */
 	{{p = ((te))-1;}{
                   addLiteral(currentSeq, *ts, mode);
               }}
 	break;
-	case 436:
+	case 438:
 /* #line 1 "NONE" */
 	{	switch( act ) {
-	case 288:
+	case 290:
 	{{p = ((te))-1;}
                   // If there are enough capturing sub expressions, this may be
                   // a back reference
@@ -10639,7 +10656,7 @@ execFuncs:
                   }
               }
 	break;
-	case 290:
+	case 292:
 	{{p = ((te))-1;}
                   // if there are enough left parens to this point, back ref
                   if (accumulator < groupIndex) {
@@ -10672,7 +10689,7 @@ execFuncs:
                   }
               }
 	break;
-	case 330:
+	case 332:
 	{{p = ((te))-1;}
                   addLiteral(currentSeq, *(ts + 1), mode);
               }
@@ -10680,7 +10697,7 @@ execFuncs:
 	}
 	}
 	break;
-/* #line 10684 "src/parser/Parser.rl.cpp" */
+/* #line 10701 "src/parser/Parser.rl.cpp" */
 		}
 	}
 	goto _again;
@@ -10694,7 +10711,7 @@ _again:
 /* #line 1 "NONE" */
 	{ts = 0;}
 	break;
-/* #line 10698 "src/parser/Parser.rl.cpp" */
+/* #line 10715 "src/parser/Parser.rl.cpp" */
 		}
 	}
 
@@ -11332,7 +11349,8 @@ _again:
 	case 558: goto tr116;
 	case 815: goto tr1042;
 	case 816: goto tr1145;
-	case 820: goto tr1166;
+	case 820: goto tr1167;
+	case 821: goto tr1169;
 	case 563: goto tr654;
 	case 564: goto tr654;
 	case 565: goto tr654;
@@ -11504,40 +11522,40 @@ _again:
 	case 731: goto tr654;
 	case 732: goto tr654;
 	case 733: goto tr654;
-	case 821: goto tr1166;
-	case 822: goto tr1199;
-	case 823: goto tr1199;
+	case 822: goto tr1167;
+	case 823: goto tr1202;
 	case 824: goto tr1202;
-	case 825: goto tr1202;
+	case 825: goto tr1205;
 	case 826: goto tr1205;
 	case 827: goto tr1208;
-	case 828: goto tr1210;
+	case 828: goto tr1211;
+	case 829: goto tr1213;
 	case 734: goto tr855;
 	case 735: goto tr855;
-	case 829: goto tr1212;
 	case 830: goto tr1215;
-	case 831: goto tr1215;
-	case 832: goto tr1223;
+	case 831: goto tr1218;
+	case 832: goto tr1218;
+	case 833: goto tr1226;
 	case 736: goto tr858;
-	case 833: goto tr1224;
-	case 834: goto tr1224;
+	case 834: goto tr1227;
+	case 835: goto tr1227;
 	case 737: goto tr861;
-	case 835: goto tr1224;
+	case 836: goto tr1227;
 	case 738: goto tr861;
 	case 739: goto tr861;
-	case 837: goto tr1232;
-	case 839: goto tr1241;
-	case 840: goto tr1243;
-	case 841: goto tr1243;
+	case 838: goto tr1235;
+	case 840: goto tr1244;
+	case 841: goto tr1246;
+	case 842: goto tr1246;
 	case 740: goto tr865;
-	case 842: goto tr1243;
+	case 843: goto tr1246;
 	case 741: goto tr865;
 	case 742: goto tr865;
-	case 844: goto tr1253;
-	case 845: goto tr1255;
-	case 846: goto tr1255;
+	case 845: goto tr1256;
+	case 846: goto tr1258;
+	case 847: goto tr1258;
 	case 743: goto tr869;
-	case 847: goto tr1255;
+	case 848: goto tr1258;
 	case 744: goto tr869;
 	case 745: goto tr869;
 	}
@@ -11549,7 +11567,7 @@ _again:
 /* #line 731 "src/parser/Parser.rl" */
 	{ throw LocatedParseError("Malformed property"); }
 	break;
-/* #line 11553 "src/parser/Parser.rl.cpp" */
+/* #line 11571 "src/parser/Parser.rl.cpp" */
 		}
 	}
 	}
@@ -11557,7 +11575,7 @@ _again:
 	_out: {}
 	}
 
-/* #line 1985 "src/parser/Parser.rl" */
+/* #line 1991 "src/parser/Parser.rl" */
 
         if (p != pe && *p != '\0') {
             // didn't make it to the end of our input, but we didn't throw a ParseError?

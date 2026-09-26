@@ -18,7 +18,7 @@ permissions:
   issues: write
 
 jobs:
-  # current-version prints the manifest's `tag` column (vectorscan/5.4.12),
+  # current-version prints the manifest's `tag` column (vectorscan/5.4.13),
   # because upstream tags releases that way and the workflow compares
   # against the tag as published.
   #

@@ -22,7 +22,7 @@ Local, not upstream.
 
 --- a/src/dispatcher.c
 +++ b/src/dispatcher.c
-@@ -182,11 +182,6 @@
+@@ -183,11 +183,6 @@
          return (*fat_dispatch_ ## NAME)(__VA_ARGS__);                          \
      }                                                                          \
  
@@ -34,7 +34,7 @@ Local, not upstream.
  
  /* this gets a bit ugly to compose the static redirect functions,
   * as we necessarily need first the typed arg list and then just the arg
-@@ -359,6 +354,3 @@
+@@ -360,6 +355,3 @@
  CONNECT_DISPATCH_2(u32, Crc32c_ComputeBuf, u32 inCrc32, const void *buf, size_t bufLen);
  CONNECT_ARGS_3(u32, Crc32c_ComputeBuf, inCrc32, buf, bufLen);
  
@@ -54,8 +54,8 @@ Local, not upstream.
  
  typedef __vector unsigned long long int  uint64x2_t;
  typedef __vector   signed long long int   int64x2_t;
-@@ -429,8 +425,5 @@
-     return (m128) v;
+@@ -439,8 +435,5 @@
+     return (m128) vec_mergeh((m128)x, zeroes128());
  }
  
 -#if defined(__clang__) && (__clang_major__ == 15)

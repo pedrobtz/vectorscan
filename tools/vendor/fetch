@@ -71,6 +71,13 @@ for src in $sources; do
         printf '    applying %s\n' "$p"
         patch -s -p1 -d "$dest" < "tools/patches/$src/$p"
     done
+    # A hunk applied with an offset or fuzz leaves a .orig backup (and a
+    # failed one a .rej) next to the file; neither belongs in the tree.
+    if [ -n "$(find "$dest" -name '*.rej')" ]; then
+        echo "    a patch left rejected hunks; refresh it against $tag" >&2
+        exit 1
+    fi
+    find "$dest" -name '*.orig' -exec rm -f {} +
 
     # Each generated file is <name>.rl.cpp next to <name>.rl, produced the way
     # upstream's cmake/ragel.cmake runs Ragel, plus -L so the output carries

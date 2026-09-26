@@ -10,7 +10,7 @@ maintained package in the R ecosystem.
 - Complete low-level binding of the core Hyperscan API: block / vectored /
   streaming scans, callbacks with early termination, extended parameters,
   serialization, database metadata.
-- Self-contained build: vendored Vectorscan 5.4.12 (~7.8 MB, 675 files)
+- Self-contained build: vendored Vectorscan 5.4.13 (~8.1 MB, 682 files)
   compiled to a private static `libhs` at install time, with system-lib and
   stub fallbacks for development.
 - Good engineering hygiene for its age: typed error conditions, external
