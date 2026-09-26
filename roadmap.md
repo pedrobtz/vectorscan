@@ -169,6 +169,36 @@ profiling says so (Stage 3).*
 two lines of vectorscan and get pattern-level attribution, matched text, and
 a 10–100× speedup on large pattern sets.*
 
+## Stage 2b — Capture groups
+
+*Goal: turn text into columns with one regex, at least 10× faster than
+`utils::strcapture()`. The motivating case is reading a log file into a data
+frame (timestamp, level, location, text).*
+
+M0 (done 2026-09-26) measured where base R's time goes. On 1M log lines,
+`strcapture()` takes 12.5 s, but PCRE2 matches the same lines in 0.23 s: the
+rest is building R objects. A C loop over PCRE2 with JIT that writes the
+columns directly takes 0.13 s. Chimera was 7.5× slower than that when every
+line matches, so `hs_capture()` runs on PCRE2 directly (preferably the one R
+uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers:
+`.agents/capture-groups.md`.
+
+- [x] M0 Benchmark gate: base R, PCRE2 + JIT and Chimera on 1M lines
+      (`tools/bench-capture/`).
+- [ ] M1 PCRE2 in the build: system PCRE2 (Rtools, `pkg-config`) or a
+      vendored 10.48 fallback with hidden symbols; a build-modes job for the
+      symbol-collision setting.
+- [ ] M2 C capture loop: columns filled in place; differential test against
+      `regexec(perl = TRUE)`; sanitizers clean.
+- [ ] M3 R API: `hs_capture(pattern, x, proto)` like `strcapture()`, at least
+      10× faster; docs, a "Parsing logs" article, benchmarks.
+- [ ] M4 Vectorscan prefilter and rule sets: route lines to formats with
+      `hs_match()`, capture with PCRE2.
+- [ ] M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.
+
+*Exit criteria: `hs_capture()` on all platforms, sanitizer-clean, identical
+to `strcapture()` on its tests and at least 10× faster.*
+
 ## Stage 3 — Performance, parallelism, and scale
 
 *Goal: own the "fast" claim with receipts, and handle data that doesn't fit
@@ -260,10 +290,10 @@ patterns fast in R?"*
 - [ ] Interop sugar: examples (not hard dependencies) for `data.table`,
       `dplyr`/`tidyr` list-column workflows, and `arrow`/duckdb pipelines
       feeding `hs_scan_file()`.
-- [ ] Evaluate a **Chimera** add-on (Hyperscan's PCRE hybrid, currently
-      excluded from the vendored tree): would bring capture groups and full
-      PCRE semantics — decide based on user demand, as it roughly doubles
-      build complexity.
+- [x] Evaluate a **Chimera** add-on (Hyperscan's PCRE hybrid): measured
+      2026-09-26 and not chosen. PCRE2 with JIT is 7.5× faster for capture
+      groups when every line matches (Stage 2b). Revisit if Vectorscan 5.5
+      moves Chimera to PCRE2.
 - [ ] Community scaffolding: `CONTRIBUTING.md`, issue templates, `NEWS.md`
       discipline per release, lifecycle badges.
 - [ ] Announce: r-universe listing, R Weekly submission, a blog post built
