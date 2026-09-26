@@ -82,7 +82,9 @@ test_that("rule sets agree with trying every rule in order", {
 
   expect_identical(hs_capture(rules2, x), naive(rules2, x))
   compiled <- hs_capture_compile(rules2)
-  expect_identical(compiled$prefiltered, c(TRUE, TRUE, TRUE, FALSE, TRUE))
+  # A build without Vectorscan (stubs) captures every rule unrouted.
+  expected <- if (hs_available()) c(TRUE, TRUE, TRUE, FALSE, TRUE) else rep(FALSE, 5)
+  expect_identical(compiled$prefiltered, expected)
   expect_output(print(compiled), "5 rules")
 })
 
