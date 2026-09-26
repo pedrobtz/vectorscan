@@ -45,6 +45,8 @@
 <li>Compile errors now report Vectorscan’s message correctly; it was read after being freed.</li>
 <li>
 <code><a href="../reference/hs_deserialize.html">hs_deserialize()</a></code> and <code><a href="../reference/hs_load.html">hs_load()</a></code> now restore the database mode and the per-pattern flags, so a restored database reports matches exactly like the original (<code>from</code> stays <code>NA</code> for patterns compiled without <code>HS_FLAG_SOM_LEFTMOST</code>; it used to come back as <code>0</code>). <code><a href="../reference/hs_serialize.html">hs_serialize()</a></code> still returns plain Vectorscan bytes, with the pattern ids and flags attached as attributes. <code><a href="../reference/hs_save.html">hs_save()</a></code> now writes a small tagged header (<code>VSCANRDB</code>) with that metadata before the bytes; <code><a href="../reference/hs_load.html">hs_load()</a></code> reads both this format and plain Vectorscan files.</li>
+<li>
+<code>VECTORSCAN_USE_SYSTEM=true</code> without a system <code>libhs</code> now fails at configure, as the bundled build does, instead of silently building runtime stubs; set <code>VECTORSCAN_ALLOW_STUBS=true</code> to get the stubs.</li>
 <li>Fixed a read past the end of the input in the bundled Vectorscan (<code>vermicelliExec</code>), hit when a scan ends inside a run of a repeated character, for example <code>foo.*bar</code> over a chunk of <code>x</code>s in streaming mode. It could crash R if the input ended at a page boundary.</li>
 <li>On Windows and Intel macOS the bundled library is now built for x86-64-v2 (SSE4.2); x86-64 Linux keeps per-CPU dispatch. Linux distributions that install libraries to <code>lib64</code> (Fedora, RHEL, openSUSE) now build correctly.</li>
 </ul></div>

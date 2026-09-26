@@ -160,7 +160,7 @@
 <p>By default, <code>configure</code> builds the bundled source in <code>src/vendor/vectorscan</code>. The following environment variables are available for development and CI:</p>
 <ul>
 <li>
-<code>VECTORSCAN_USE_SYSTEM=true</code>: link against an installed compatible <code>libhs</code> instead of the bundled source.</li>
+<code>VECTORSCAN_USE_SYSTEM=true</code>: link against an installed compatible <code>libhs</code> instead of the bundled source. Configure fails if none is found, unless <code>VECTORSCAN_ALLOW_STUBS=true</code> is also set.</li>
 <li>
 <code>VECTORSCAN_INCLUDE_DIR</code> and <code>VECTORSCAN_LIB_DIR</code>: point to a custom system install.</li>
 <li>

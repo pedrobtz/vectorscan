@@ -29,6 +29,9 @@
   before the bytes;
   [`hs_load()`](https://pedrobtz.github.io/vectorscan/reference/hs_load.md)
   reads both this format and plain Vectorscan files.
+- `VECTORSCAN_USE_SYSTEM=true` without a system `libhs` now fails at
+  configure, as the bundled build does, instead of silently building
+  runtime stubs; set `VECTORSCAN_ALLOW_STUBS=true` to get the stubs.
 - Fixed a read past the end of the input in the bundled Vectorscan
   (`vermicelliExec`), hit when a scan ends inside a run of a repeated
   character, for example `foo.*bar` over a chunk of `x`s in streaming

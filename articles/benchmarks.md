@@ -123,10 +123,10 @@ results <- do.call(rbind, lapply(n_extra_grid, function(n_extra) {
 
 results
 #>   n_patterns vectorscan base_pcre base_tre
-#> 1          7      0.002     0.007    0.017
-#> 2         32      0.001     0.009    0.056
-#> 3        107      0.002     0.010    0.171
-#> 4        507      0.002     0.013    0.792
+#> 1          7      0.002     0.007    0.021
+#> 2         32      0.002     0.007    0.055
+#> 3        107      0.002     0.008    0.154
+#> 4        507      0.002     0.011    0.679
 ```
 
 Compute throughput in MB/s so the columns are easy to read.
@@ -142,10 +142,10 @@ throughput <- data.frame(
 )
 throughput
 #>   n_patterns vectorscan_mb_s base_pcre_mb_s base_tre_mb_s
-#> 1          7            85.8           24.5          10.1
-#> 2         32           171.7           19.1           3.1
-#> 3        107            85.8           17.2           1.0
-#> 4        507            85.8           13.2           0.2
+#> 1          7            85.8           24.5           8.2
+#> 2         32            85.8           24.5           3.1
+#> 3        107            85.8           21.5           1.1
+#> 4        507            85.8           15.6           0.3
 ```
 
 You should see Vectorscan stay roughly flat as rules grow, while the
@@ -181,10 +181,10 @@ size_results <- do.call(rbind, lapply(sizes, function(mult) {
 
 size_results
 #>   corpus_kb vectorscan_s base_pcre_s
-#> 1     175.3        0.002       0.007
-#> 2     876.5        0.006       0.045
-#> 3    4382.3        0.035       0.219
-#> 4   17529.3        0.122       0.870
+#> 1     175.3        0.001       0.007
+#> 2     876.5        0.005       0.036
+#> 3    4382.3        0.037       0.188
+#> 4   17529.3        0.128       0.758
 ```
 
 ## Benchmark 3 — compile cost is amortizable
@@ -216,8 +216,8 @@ data.frame(
   seconds = round(c(compile_time, load_time, scan_time), 4)
 )
 #>        step seconds
-#> 1   compile   0.021
-#> 2 save+load   0.001
+#> 1   compile   0.023
+#> 2 save+load   0.000
 #> 3 scan once   0.001
 ```
 
@@ -262,8 +262,8 @@ data.frame(
   seconds = round(c(cb_time, df_time), 4)
 )
 #>                        mode seconds
-#> 1    callback (counts only)   0.093
-#> 2 data frame (collects all)   0.002
+#> 1    callback (counts only)   0.082
+#> 2 data frame (collects all)   0.001
 ```
 
 On this corpus the data-frame path is dramatically faster — match
