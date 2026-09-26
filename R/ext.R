@@ -59,14 +59,21 @@ normalize_ext_value <- function(x, name) {
 
   # Offsets are 64-bit in Vectorscan, so values past .Machine$integer.max
   # are kept as doubles rather than turned into NA by as.integer().
-  if (!is.numeric(x) || length(x) != 1L || is.na(x)) {
-    stop_vectorscan(sprintf("`%s` must be a single number.", name))
+  if (!is.numeric(x)) {
+    stop_vectorscan(sprintf("`%s` must be numeric.", name))
   }
-  if (x < 0 || x != floor(x) || x > 2^53) {
-    stop_vectorscan(sprintf(
-      "`%s` must be a whole number between 0 and 2^53.",
-      name
-    ))
+  if (length(x) != 1L) {
+    stop_vectorscan(sprintf("`%s` must have length 1.", name))
+  }
+  if (is.na(x)) {
+    stop_vectorscan(sprintf("`%s` must not contain missing values.", name))
+  }
+  if (x != floor(x)) {
+    stop_vectorscan(sprintf("`%s` must contain whole numbers.", name))
+  }
+  check_nonnegative(x, name)
+  if (x > 2^53) {
+    stop_vectorscan(sprintf("`%s` must be at most 2^53.", name))
   }
   x
 }
