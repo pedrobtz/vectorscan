@@ -1,0 +1,180 @@
+#!/usr/bin/env Rscript
+#
+# Exercise the C layer under a sanitizer, using nothing but base R.
+#
+# The sanitizer jobs care about the compiled code: memory errors, undefined
+# behaviour, and leaks on the unwind path. They do not care about testthat's
+# assertions, and depending on testthat would make the ASan containers build
+# it and its dependencies from source under a sanitizer. So this script has
+# no dependencies at all.
+#
+# It spends most of its effort on error paths. An R error is a longjmp out of
+# the C layer: a failed compile raises after Vectorscan has allocated a
+# compile error, and an error in a scan callback is caught by R_tryEval and
+# re-raised once the scan has returned. Anything those paths fail to free is
+# what a leak checker is best placed to catch.
+#
+# Usage:  Rscript tools/sanitizer-exercise.R
+
+library(vectorscan)
+
+if (!hs_available()) {
+  stop("vectorscan was built without Vectorscan; nothing to exercise.")
+}
+
+failures <- 0L
+checked <- 0L
+
+check <- function(label, expr) {
+  checked <<- checked + 1L
+  ok <- tryCatch(isTRUE(expr), error = function(e) {
+    message("  ERROR in ", label, ": ", conditionMessage(e))
+    FALSE
+  })
+  if (!ok) {
+    failures <<- failures + 1L
+    message("  FAILED: ", label)
+  }
+  invisible(ok)
+}
+
+# An R error is expected on these paths; a crash is not, and the sanitizer
+# reports memory problems independently of what this returns.
+raises <- function(expr) {
+  tryCatch({ force(expr); FALSE }, error = function(e) TRUE)
+}
+
+cat("-- compile, including every error path ---------------------------\n")
+
+good <- list(
+  "foo", c("foo", "bar", "baz"), "^foobar$", "a.*b", "[a-z]+[0-9]{2,4}",
+  "(foo|bar)+baz", paste0("w", 1:200), "\\bword\\b", "café"
+)
+for (expr in good) {
+  db <- hs_database()
+  hs_compile(db, expr)
+  check(paste("compile", expr[[1]]), hs_database_size(db) > 0)
+}
+
+bad <- c("(", "[a-", "a{2,1}", "(?<name", "\\", "a**")
+for (expr in bad) {
+  db <- hs_database()
+  check(paste("compile error", expr), raises(hs_compile(db, expr)))
+  # a database whose compile failed must still be collectable
+}
+db <- hs_database()
+check("error in second of many", raises(hs_compile(db, c("ok", "(", "fine"))))
+
+cat("-- block scans ---------------------------------------------------\n")
+
+db <- hs_database()
+hs_compile(
+  db,
+  c("foo", "bar", "o+", "^f"),
+  flags = c(HS_FLAG_NONE, HS_FLAG_SOM_LEFTMOST, HS_FLAG_NONE, HS_FLAG_CASELESS)
+)
+inputs <- list(
+  "", "foobar", "FOOBAR", strrep("foo", 10000), charToRaw("foobar"),
+  as.raw(0:255), "日本語 foo"
+)
+for (x in inputs) {
+  check("scan returns a data frame", is.data.frame(hs_scan(db, x)))
+}
+
+cat("-- callbacks, including errors and early termination -------------\n")
+
+check("callback counts", {
+  n <- hs_scan(db, "foobar", callback = function(id, from, to, flags, ctx) {
+    FALSE
+  })
+  n > 0
+})
+check("callback terminates", {
+  hs_scan(db, "foobar", callback = function(...) TRUE) == 1L
+})
+for (i in 1:50) {
+  check("callback error", raises(hs_scan(
+    db, strrep("foobar", 100),
+    callback = function(...) stop("boom")
+  )))
+  check("scan after callback error", is.data.frame(hs_scan(db, "foobar")))
+}
+# Whether a non-logical return is an error is the R layer's business; the
+# point here is only to run the path.
+invisible(raises(hs_scan(db, "foobar", callback = function(...) list(1, 2))))
+check("callback context", {
+  seen <- NULL
+  hs_scan(db, "foo", callback = function(id, from, to, flags, ctx) {
+    seen <<- ctx$tag
+    FALSE
+  }, context = list(tag = "x"))
+  identical(seen, "x")
+})
+
+cat("-- vectored and streaming ----------------------------------------\n")
+
+vdb <- hs_database(HS_MODE_VECTORED)
+hs_compile(vdb, c("foobar", "o+b"))
+check("vectored", is.data.frame(hs_scan_vector(vdb, c("foo", "bar"))))
+check("vectored empty blocks", is.data.frame(hs_scan_vector(vdb, c("", "", "x"))))
+check("vectored callback error", raises(hs_scan_vector(
+  vdb, c("foo", "bar"),
+  callback = function(...) stop("boom")
+)))
+
+# SOM in stream mode needs a SOM horizon mode, which the package does not
+# expose, so this is a compile error -- the path that once read Vectorscan's
+# message after freeing it.
+check("stream SOM compile error", raises(hs_compile(
+  hs_database(HS_MODE_STREAM), "foo.*bar", flags = HS_FLAG_SOM_LEFTMOST
+)))
+
+sdb <- hs_database(HS_MODE_STREAM)
+hs_compile(sdb, c("foo.*bar", "baz"))
+for (i in 1:20) {
+  s <- hs_stream_open(sdb)
+  hs_stream_scan(s, "foo and ")
+  hs_stream_scan(s, strrep("x", 1000))
+  check("stream match across chunks", nrow(hs_stream_scan(s, " then bar")) >= 1)
+  check("stream callback error", raises(hs_stream_scan(
+    s, "baz",
+    callback = function(...) stop("boom")
+  )))
+  hs_stream_close(s)
+  check("closed stream rejects scans", raises(hs_stream_scan(s, "foo")))
+}
+# Streams that are never closed are reclaimed by their finalizers.
+for (i in 1:20) {
+  s <- hs_stream_open(sdb)
+  hs_stream_scan(s, "foo")
+}
+rm(s)
+invisible(gc())
+
+cat("-- serialization -------------------------------------------------\n")
+
+bytes <- hs_serialize(db)
+check("round trip", is.data.frame(hs_scan(hs_deserialize(bytes), "foobar")))
+check("empty bytes", raises(hs_deserialize(raw())))
+check("junk bytes", raises(hs_deserialize(as.raw(sample(0:255, 64, TRUE)))))
+check("truncated bytes", raises(hs_deserialize(bytes[seq_len(length(bytes) %/% 2)])))
+path <- tempfile(fileext = ".hsdb")
+hs_save(db, path)
+check("save and load", is.data.frame(hs_scan(hs_load(path), "foo")))
+unlink(path)
+
+cat("-- finalizers ----------------------------------------------------\n")
+
+for (i in 1:100) {
+  tmp <- hs_database()
+  hs_compile(tmp, c("foo", "bar"))
+  hs_scan(tmp, "foobar")
+}
+rm(tmp, db, vdb, sdb)
+invisible(gc())
+invisible(gc())
+
+cat(sprintf("\n%d checks, %d failed\n", checked, failures))
+if (failures > 0L) {
+  quit(status = 1L)
+}

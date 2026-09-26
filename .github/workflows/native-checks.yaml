@@ -1,0 +1,78 @@
+# Native-code checks for the C layer and the bundled Vectorscan, via the
+# reusable workflows in pedrobtz/r-actions.
+#
+# The package hands R strings and callbacks to a large vendored C/C++ library
+# through external pointers, and R errors unwind straight through that
+# boundary (a failed compile, an error in a scan callback). These jobs are what
+# make "no leaks, no memory errors, PROTECT balanced" something CI checks.
+#
+# Each job builds the bundled libhs, which dominates its run time. Pull
+# requests run the quick profile; pushes to main and the `full-ci` label run
+# the full one, as in R-CMD-check.yaml.
+#
+# paths-ignore skips the whole workflow for prose-only changes: nothing these
+# jobs observe lives in a .md file or the pkgdown config. GitHub applies it
+# only when every changed file matches.
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - '**.md'
+      - 'vignettes/**'
+      - '_pkgdown.yml'
+      - 'docs/**'
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths-ignore:
+      - '**.md'
+      - 'vignettes/**'
+      - '_pkgdown.yml'
+      - 'docs/**'
+  schedule:
+    # Weekly, so that a latent problem surfaces without waiting for a push.
+    - cron: "0 4 * * 2"
+  workflow_dispatch:
+
+name: native-checks
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  # UBSan over the test suite on a runner, plus the ASan containers running
+  # tools/sanitizer-exercise.R. The exerciser uses base R only (hence
+  # asan-dependencies: false) and concentrates on the error and unwind paths,
+  # where a longjmp skips C cleanup.
+  sanitizers:
+    uses: pedrobtz/r-actions/.github/workflows/sanitizers.yml@v1
+    with:
+      profile: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'full-ci') && 'quick' || 'full' }}
+      asan: true
+      asan-dependencies: false
+      asan-run: Rscript tools/sanitizer-exercise.R
+      env: |
+        VECTORSCAN_BUILD_JOBS=4
+
+  valgrind:
+    uses: pedrobtz/r-actions/.github/workflows/valgrind.yml@v1
+    with:
+      profile: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'full-ci') && 'quick' || 'full' }}
+
+  lto:
+    uses: pedrobtz/r-actions/.github/workflows/lto.yml@v1
+
+  gctorture:
+    uses: pedrobtz/r-actions/.github/workflows/gctorture.yml@v1
+    with:
+      profile: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'full-ci') && 'quick' || 'full' }}
+      env: |
+        VECTORSCAN_BUILD_JOBS=4
+
+  # Not blocking yet: this is the first run against this C layer. Once the
+  # findings are triaged to zero, set fail-on-findings: true so the next one
+  # is a regression rather than an annotation nobody opens.
+  rchk:
+    uses: pedrobtz/r-actions/.github/workflows/rchk.yml@v1
