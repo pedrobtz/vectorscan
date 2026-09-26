@@ -23,3 +23,7 @@ Local modifications:
 - `cmake/ragel.cmake` and `CMakeLists.txt` are patched so that, when Ragel is
   not installed, the build copies those pre-generated sources instead of
   failing. Regenerate them after updating the vendored tree.
+- `CMakeLists.txt` also appends `HS_C_FLAGS`/`HS_CXX_FLAGS` in the fat
+  runtime branch (upstream applies them only to non-fat builds), so the
+  `-Wno-error` that `configure` passes overrides upstream's `-Werror` on
+  x86-64 Linux too.
