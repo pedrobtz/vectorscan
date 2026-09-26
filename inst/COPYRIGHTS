@@ -41,6 +41,21 @@ src/vendor/vectorscan/
     src/vendor/vectorscan/include/boost-patched/, Boost Software
     License 1.0.
 
+src/vendor/pcre2/
+
+  PCRE2 10.48, https://github.com/PCRE2Project/pcre2
+  Copyright (c) 1997-2007 University of Cambridge
+  Copyright (c) 2007-2024 Philip Hazel
+  Copyright (c) 2009-2024 Zoltan Herczeg (just-in-time compiler, sljit)
+  BSD-3-Clause licence with the PCRE2 exception (SPDX: BSD-3-Clause WITH
+  PCRE2-exception); the just-in-time compiler in deps/sljit is BSD-2-Clause.
+  The full texts ship as src/vendor/pcre2/LICENCE.md and
+  src/vendor/pcre2/deps/sljit/LICENSE.
+
+  The library subset of the release archive (tools/vendor/keep/pcre2.txt),
+  unpatched. It is built only when no system PCRE2 is found, with its
+  symbols hidden so that it cannot clash with the PCRE2 R itself loads.
+
 Boost headers used at build time come from the BH package and are not
 bundled.
 

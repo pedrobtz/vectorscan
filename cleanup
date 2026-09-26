@@ -1,4 +1,4 @@
 #!/bin/sh
 
 rm -rf src/Makevars src/Makevars.win
-rm -rf src/vendor/vectorscan-build src/vendor/vectorscan-install
+rm -rf src/vendor/vectorscan-build src/vendor/vectorscan-install src/vendor/pcre2-install

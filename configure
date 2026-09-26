@@ -96,6 +96,26 @@ compiler_flags() {
   printf '%s' "${flags# }"
 }
 
+# Build the vendored libraries with R's compilers, so they use the same C++
+# standard library as the package code that links against them.
+detect_r_compilers() {
+  cc_line=""
+  cxx_line=""
+  compiler_args=""
+  cc_flags=""
+  cxx_flags=""
+  if [ -n "$R_HOME" ]; then
+    cc_line="$("$R_HOME/bin/R" CMD config CC)"
+    cxx_line="$("$R_HOME/bin/R" CMD config CXX17)"
+    if [ -z "$cxx_line" ]; then
+      cxx_line="$("$R_HOME/bin/R" CMD config CXX)"
+    fi
+    compiler_args="$(compiler_cmake_args C "$cc_line") $(compiler_cmake_args CXX "$cxx_line")"
+    cc_flags="$(compiler_flags "$cc_line")"
+    cxx_flags="$(compiler_flags "$cxx_line")"
+  fi
+}
+
 build_bundled_vectorscan() {
   if [ ! -f "$BUNDLED_SOURCE_DIR/src/hs.h" ]; then
     echo "configure: bundled Vectorscan source is missing at $BUNDLED_SOURCE_DIR"
@@ -146,18 +166,7 @@ build_bundled_vectorscan() {
     boost_root="$(brew --prefix boost 2>/dev/null || true)"
   fi
 
-  # Build with R's compilers, so libhs uses the same C++ standard library
-  # as the package code that links against it.
-  if [ -n "$R_HOME" ]; then
-    cc_line="$("$R_HOME/bin/R" CMD config CC)"
-    cxx_line="$("$R_HOME/bin/R" CMD config CXX17)"
-    if [ -z "$cxx_line" ]; then
-      cxx_line="$("$R_HOME/bin/R" CMD config CXX)"
-    fi
-    cmake_args="$cmake_args $(compiler_cmake_args C "$cc_line") $(compiler_cmake_args CXX "$cxx_line")"
-    cc_flags="$(compiler_flags "$cc_line")"
-    cxx_flags="$(compiler_flags "$cxx_line")"
-  fi
+  cmake_args="$cmake_args $compiler_args"
 
   # The x86-64 fat runtime (one build per microarchitecture, chosen at run
   # time) relies on ELF ifunc and ELF symbol renaming, so upstream supports it
@@ -259,6 +268,7 @@ if [ "$VECTORSCAN_USE_SYSTEM" = "true" ] || [ "$VECTORSCAN_USE_SYSTEM" = "1" ]; 
     fi
   fi
 else
+  detect_r_compilers
   if ! build_bundled_vectorscan; then
     if allow_stubs; then
       echo "configure: falling back to runtime stubs because VECTORSCAN_ALLOW_STUBS is set"
@@ -268,6 +278,138 @@ else
       exit 1
     fi
   fi
+fi
+
+# -- PCRE2, for hs_capture() -------------------------------------------------
+#
+# VECTORSCAN_PCRE2 picks the route: auto (default: system, else vendored,
+# else none), system, vendored or none. The system PCRE2 is preferred: on
+# Linux it is the very library R loads. The vendored copy is built with every
+# symbol hidden (HAVE_VISIBILITY=OFF leaves PCRE2_EXPORT empty on top of
+# PCRE2's own hidden preset), so that our calls can never be resolved to a
+# different PCRE2 already loaded in the process. See
+# .agents/capture-groups.md.
+
+PCRE2_SOURCE_DIR="src/vendor/pcre2"
+PCRE2_BUILD_DIR="${TMPDIR:-/tmp}/vectorscan-pcre2-build-$$"
+PCRE2_INSTALL_DIR="src/vendor/pcre2-install"
+PCRE2_MIN_VERSION="10.34"
+FOUND_PCRE2=no
+
+# 0 when version $1 is at least $2 (both major.minor).
+version_at_least() {
+  awk -v a="$1" -v b="$2" 'BEGIN {
+    split(a, x, "."); split(b, y, ".")
+    exit !((x[1] + 0 > y[1] + 0) || (x[1] + 0 == y[1] + 0 && x[2] + 0 >= y[2] + 0))
+  }'
+}
+
+find_system_pcre2() {
+  if command -v pkg-config >/dev/null 2>&1 &&
+    pkg-config --atleast-version="$PCRE2_MIN_VERSION" libpcre2-8 2>/dev/null; then
+    PCRE2_CPPFLAGS="$(pkg-config --cflags libpcre2-8)"
+    PCRE2_LIBS="$(pkg-config --libs libpcre2-8)"
+    PCRE2_VERSION="$(pkg-config --modversion libpcre2-8)"
+    FOUND_PCRE2=system
+    return 0
+  fi
+  if command -v pcre2-config >/dev/null 2>&1; then
+    version="$(pcre2-config --version)"
+    if version_at_least "$version" "$PCRE2_MIN_VERSION"; then
+      PCRE2_CPPFLAGS="$(pcre2-config --cflags)"
+      PCRE2_LIBS="$(pcre2-config --libs8)"
+      PCRE2_VERSION="$version"
+      FOUND_PCRE2=system
+      return 0
+    fi
+  fi
+  return 1
+}
+
+build_vendored_pcre2() {
+  if [ ! -f "$PCRE2_SOURCE_DIR/CMakeLists.txt" ]; then
+    echo "configure: vendored PCRE2 is missing at $PCRE2_SOURCE_DIR"
+    return 1
+  fi
+  if ! command -v cmake >/dev/null 2>&1; then
+    echo "configure: cmake is required to build the vendored PCRE2"
+    return 1
+  fi
+
+  rm -rf "$PCRE2_BUILD_DIR" "$PCRE2_INSTALL_DIR"
+  echo "configure: building vendored PCRE2"
+  # shellcheck disable=SC2086
+  (
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+    cmake -S "$PCRE2_SOURCE_DIR" -B "$PCRE2_BUILD_DIR" $compiler_args \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DBUILD_STATIC_LIBS=ON \
+      -DPCRE2_STATIC_PIC=ON \
+      -DPCRE2_BUILD_PCRE2GREP=OFF \
+      -DPCRE2_BUILD_TESTS=OFF \
+      -DPCRE2_SUPPORT_JIT=ON \
+      -DPCRE2_SUPPORT_UNICODE=ON \
+      -DHAVE_VISIBILITY=OFF \
+      -DCMAKE_INSTALL_LIBDIR=lib \
+      ${cc_flags:+"-DCMAKE_C_FLAGS=$cc_flags"} &&
+      cmake --build "$PCRE2_BUILD_DIR" --target pcre2-8-static --config Release \
+        -j "${VECTORSCAN_BUILD_JOBS:-2}" &&
+      # Only the 8-bit static library is built, so copy it and its header
+      # rather than `cmake --install`, which would install every target.
+      mkdir -p "$PCRE2_INSTALL_DIR/lib" "$PCRE2_INSTALL_DIR/include" &&
+      cp "$PCRE2_BUILD_DIR/libpcre2-8.a" "$PCRE2_INSTALL_DIR/lib/" &&
+      cp "$PCRE2_BUILD_DIR/interface/pcre2.h" "$PCRE2_INSTALL_DIR/include/"
+  )
+  status=$?
+  rm -rf "$PCRE2_BUILD_DIR"
+  if [ "$status" -ne 0 ] || [ ! -f "$PCRE2_INSTALL_DIR/lib/libpcre2-8.a" ]; then
+    echo "configure: vendored PCRE2 build failed"
+    return 1
+  fi
+
+  PCRE2_CPPFLAGS="-DPCRE2_STATIC -Ivendor/pcre2-install/include"
+  PCRE2_LIBS="vendor/pcre2-install/lib/libpcre2-8.a"
+  header="$PCRE2_INSTALL_DIR/include/pcre2.h"
+  PCRE2_VERSION="$(sed -n 's/^#define PCRE2_MAJOR[[:space:]]*\([0-9]*\).*/\1/p' "$header").$(sed -n 's/^#define PCRE2_MINOR[[:space:]]*\([0-9]*\).*/\1/p' "$header")"
+  FOUND_PCRE2=vendored
+  return 0
+}
+
+pcre2_mode="${VECTORSCAN_PCRE2:-auto}"
+case "$pcre2_mode" in
+  auto)
+    find_system_pcre2 || { detect_r_compilers; build_vendored_pcre2; } || true
+    ;;
+  system)
+    if ! find_system_pcre2; then
+      echo "configure: VECTORSCAN_PCRE2=system but no PCRE2 >= $PCRE2_MIN_VERSION was found (pkg-config libpcre2-8, pcre2-config)"
+      exit 1
+    fi
+    ;;
+  vendored)
+    detect_r_compilers
+    if ! build_vendored_pcre2; then
+      echo "configure: VECTORSCAN_PCRE2=vendored but the vendored PCRE2 did not build"
+      exit 1
+    fi
+    ;;
+  none) ;;
+  *)
+    echo "configure: VECTORSCAN_PCRE2 must be auto, system, vendored or none (got '$pcre2_mode')"
+    exit 1
+    ;;
+esac
+
+if [ "$FOUND_PCRE2" != no ]; then
+  PKG_CPPFLAGS="$PKG_CPPFLAGS -DHAVE_PCRE2 -DPCRE2_CODE_UNIT_WIDTH=8 $PCRE2_CPPFLAGS"
+  if [ "$FOUND_PCRE2" = vendored ]; then
+    PKG_CPPFLAGS="$PKG_CPPFLAGS -DVCTRSN_PCRE2_VENDORED"
+  fi
+  PKG_LIBS="$PKG_LIBS $PCRE2_LIBS"
+  echo "configure: PCRE2 $PCRE2_VERSION ($FOUND_PCRE2)"
+else
+  echo "configure: PCRE2 not available; hs_capture() will be unavailable"
 fi
 
 cat > src/Makevars <<EOF

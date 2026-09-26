@@ -1,5 +1,9 @@
 # vectorscan 0.0.0.9000
 
+- PCRE2 is now part of the build, for the upcoming `hs_capture()`: a system
+  PCRE2 (>= 10.34) when available, else a bundled PCRE2 10.48 compiled with
+  its symbols hidden so it cannot clash with the PCRE2 R itself loads.
+  `VECTORSCAN_PCRE2` selects the route.
 - New vectorized verbs scan a whole character vector in one call:
   `hs_detect()` (like `grepl()` for many patterns), `hs_count()`,
   `hs_match()` (a data frame of every match with its pattern, offsets and

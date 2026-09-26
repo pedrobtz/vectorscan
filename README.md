@@ -198,6 +198,11 @@ The following environment variables are available for development and CI:
 - `VECTORSCAN_CMAKE_ARGS`: append extra CMake arguments for the bundled build.
 - `VECTORSCAN_ALLOW_STUBS=true`: build runtime stubs when native Vectorscan is
   unavailable. This is only intended for wrapper development.
+- `VECTORSCAN_PCRE2`: where the PCRE2 used for capture groups comes from.
+  `auto` (the default) uses a system PCRE2 (`pkg-config libpcre2-8`,
+  `pcre2-config`, or Rtools on Windows) and otherwise builds the bundled copy
+  in `src/vendor/pcre2`; `system` and `vendored` force one of them; `none`
+  builds without it.
 
 ## Vendored Source
 
