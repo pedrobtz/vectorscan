@@ -17,6 +17,10 @@ static SEXP unavailable(void) {
 
 SEXP vctrsn_hs_available(void) { return Rf_ScalarLogical(FALSE); }
 
+SEXP vctrsn_hs_version(void) { return Rf_ScalarString(NA_STRING); }
+
+SEXP vctrsn_hs_stream_size(SEXP database_xptr) { return unavailable(); }
+
 SEXP vctrsn_hs_compile(SEXP expressions,
                         SEXP ids,
                         SEXP flags,
@@ -234,8 +238,28 @@ static SEXP make_compiled_database(hs_database_t *database,
   return out;
 }
 
+/* Native errors are raised by R functions (R/errors.R), so that they carry
+   a condition class per Vectorscan error code. Callers free their native
+   resources first: the R function does not return. */
+static void call_r_stop(SEXP fun_name, SEXP arg1, SEXP arg2) {
+  SEXP call = PROTECT(Rf_lang3(fun_name, arg1, arg2));
+  SEXP ns = PROTECT(R_FindNamespace(Rf_mkString("vectorscan")));
+  Rf_eval(call, ns);
+  UNPROTECT(2);
+}
+
 static void stop_hs_error(hs_error_t hs_err, const char *operation) {
-  Rf_error("Vectorscan %s failed with error code %d.", operation, hs_err);
+  SEXP code = PROTECT(Rf_ScalarInteger((int)hs_err));
+  SEXP op = PROTECT(Rf_mkString(operation));
+  call_r_stop(Rf_install("stop_native_error"), code, op);
+  UNPROTECT(2);
+}
+
+static void stop_compile_error(int expression, const char *message) {
+  SEXP index = PROTECT(Rf_ScalarInteger(expression));
+  SEXP text = PROTECT(Rf_mkString(message));
+  call_r_stop(Rf_install("stop_compile_error"), index, text);
+  UNPROTECT(2);
 }
 
 static void ensure_scan_capacity(vctrsn_scan_context_t *ctx) {
@@ -426,8 +450,7 @@ SEXP vctrsn_hs_compile(SEXP expressions,
                                               : compile_error->message);
       int expression = compile_error->expression;
       hs_free_compile_error(compile_error);
-      Rf_error("Vectorscan compile error at expression %d: %s", expression,
-               message);
+      stop_compile_error(expression, message);
     }
     stop_hs_error(hs_err, "compile");
   }
@@ -603,6 +626,19 @@ SEXP vctrsn_hs_deserialize(SEXP bytes) {
   }
 
   return make_compiled_database(database, scratch);
+}
+
+SEXP vctrsn_hs_version(void) { return Rf_mkString(hs_version()); }
+
+/* Bytes of stream state each open stream of this database needs. */
+SEXP vctrsn_hs_stream_size(SEXP database_xptr) {
+  hs_database_t *database = database_addr(database_xptr);
+  size_t size = 0;
+  hs_error_t hs_err = hs_stream_size(database, &size);
+  if (hs_err != HS_SUCCESS) {
+    stop_hs_error(hs_err, "stream size");
+  }
+  return Rf_ScalarReal((double)size);
 }
 
 /* Scanning a character vector: one hs_scan() per element, reusing the

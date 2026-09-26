@@ -19,6 +19,17 @@ hs_available <- function() {
   .Call(vctrsn_hs_available)
 }
 
+#' @rdname hs_available
+#' @return `hs_version()`: the version string of the Vectorscan library the
+#'   package was built with (bundled or system), or `NA` in a build without
+#'   one.
+#' @export
+#' @examples
+#' hs_version()
+hs_version <- function() {
+  .Call(vctrsn_hs_version)
+}
+
 check_integerish <- function(x, name, len = NULL, allow_na = FALSE) {
   if (!is.numeric(x)) {
     stop_vectorscan(sprintf("`%s` must be numeric.", name))

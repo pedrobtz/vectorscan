@@ -17,6 +17,9 @@
 \alias{HS_MODE_BLOCK}
 \alias{HS_MODE_STREAM}
 \alias{HS_MODE_VECTORED}
+\alias{HS_MODE_SOM_HORIZON_LARGE}
+\alias{HS_MODE_SOM_HORIZON_MEDIUM}
+\alias{HS_MODE_SOM_HORIZON_SMALL}
 \title{Vectorscan and Hyperscan constants}
 \usage{
 HS_FLAG_NONE
@@ -48,9 +51,25 @@ HS_MODE_BLOCK
 HS_MODE_STREAM
 
 HS_MODE_VECTORED
+
+HS_MODE_SOM_HORIZON_LARGE
+
+HS_MODE_SOM_HORIZON_MEDIUM
+
+HS_MODE_SOM_HORIZON_SMALL
 }
 \description{
 Integer constants used when compiling Vectorscan/Hyperscan databases.
+}
+\details{
+Combine flags with \code{\link[=bitwOr]{bitwOr()}}, not \code{|} (which is a logical "or" in R).
+
+In stream mode, patterns compiled with \code{HS_FLAG_SOM_LEFTMOST} need a
+start-of-match horizon, which bounds how far back a start offset is kept:
+\code{HS_MODE_SOM_HORIZON_LARGE} (the whole stream), \verb{_MEDIUM} (32 bits of
+offset) or \verb{_SMALL} (16 bits), as in
+\code{hs_database(bitwOr(HS_MODE_STREAM, HS_MODE_SOM_HORIZON_LARGE))}. A start
+beyond the horizon is reported as \code{NA}.
 }
 \examples{
 HS_FLAG_CASELESS

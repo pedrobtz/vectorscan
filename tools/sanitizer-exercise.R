@@ -195,6 +195,27 @@ if (!is.null(vectorscan:::pcre2_info())) {
   invisible(gc())
 }
 
+cat("-- stream extras and native errors -------------------------------\n")
+
+hdb <- hs_database(bitwOr(HS_MODE_STREAM, HS_MODE_SOM_HORIZON_SMALL))
+hs_compile(hdb, c("foo.*bar", "x"), flags = HS_FLAG_SOM_LEFTMOST)
+check("stream size", hs_stream_size(hdb) > 0)
+for (i in 1:20) {
+  s <- hs_stream_open(hdb)
+  hs_stream_scan(s, strrep("foo ", 100))
+  hs_stream_scan(s, "bar")
+  hs_stream_close(s)
+}
+check("typed native error", inherits(
+  tryCatch(hs_stream_open(hs_compile("a")), error = function(e) e),
+  "vectorscan_error_native"
+))
+check("callback condition kept", identical(
+  tryCatch(hs_scan(hs_compile("a"), "aa", callback = function(...) stop("mine")),
+           error = conditionMessage),
+  "mine"
+))
+
 cat("-- serialization -------------------------------------------------\n")
 
 bytes <- hs_serialize(db)

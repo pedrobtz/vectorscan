@@ -23,6 +23,7 @@ reference:
   - hs_stream_open
   - hs_stream_scan
   - hs_stream_close
+  - hs_stream_size
 - title: Serialization
   contents:
   - hs_serialize
@@ -34,6 +35,7 @@ reference:
   - hs_ext
   - hs_available
   - vectorscan-constants
+  - vectorscan-errors
 articles:
 - title: Guides
   navbar: ~
