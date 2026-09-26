@@ -150,7 +150,7 @@ hs_save(db, path)
 restored <- hs_load(path)
 hs_scan(restored, "foo")
 #>   id from to flags
-#> 1  0    0  3     0
+#> 1  0   NA  3     0
 ```
 
 ## A real-world example: scanning text for secrets and PII
@@ -298,10 +298,10 @@ base_time <- system.time({
 
 vs_time["elapsed"]
 #> elapsed 
-#>    0.01
+#>   0.008
 base_time["elapsed"]
 #> elapsed 
-#>   0.035
+#>   0.026
 ```
 
 The gap widens as you add more patterns. With a hundred rules (realistic

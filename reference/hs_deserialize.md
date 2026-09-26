@@ -1,6 +1,12 @@
 # Deserialize a database
 
-Deserialize a database
+The mode is read from the database itself. Pattern ids and flags come
+from the attributes
+[`hs_serialize()`](https://pedrobtz.github.io/vectorscan/reference/hs_serialize.md)
+attaches; without them (bytes from another tool, or with the attributes
+dropped) `from` is reported as Vectorscan gives it, which is `0` for
+patterns compiled without
+[HS_FLAG_SOM_LEFTMOST](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md).
 
 ## Usage
 
