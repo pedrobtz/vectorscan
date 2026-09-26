@@ -27,6 +27,9 @@ src/vendor/vectorscan/
                                           notes
     0005-vermicelli-tail-overread.patch   stop vermicelliExec reading past
                                           the end of the input buffer
+    0006-gough-som-slots-pointer.patch    index the Gough SOM slots through a
+                                          pointer rather than past a [1]
+                                          array
 
   The patches carry the same licence as the files they change.
 

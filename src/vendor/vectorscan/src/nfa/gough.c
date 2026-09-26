@@ -43,6 +43,12 @@
 
 #include "mcclellan_common_impl.h"
 
+/* R package patch: struct gough_som_info declares its slots as `u64a
+ * slots[1]` and is used as a variable-length array over the stream state.
+ * Indexing past [1] is undefined behaviour that UBSan's bounds check reports,
+ * although the memory is there. Index through a plain pointer instead. */
+#define SOM_SLOTS(p) ((u64a *)(void *)(p))
+
 #define GOUGH_SOM_EARLY (~0ULL)
 
 static really_inline
@@ -119,7 +125,7 @@ char doReports(NfaCallback cb, void *ctxt, const struct mcclellan *m,
 
     if (!eod && s == *cached_accept_state) {
         u64a from = *cached_accept_som == INVALID_SLOT ? loc
-                                               : som->slots[*cached_accept_som];
+                                               : SOM_SLOTS(som)[*cached_accept_som];
         if (cb(from, loc, *cached_accept_id, ctxt) == MO_HALT_MATCHING) {
             return MO_HALT_MATCHING; /* termination requested */
         }
@@ -144,7 +150,7 @@ char doReports(NfaCallback cb, void *ctxt, const struct mcclellan *m,
         *cached_accept_som = rl->report[0].som;
 
         u64a from = *cached_accept_som == INVALID_SLOT ? loc
-                                               : som->slots[*cached_accept_som];
+                                               : SOM_SLOTS(som)[*cached_accept_som];
         DEBUG_PRINTF("reporting %u, using som[%u]=%llu\n", rl->report[0].r,
                      *cached_accept_som, from);
         if (cb(from, loc, *cached_accept_id, ctxt) == MO_HALT_MATCHING) {
@@ -156,7 +162,7 @@ char doReports(NfaCallback cb, void *ctxt, const struct mcclellan *m,
 
     for (u32 i = 0; i < count; i++) {
         u32 slot = rl->report[i].som;
-        u64a from = slot == INVALID_SLOT ? loc : som->slots[slot];
+        u64a from = slot == INVALID_SLOT ? loc : SOM_SLOTS(som)[slot];
         DEBUG_PRINTF("reporting %u, using som[%u] = %llu\n",
                      rl->report[i].r, slot, from);
         if (cb(from, loc, rl->report[i].r, ctxt) == MO_HALT_MATCHING) {
@@ -202,29 +208,29 @@ void run_prog_i(UNUSED const struct NFA *nfa,
         case GOUGH_INS_END:
             return;
         case GOUGH_INS_MOV:
-            som->slots[dest] = som->slots[src];
+            SOM_SLOTS(som)[dest] = SOM_SLOTS(som)[src];
             break;
         case GOUGH_INS_NEW:
             /* note: c has already been advanced */
             DEBUG_PRINTF("current offset %llu; adjust %u\n", som_offset,
                          pc->src);
             assert(som_offset >= pc->src);
-            som->slots[dest] = som_offset - pc->src;
+            SOM_SLOTS(som)[dest] = som_offset - pc->src;
             break;
         case GOUGH_INS_MIN:
             /* TODO: shift all values along by one so that a normal min works
              */
-            if (som->slots[src] == GOUGH_SOM_EARLY) {
-                som->slots[dest] = som->slots[src];
-            } else if (som->slots[dest] != GOUGH_SOM_EARLY) {
-                LIMIT_TO_AT_MOST(&som->slots[dest], som->slots[src]);
+            if (SOM_SLOTS(som)[src] == GOUGH_SOM_EARLY) {
+                SOM_SLOTS(som)[dest] = SOM_SLOTS(som)[src];
+            } else if (SOM_SLOTS(som)[dest] != GOUGH_SOM_EARLY) {
+                LIMIT_TO_AT_MOST(&SOM_SLOTS(som)[dest], SOM_SLOTS(som)[src]);
             }
             break;
         default:
             assert(0);
             return;
         }
-        DEBUG_PRINTF("dest slot[%u] = %llu\n", dest, som->slots[dest]);
+        DEBUG_PRINTF("dest slot[%u] = %llu\n", dest, SOM_SLOTS(som)[dest]);
         ++pc;
     }
 }
@@ -1089,7 +1095,7 @@ void compSomSpace(const struct NFA *nfa, u8 *dest_som_base,
     u32 width = gi->stream_som_loc_width;
 
     for (u32 i = 0; i < count; i++) {
-        compressSomValue(width, curr_offset, dest_som_base, i, src->slots[i]);
+        compressSomValue(width, curr_offset, dest_som_base, i, SOM_SLOTS(src)[i]);
     }
 }
 
@@ -1102,7 +1108,7 @@ void expandSomSpace(const struct NFA *nfa, struct gough_som_info *som,
     u32 width = gi->stream_som_loc_width;
 
     for (u32 i = 0; i < count; i++) {
-        som->slots[i] = expandSomValue(width, curr_offset, src_som_base, i);
+        SOM_SLOTS(som)[i] = expandSomValue(width, curr_offset, src_som_base, i);
     }
 }
 
