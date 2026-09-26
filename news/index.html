@@ -39,7 +39,10 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="vectorscan-0009000">vectorscan 0.0.0.9000<a class="anchor" aria-label="anchor" href="#vectorscan-0009000"></a></h2>
-<ul><li>Initial package implementation with native bindings for compiling databases, block scanning, vectored scanning, streaming, database metadata, and database serialization.</li>
+<ul><li>New vectorized verbs scan a whole character vector in one call: <code><a href="../reference/hs_verbs.html">hs_detect()</a></code> (like <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> for many patterns), <code><a href="../reference/hs_verbs.html">hs_count()</a></code>, <code><a href="../reference/hs_verbs.html">hs_match()</a></code> (a data frame of every match with its pattern, offsets and text) and <code><a href="../reference/hs_verbs.html">hs_extract()</a></code>. They take a compiled block-mode database or the patterns themselves; given patterns, <code><a href="../reference/hs_verbs.html">hs_match()</a></code> and <code><a href="../reference/hs_verbs.html">hs_extract()</a></code> turn on start-of-match offsets automatically.</li>
+<li>
+<code><a href="../reference/hs_compile.html">hs_compile()</a></code> accepts named patterns and rules data frames (<code>pattern</code>, <code>id</code>, <code>flags</code>, <code>name</code>), and <code>hs_compile(patterns)</code> without a database returns a new block-mode database.</li>
+<li>Initial package implementation with native bindings for compiling databases, block scanning, vectored scanning, streaming, database metadata, and database serialization.</li>
 <li>The package now vendors the Vectorscan source and builds the native library from source by default during configuration.</li>
 <li>The bundled Vectorscan is updated to 5.4.13, which fixes a stack buffer overflow in <code>rvermicelliDoubleExecReal()</code>, an AVX-512 scanning bug, SVE accelerator bugs, an integer overflow, a wrong page-size assumption on Apple Silicon, and compiler errors with clang 21 and GCC 15/16. Invalid character classes are now a compile error.</li>
 <li>Compile errors now report Vectorscan’s message correctly; it was read after being freed.</li>

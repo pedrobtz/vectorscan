@@ -1,5 +1,13 @@
 # Package index
 
+## Matching character vectors
+
+- [`hs_detect()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  [`hs_count()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  [`hs_match()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  [`hs_extract()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  : Vectorized matching over a character vector
+
 ## Database lifecycle
 
 - [`hs_database()`](https://pedrobtz.github.io/vectorscan/reference/hs_database.md)

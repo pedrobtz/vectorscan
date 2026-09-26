@@ -64,6 +64,7 @@
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
+<li>Scan a whole character vector against many patterns at once with <code><a href="reference/hs_verbs.html">hs_detect()</a></code>, <code><a href="reference/hs_verbs.html">hs_count()</a></code>, <code><a href="reference/hs_verbs.html">hs_match()</a></code> and <code><a href="reference/hs_verbs.html">hs_extract()</a></code>, with named patterns or rule tables carried through to the results.</li>
 <li>Compile Vectorscan/Hyperscan databases from R with <code><a href="reference/hs_database.html">hs_database()</a></code> and <code><a href="reference/hs_compile.html">hs_compile()</a></code>.</li>
 <li>Scan block, vectored, and streaming data with <code><a href="reference/hs_scan.html">hs_scan()</a></code>, <code><a href="reference/hs_scan_vector.html">hs_scan_vector()</a></code>, <code><a href="reference/hs_stream_open.html">hs_stream_open()</a></code>, <code><a href="reference/hs_stream_scan.html">hs_stream_scan()</a></code>, and <code><a href="reference/hs_stream_close.html">hs_stream_close()</a></code>.</li>
 <li>Return R data frames of match events by default.</li>
@@ -100,10 +101,46 @@
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
+<p>Scan a whole character vector against a set of patterns in one call. Names label the patterns in the results:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pedrobtz.github.io/vectorscan/">vectorscan</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="va">HS_MODE_BLOCK</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"apple pie"</span>, <span class="st">"banana split"</span>, <span class="cn">NA</span>, <span class="st">"cherry tart"</span><span class="op">)</span></span>
+<span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>fruit <span class="op">=</span> <span class="st">"apple|banana|cherry"</span>, dessert <span class="op">=</span> <span class="st">"pie|split|tart"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/hs_verbs.html">hs_detect</a></span><span class="op">(</span><span class="va">rules</span>, <span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE TRUE   NA TRUE</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/hs_verbs.html">hs_count</a></span><span class="op">(</span><span class="va">rules</span>, <span class="va">x</span>, per_pattern <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      fruit dessert</span></span>
+<span><span class="co">#&gt; [1,]     1       1</span></span>
+<span><span class="co">#&gt; [2,]     1       1</span></span>
+<span><span class="co">#&gt; [3,]    NA      NA</span></span>
+<span><span class="co">#&gt; [4,]     1       1</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/hs_verbs.html">hs_match</a></span><span class="op">(</span><span class="va">rules</span>, <span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   input id pattern from to  match</span></span>
+<span><span class="co">#&gt; 1     1  0   fruit    0  5  apple</span></span>
+<span><span class="co">#&gt; 2     1  1 dessert    6  9    pie</span></span>
+<span><span class="co">#&gt; 3     2  0   fruit    0  6 banana</span></span>
+<span><span class="co">#&gt; 4     2  1 dessert    7 12  split</span></span>
+<span><span class="co">#&gt; 5     4  0   fruit    0  6 cherry</span></span>
+<span><span class="co">#&gt; 6     4  1 dessert    7 11   tart</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/hs_verbs.html">hs_extract</a></span><span class="op">(</span><span class="va">rules</span>, <span class="va">x</span><span class="op">)</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] "banana" "split"</span></span></code></pre></div>
+<p><code><a href="reference/hs_verbs.html">hs_detect()</a></code>, <code><a href="reference/hs_verbs.html">hs_count()</a></code>, <code><a href="reference/hs_verbs.html">hs_match()</a></code> and <code><a href="reference/hs_verbs.html">hs_extract()</a></code> take the patterns (a character vector, possibly named, or a data frame of rules) or a database compiled once with <code><a href="reference/hs_compile.html">hs_compile()</a></code> and reused:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">rules</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/hs_verbs.html">hs_detect</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"banana"</span>, <span class="st">"kiwi"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]  TRUE FALSE</span></span></code></pre></div>
+<p>Offsets are zero-based byte offsets into the UTF-8 encoding of each string.</p>
+<div class="section level3">
+<h3 id="low-level-interface">Low-level interface<a class="anchor" aria-label="anchor" href="#low-level-interface"></a>
+</h3>
+<p>The <code>hs_*</code> scanning functions map one to one onto the Vectorscan API: compile a database in a chosen mode, then scan single blocks, vectored blocks or streams, with the flags and extended parameters Vectorscan offers.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="va">HS_MODE_BLOCK</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span></span>
 <span>  <span class="va">db</span>,</span>
 <span>  expressions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foo"</span>, <span class="st">"^foobar$"</span>, <span class="st">"BAR"</span><span class="op">)</span>,</span>
@@ -111,17 +148,17 @@
 <span>  flags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="va">HS_FLAG_NONE</span>,</span>
 <span>    <span class="va">HS_FLAG_NONE</span>,</span>
-<span>    <span class="va">HS_FLAG_CASELESS</span> <span class="op">|</span> <span class="va">HS_FLAG_SOM_LEFTMOST</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/bitwise.html" class="external-link">bitwOr</a></span><span class="op">(</span><span class="va">HS_FLAG_CASELESS</span>, <span class="va">HS_FLAG_SOM_LEFTMOST</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/hs_scan.html">hs_scan</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foobar"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   id from to flags</span></span>
 <span><span class="co">#&gt; 1  0   NA  3     0</span></span>
-<span><span class="co">#&gt; 2  1   NA  6     0</span></span>
-<span><span class="co">#&gt; 3  2    3  6     0</span></span></code></pre></div>
+<span><span class="co">#&gt; 2  2    3  6     0</span></span>
+<span><span class="co">#&gt; 3  1   NA  6     0</span></span></code></pre></div>
 <p>Use a callback to handle matches as they are reported by Vectorscan. Return <code>TRUE</code> from the callback to terminate scanning early.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/hs_scan.html">hs_scan</a></span><span class="op">(</span></span>
 <span>  <span class="va">db</span>,</span>
 <span>  <span class="st">"foobar"</span>,</span>
@@ -132,12 +169,12 @@
 <span>  context <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>source <span class="op">=</span> <span class="st">"example"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Vectored mode scans adjacent buffers as one logical input:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="va">HS_MODE_VECTORED</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foobar"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_scan_vector.html">hs_scan_vector</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foo"</span>, <span class="st">"bar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Streaming mode keeps scan state across chunks:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="va">HS_MODE_STREAM</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foo.*bar"</span><span class="op">)</span></span>
 <span></span>
@@ -146,13 +183,14 @@
 <span><span class="fu"><a href="reference/hs_stream_scan.html">hs_stream_scan</a></span><span class="op">(</span><span class="va">stream</span>, <span class="st">" and then bar"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_stream_close.html">hs_stream_close</a></span><span class="op">(</span><span class="va">stream</span><span class="op">)</span></span></code></pre></div>
 <p>Compiled databases can be serialized:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foo"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">bytes</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_serialize.html">hs_serialize</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
 <span><span class="va">restored</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_deserialize.html">hs_deserialize</a></span><span class="op">(</span><span class="va">bytes</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_scan.html">hs_scan</a></span><span class="op">(</span><span class="va">restored</span>, <span class="st">"foo"</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="build-configuration">Build Configuration<a class="anchor" aria-label="anchor" href="#build-configuration"></a>
@@ -185,11 +223,11 @@
 <h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
 </h2>
 <p>Useful package checks:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="ex">air</span> format .</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::document()"</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::test()"</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"pkgdown::check_pkgdown()"</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::check()"</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">air</span> format .</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::document()"</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::test()"</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"pkgdown::check_pkgdown()"</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::check()"</span></span></code></pre></div>
 <p>The native extension uses <code>.Call</code> and external pointers to manage <code>hs_database_t</code>, <code>hs_scratch_t</code>, and <code>hs_stream_t</code> objects. Native calls check <code>hs_error_t</code> values and convert failures to typed R conditions.</p>
 </div>
 </div>

@@ -2,6 +2,24 @@
 
 ## vectorscan 0.0.0.9000
 
+- New vectorized verbs scan a whole character vector in one call:
+  [`hs_detect()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  (like [`grepl()`](https://rdrr.io/r/base/grep.html) for many
+  patterns),
+  [`hs_count()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md),
+  [`hs_match()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  (a data frame of every match with its pattern, offsets and text) and
+  [`hs_extract()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md).
+  They take a compiled block-mode database or the patterns themselves;
+  given patterns,
+  [`hs_match()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  and
+  [`hs_extract()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  turn on start-of-match offsets automatically.
+- [`hs_compile()`](https://pedrobtz.github.io/vectorscan/reference/hs_compile.md)
+  accepts named patterns and rules data frames (`pattern`, `id`,
+  `flags`, `name`), and `hs_compile(patterns)` without a database
+  returns a new block-mode database.
 - Initial package implementation with native bindings for compiling
   databases, block scanning, vectored scanning, streaming, database
   metadata, and database serialization.

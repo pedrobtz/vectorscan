@@ -151,6 +151,15 @@ per-pattern results (element × pattern logical matrix or list-column).
 `HS_FLAG_SOM_LEFTMOST` when needed (with a documented opt-out, since SOM
 costs compile-time/state).
 
+*Done 2026-09-26: the four verbs scan in C (`vctrsn_hs_scan_many`, one
+scratch per call);
+[`hs_detect()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+stops each element at its first match.
+[`hs_extract()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+returns a list per element, like `stringr::str_extract_all()`. Matched
+text is sliced in R, which is the next thing to move to C if profiling
+says so (Stage 3).*
+
 **Ergonomics**
 
 Named patterns: accept a named character vector or a data frame of rules
@@ -199,8 +208,10 @@ semantics so databases can be shared across threads/processes; document
 (and test) the one-scratch-per-thread rule.
 
 Parallel vectorized scan: optional OpenMP (or thread pool) over elements
-in `hs_match()`/`hs_detect()` — Vectorscan scans are callback-driven C,
-so true parallelism is feasible when no R callback is involved.
+in
+[`hs_match()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)/[`hs_detect()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+— Vectorscan scans are callback-driven C, so true parallelism is
+feasible when no R callback is involved.
 
 File/connection streaming helpers: `hs_scan_file(db, path, chunk_size)`
 built on the streaming API — scan multi-GB logs without loading them;
@@ -326,10 +337,13 @@ package appears in search results for its target problems.*
   size measurement) should start during Stage 2 — if CRAN turns out to
   be impossible in the current shape, that changes vendoring decisions
   early.
-- The single highest-leverage item in the whole plan is **`hs_match()` /
-  `hs_detect()` over character vectors** (Stage 2). Without it the
-  package is a niche C binding; with it, it answers a question thousands
-  of R users actually have.
+- The single highest-leverage item in the whole plan is
+  **[`hs_match()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  /
+  [`hs_detect()`](https://pedrobtz.github.io/vectorscan/reference/hs_verbs.md)
+  over character vectors** (Stage 2). Without it the package is a niche
+  C binding; with it, it answers a question thousands of R users
+  actually have.
 
 ## Risks
 
