@@ -68,6 +68,7 @@ hs_stream_scan <- function(stream, data, callback = NULL, context = NULL) {
     callback %||% NULL,
     context
   )
+  rethrow_callback_error(callback)
 
   if (has_callback) {
     return(invisible(matches))
@@ -96,10 +97,30 @@ hs_stream_close <- function(stream, callback = NULL, context = NULL) {
     context
   )
   stream$closed <- TRUE
+  rethrow_callback_error(callback)
 
   if (has_callback) {
     return(invisible(matches))
   }
 
   as_match_data_frame(matches, database)
+}
+
+#' Size of a stream's state
+#'
+#' The number of bytes of state each open stream of a stream-mode database
+#' needs, a measure of the memory cost of keeping many streams open.
+#'
+#' @param database A compiled stream-mode `hs_database`.
+#' @return A single number of bytes.
+#' @export
+#' @examples
+#' if (hs_available()) {
+#'   db <- hs_database(HS_MODE_STREAM)
+#'   hs_compile(db, c("foo.*bar", "baz"))
+#'   hs_stream_size(db)
+#' }
+hs_stream_size <- function(database) {
+  check_database(database, compiled = TRUE)
+  .Call(vctrsn_hs_stream_size, database$ptr)
 }

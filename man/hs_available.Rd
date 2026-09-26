@@ -2,12 +2,19 @@
 % Please edit documentation in R/utils.R
 \name{hs_available}
 \alias{hs_available}
+\alias{hs_version}
 \title{Is Vectorscan or Hyperscan available?}
 \usage{
 hs_available()
+
+hs_version()
 }
 \value{
 A single \code{TRUE} or \code{FALSE}.
+
+\code{hs_version()}: the version string of the Vectorscan library the
+package was built with (bundled or system), or \code{NA} in a build without
+one.
 }
 \description{
 Reports whether this installation was compiled with native
@@ -15,4 +22,5 @@ Vectorscan/Hyperscan support.
 }
 \examples{
 hs_available()
+hs_version()
 }

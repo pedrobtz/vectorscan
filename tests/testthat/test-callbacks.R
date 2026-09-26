@@ -33,7 +33,7 @@ test_that("an error in a callback stops the scan and is reported", {
       calls <<- calls + 1L
       stop("boom")
     })),
-    "callback failed"
+    "boom"
   )
   expect_equal(calls, 1L)
 })

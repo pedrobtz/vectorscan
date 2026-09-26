@@ -1,5 +1,17 @@
 # vectorscan 0.0.0.9000
 
+- An error raised inside a match callback now reaches the caller unchanged,
+  with its own class and message; it used to become a generic "R callback
+  failed" error.
+- Errors from the Vectorscan library carry a class per error code
+  (`vectorscan_error_db_mode`, `vectorscan_error_scratch_in_use`, ...) under
+  `vectorscan_error_native`, and compile errors are
+  `vectorscan_error_compile` with the offending `expression` and the
+  `reason`. See `?vectorscan-errors`.
+- New `HS_MODE_SOM_HORIZON_LARGE`, `_MEDIUM` and `_SMALL`, needed for start
+  offsets (`HS_FLAG_SOM_LEFTMOST`) in stream mode; a start beyond the horizon
+  is `NA`.
+- New `hs_version()` and `hs_stream_size()`.
 - New `hs_capture()` turns text into a data frame with one regular
   expression: one row per element, one column per capture group, named after
   named groups or typed by a `proto` as in `utils::strcapture()`. It returns
