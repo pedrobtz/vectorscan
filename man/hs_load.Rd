@@ -13,5 +13,7 @@ hs_load(path)
 A compiled \code{hs_database} object.
 }
 \description{
-Load a serialized database
+Reads files written by \code{\link[=hs_save]{hs_save()}}, and also plain Vectorscan or Hyperscan
+serialized databases (for which \code{from} behaves as described in
+\code{\link[=hs_deserialize]{hs_deserialize()}}).
 }

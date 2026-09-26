@@ -13,7 +13,13 @@ hs_serialize(database)
 A raw vector containing the serialized database.
 }
 \description{
-Serialize a database
+The bytes are exactly what Vectorscan's \code{hs_serialize_database()}
+produces, so they can be deserialized by any compatible Vectorscan or
+Hyperscan build. The pattern ids and flags, which Vectorscan does not
+store, are attached as the attributes \code{hs_pattern_ids} and
+\code{hs_pattern_flags}; \code{\link[=hs_deserialize]{hs_deserialize()}} uses them to report \code{from = NA} for
+patterns compiled without \link{HS_FLAG_SOM_LEFTMOST}, as the original database
+does.
 }
 \examples{
 if (hs_available()) {

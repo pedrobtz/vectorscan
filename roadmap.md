@@ -88,8 +88,12 @@ builds on this.*
       Original item: ASAN/UBSAN job (rocker `r-devel-san` or rhub2
       actions), valgrind spot-checks. External-pointer packages live and die
       by this.
-- [ ] Test-suite expansion (target: every exported function, every typed
-      error class):
+- [x] Test-suite expansion (target: every exported function, every typed
+      error class). Done 2026-09-26: 49 tests, 187 expectations across
+      serialization, streams, callbacks, inputs and validation. It found that
+      deserialization lost the mode and the SOM flags (fixed). Callback
+      errors are caught with `R_tryEval()` and re-raised after the scan, so
+      no longjmp crosses Vectorscan; the ASan job exercises that path.
       - serialization: round-trip equivalence, `hs_save()`/`hs_load()`,
         corrupt-bytes error path, cross-mode deserialization.
       - streams: matches spanning chunk boundaries, matches reported at
