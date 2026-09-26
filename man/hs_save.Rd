@@ -15,5 +15,8 @@ hs_save(database, path)
 \code{path}, invisibly.
 }
 \description{
-Save a serialized database
+Writes the database together with its pattern ids and flags, so that
+\code{\link[=hs_load]{hs_load()}} restores it exactly. The file starts with the 8-byte tag
+\code{VSCANRDB}, a format version and the pattern metadata, followed by the
+bytes \code{\link[=hs_serialize]{hs_serialize()}} returns.
 }

@@ -13,5 +13,9 @@ hs_deserialize(bytes)
 A compiled \code{hs_database} object.
 }
 \description{
-Deserialize a database
+The mode is read from the database itself. Pattern ids and flags come from
+the attributes \code{\link[=hs_serialize]{hs_serialize()}} attaches; without them (bytes from another
+tool, or with the attributes dropped) \code{from} is reported as Vectorscan
+gives it, which is \code{0} for patterns compiled without
+\link{HS_FLAG_SOM_LEFTMOST}.
 }
