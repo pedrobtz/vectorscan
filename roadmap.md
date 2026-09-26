@@ -122,26 +122,32 @@ stage is the adoption driver — prioritize it over everything except safety.*
 
 **Vectorized scanning (the centerpiece)**
 
-- [ ] `hs_match(db, x)` — scan a character vector, return a tidy data frame:
+- [x] `hs_match(db, x)` — scan a character vector, return a tidy data frame:
       `input` (element index), `id`/`pattern`, `from`, `to`, `match`
       (extracted text). Implemented in C: loop over elements reusing one
       scratch, no per-element R overhead.
-- [ ] `hs_detect(db, x)` — `grepl()` at scale: logical vector ("any pattern
+- [x] `hs_detect(db, x)` — `grepl()` at scale: logical vector ("any pattern
       hit?") plus a variant returning per-pattern results (element × pattern
       logical matrix or list-column).
-- [ ] `hs_count(db, x)` — match counts per element (respecting
+- [x] `hs_count(db, x)` — match counts per element (respecting
       `HS_FLAG_SINGLEMATCH` semantics where set).
-- [ ] `hs_extract(db, x)` — matched substrings; auto-enable
+- [x] `hs_extract(db, x)` — matched substrings; auto-enable
       `HS_FLAG_SOM_LEFTMOST` when needed (with a documented opt-out, since
       SOM costs compile-time/state).
 
+*Done 2026-09-26: the four verbs scan in C (`vctrsn_hs_scan_many`, one
+scratch per call); `hs_detect()` stops each element at its first match.
+`hs_extract()` returns a list per element, like `stringr::str_extract_all()`.
+Matched text is sliced in R, which is the next thing to move to C if
+profiling says so (Stage 3).*
+
 **Ergonomics**
 
-- [ ] Named patterns: accept a named character vector or a data frame of
+- [x] Named patterns: accept a named character vector or a data frame of
       rules (`pattern`, `id`, `flags`, ext columns) in `hs_compile()`; carry
       names through to match output. This is how real rule sets (secret
       scanners, IOC feeds) arrive.
-- [ ] One-call convenience: `hs_compile()` on a bare character vector without
+- [x] One-call convenience: `hs_compile()` on a bare character vector without
       pre-creating a database (`hs_database()` becomes optional plumbing).
 - [ ] Literal API: bind `hs_compile_lit_multi()` for massive literal
       dictionaries (no regex escaping footguns, faster compiles).
