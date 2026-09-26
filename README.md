@@ -1,5 +1,12 @@
 # vectorscan
 
+<!-- badges: start -->
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/pedrobtz/vectorscan/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pedrobtz/vectorscan/actions/workflows/R-CMD-check.yaml)
+[![native-checks](https://github.com/pedrobtz/vectorscan/actions/workflows/native-checks.yaml/badge.svg)](https://github.com/pedrobtz/vectorscan/actions/workflows/native-checks.yaml)
+[![coverage](https://raw.githubusercontent.com/pedrobtz/vectorscan/main/.github/badges/coverage.svg)](https://github.com/pedrobtz/vectorscan/actions/workflows/coverage.yaml)
+<!-- badges: end -->
+
 `vectorscan` is an R package that wraps
 [Vectorscan](https://github.com/VectorCamp/vectorscan), the portable fork of
 Intel Hyperscan, for high-performance multi-pattern regular expression

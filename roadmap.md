@@ -29,13 +29,12 @@ maintained package in the R ecosystem.
 - Thin test suite (~130 lines) with no coverage of serialization round-trips,
   stream edge cases, UTF-8, large inputs, error paths in native code, or
   callback misbehavior (errors thrown inside callbacks).
-- No CI. Given three build modes (bundled / system / stubs) × three OSes,
-  untested configurations will rot immediately.
-- Placeholder identity: `maintainer@example.com`, URLs pointing at
-  `utopp/pkg-vectorscan` while the repo is `pedrobtz/vectorscan`; compiled
-  artifacts (`*.o`, `*.so`, `vendor/vectorscan-install`) committed to git.
-- Not on CRAN, and the current build has real CRAN blockers (ragel, Boost,
-  tarball size, build time).
+- CI (since 2026-09-26) checks the bundled build on Linux, macOS and Windows,
+  in CRAN-like containers, and under ASan, UBSan, valgrind, LTO, gctorture
+  and rchk. The system-library and stub build modes are not exercised yet.
+- Not on CRAN. Ragel and Boost are no longer build requirements and the
+  source tarball is 1.25 MB; build time is the main remaining risk (see
+  Stage 4).
 
 **Positioning: why this package deserves to exist**
 
@@ -69,19 +68,24 @@ builds on this.*
 - [x] Fix package identity: real maintainer in `DESCRIPTION`, correct
       `URL`/`BugReports` (repo is `pedrobtz/vectorscan`), align `_pkgdown.yml`
       URL.
-- [ ] Add `.gitignore` / clean tree: remove committed `src/*.o`,
+- [x] Add `.gitignore` / clean tree: remove committed `src/*.o`,
       `src/vectorscan.so`, `src/vendor/vectorscan-install/`,
       `vignettes/*.html`; verify `.Rbuildignore` covers dev-only files
       (`roadmap.md`, `CLAUDE.md`, `_pkgdown.yml`, `.github/`).
 - [ ] GitHub Actions CI matrix:
-      - `R CMD check` on Linux / macOS / Windows with the **bundled** build
-        (installs cmake + ragel + boost per platform).
-      - One Linux job with `VECTORSCAN_USE_SYSTEM=true`.
-      - One job with `VECTORSCAN_ALLOW_STUBS=true` to keep the stub path
+      - [x] `R CMD check` on Linux / macOS / Windows with the **bundled**
+        build, via pedrobtz/r-actions (only cmake is needed now), plus the
+        clang23, ubuntu-clang and ubuntu-gcc16 containers.
+      - [ ] One Linux job with `VECTORSCAN_USE_SYSTEM=true`.
+      - [ ] One job with `VECTORSCAN_ALLOW_STUBS=true` to keep the stub path
         compiling and the `hs_available()` gating honest.
-      - Cache the compiled `libhs` between runs (the bundled build is the
+      - [ ] Cache the compiled `libhs` between runs (the bundled build is the
         slow step).
-- [ ] Memory-safety CI: ASAN/UBSAN job (rocker `r-devel-san` or rhub2
+- [x] Memory-safety CI (`native-checks.yaml`: ASan containers running
+      `tools/sanitizer-exercise.R`, UBSan, valgrind, LTO, gctorture, rchk).
+      Its first run found a use-after-free in the compile error path and a
+      read past the end of the input in Vectorscan itself (patch 0005, #4).
+      Original item: ASAN/UBSAN job (rocker `r-devel-san` or rhub2
       actions), valgrind spot-checks. External-pointer packages live and die
       by this.
 - [ ] Test-suite expansion (target: every exported function, every typed
@@ -98,8 +102,10 @@ builds on this.*
         UTF-8, very large inputs, all `hs_ext()` parameters actually
         affecting matches.
       - validation: one test per `stop_vectorscan()` class.
-- [ ] Coverage reporting (`covr` + codecov badge).
-- [ ] `README` badges (R-CMD-check, coverage, r-universe once live).
+- [x] Coverage reporting (`covr` via pedrobtz/r-actions, badge committed to
+      `.github/badges/coverage.svg`; no codecov).
+- [x] `README` badges (R-CMD-check, native-checks, coverage; add
+      r-universe once live).
 
 *Exit criteria: green matrix CI, clean sanitizer run, coverage meaningfully
 tracked, no placeholder metadata.*
@@ -195,15 +201,22 @@ Known blockers and their mitigations:
       preference: (a) point the CMake build at the `BH` package's headers via
       `LinkingTo: BH` + `BOOST_ROOT`; (b) vendor the small subset of Boost
       headers Vectorscan actually uses.
-- [ ] **Tarball size**: measure the compressed source tarball; prune the
+- [x] **Tarball size**: 1.25 MB compressed (773 files) with Vectorscan
+      5.4.13, measured 2026-09-26 -- well under the ceiling, no pruning
+      needed. Original item: measure the compressed source tarball; prune the
       vendored tree further (per-arch SIMD sources for platforms CRAN doesn't
       ship, cmake scaffolding). CRAN's informal ceiling is ~5 MB — request an
       exception with justification if pruning can't get there.
 - [ ] **Build time**: CRAN checks time out; tune the bundled build (single
       target, `-j2`, `FAT_RUNTIME=OFF` with baseline SIMD) and measure on the
-      slowest platform.
+      slowest platform. Measured in CI on 2026-09-26: a single install with
+      the x86-64 fat runtime at `-j2` takes about 5 min; a full R CMD check
+      (two builds, `-j4`) 8 min on macOS, 11-17 min on Linux and 20 min on
+      Windows. Windows and Intel macOS already build without the fat runtime.
 - [ ] **Architecture coverage**: verify builds on CRAN's actual fleet —
-      x86-64 Linux/Windows (ucrt), macOS x86-64 + arm64 (NEON path), and
+      x86-64 Linux/Windows (ucrt), macOS x86-64 + arm64 (NEON path). CI
+      covers x86-64 Linux and Windows and arm64 macOS; Intel macOS is not
+      exercised. Also and
       decide behavior on unsupported arches (fail at install vs stub build —
       CRAN will not accept a package whose examples/tests all skip, so
       unsupported-arch policy must be explicit).
@@ -212,7 +225,10 @@ Known blockers and their mitigations:
 - [ ] CRAN submission checklist: `cran-comments.md`, win-builder + mac-builder
       runs, rhub2 sweep, `Additional_repositories`/`SystemRequirements`
       accuracy, reverse-dependency-free first release.
-- [ ] Define the vendored-source upgrade policy: script the sync from
+- [x] Vendored-source upgrade policy: `tools/vendor/` (manifest pinned by
+      commit and sha256, keep list, patches in `tools/patches/`, `verify`),
+      the `vendor` guard and the `vendor-upstream` release watcher; updated to
+      5.4.13. Original item: Define the vendored-source upgrade policy: script the sync from
       upstream (`tools/update-vendor.sh`), record the upstream commit, track
       Vectorscan releases (5.4.x → current) and CVEs.
 
