@@ -43,6 +43,8 @@
 <li>The package now vendors the Vectorscan source and builds the native library from source by default during configuration.</li>
 <li>The bundled Vectorscan is updated to 5.4.13, which fixes a stack buffer overflow in <code>rvermicelliDoubleExecReal()</code>, an AVX-512 scanning bug, SVE accelerator bugs, an integer overflow, a wrong page-size assumption on Apple Silicon, and compiler errors with clang 21 and GCC 15/16. Invalid character classes are now a compile error.</li>
 <li>Compile errors now report Vectorscan’s message correctly; it was read after being freed.</li>
+<li>Fixed a read past the end of the input in the bundled Vectorscan (<code>vermicelliExec</code>), hit when a scan ends inside a run of a repeated character, for example <code>foo.*bar</code> over a chunk of <code>x</code>s in streaming mode. It could crash R if the input ended at a page boundary.</li>
+<li>On Windows and Intel macOS the bundled library is now built for x86-64-v2 (SSE4.2); x86-64 Linux keeps per-CPU dispatch. Linux distributions that install libraries to <code>lib64</code> (Fedora, RHEL, openSUSE) now build correctly.</li>
 </ul></div>
   </main></div>
 

@@ -339,10 +339,10 @@ compare against running each pattern separately with base R.</p>
 <span></span>
 <span><span class="va">vs_time</span><span class="op">[</span><span class="st">"elapsed"</span><span class="op">]</span></span>
 <span><span class="co">#&gt; elapsed </span></span>
-<span><span class="co">#&gt;   0.006</span></span>
+<span><span class="co">#&gt;    0.01</span></span>
 <span><span class="va">base_time</span><span class="op">[</span><span class="st">"elapsed"</span><span class="op">]</span></span>
 <span><span class="co">#&gt; elapsed </span></span>
-<span><span class="co">#&gt;   0.021</span></span></code></pre></div>
+<span><span class="co">#&gt;   0.036</span></span></code></pre></div>
 <p>The gap widens as you add more patterns. With a hundred rules
 (realistic for a log-rule engine) the base-R approach pays the linear
 factor in pattern count, while Vectorscan stays close to flat: its
