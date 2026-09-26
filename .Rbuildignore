@@ -13,3 +13,4 @@
 ^tools$
 ^\.agents$
 ^src/vendor/pcre2-install$
+^vignettes/articles$

@@ -30,6 +30,9 @@ Other contributors:
   \item Intel Corporation (Hyperscan, bundled in src/vendor/vectorscan) [copyright holder]
   \item VectorCamp PC (Vectorscan, bundled in src/vendor/vectorscan) [copyright holder]
   \item Arm Limited (Vectorscan, bundled in src/vendor/vectorscan) [copyright holder]
+  \item University of Cambridge (PCRE2, bundled in src/vendor/pcre2) [copyright holder]
+  \item Philip Hazel (PCRE2, bundled in src/vendor/pcre2) [copyright holder]
+  \item Zoltan Herczeg (PCRE2 just-in-time compiler, bundled in src/vendor/pcre2) [copyright holder]
 }
 
 }

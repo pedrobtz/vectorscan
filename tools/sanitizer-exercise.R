@@ -177,6 +177,9 @@ if (!is.null(vectorscan:::pcre2_info())) {
   check("capture no groups", is.list(cap("=", lines)))
   check("capture many elements", sum(cap("(k)=(v)", rep(lines, 400))$matched, na.rm = TRUE) > 0)
   check("capture bad pattern", raises(cap("(", "x")))
+  check("hs_capture typed", is.data.frame(suppressWarnings(hs_capture(
+    "^(\\w+)=(\\d+)", lines, data.frame(k = character(), v = integer())
+  ))))
   for (i in 1:50) cap("(a)(b)?(c)", c("abc", "ac", NA))
   invisible(gc())
 }
