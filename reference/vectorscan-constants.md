@@ -1,0 +1,46 @@
+# Vectorscan and Hyperscan constants
+
+Integer constants used when compiling Vectorscan/Hyperscan databases.
+
+## Usage
+
+``` r
+HS_FLAG_NONE
+
+HS_FLAG_CASELESS
+
+HS_FLAG_DOTALL
+
+HS_FLAG_MULTILINE
+
+HS_FLAG_SINGLEMATCH
+
+HS_FLAG_ALLOWEMPTY
+
+HS_FLAG_UTF8
+
+HS_FLAG_UCP
+
+HS_FLAG_PREFILTER
+
+HS_FLAG_SOM_LEFTMOST
+
+HS_FLAG_COMBINATION
+
+HS_FLAG_QUIET
+
+HS_MODE_BLOCK
+
+HS_MODE_STREAM
+
+HS_MODE_VECTORED
+```
+
+## Examples
+
+``` r
+HS_FLAG_CASELESS
+#> [1] 1
+HS_MODE_BLOCK
+#> [1] 1
+```
