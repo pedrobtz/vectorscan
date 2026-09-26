@@ -25,6 +25,10 @@ src/vendor/vectorscan/
                                           without rev(1)
     0004-drop-diagnostic-pragmas.patch    remove the pragmas R CMD check
                                           notes
+    0005-build-wrapper-rename-asan-odr-indicators.patch
+                                          fat-runtime symbol prefixing also
+                                          renames AddressSanitizer ODR
+                                          indicators
 
   The patches carry the same licence as the files they change.
 
