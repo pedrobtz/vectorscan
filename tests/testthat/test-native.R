@@ -80,3 +80,15 @@ test_that("serialized databases round trip", {
   expect_equal(matches$id, 0L)
   expect_equal(matches$to, 3)
 })
+
+test_that("compile errors report Vectorscan's message", {
+  skip_if_not(hs_available())
+
+  # The message belongs to the compile error, which is freed before the R
+  # error is raised; it used to be read after the free.
+  db <- hs_database()
+  expect_error(
+    hs_compile(db, c("ok", "(")),
+    "compile error at expression 1: Missing close parenthesis"
+  )
+})

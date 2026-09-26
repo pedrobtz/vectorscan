@@ -4,6 +4,7 @@
 #include <Rinternals.h>
 #include <Rversion.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -410,9 +411,12 @@ SEXP vctrsn_hs_compile(SEXP expressions,
 
   if (hs_err != HS_SUCCESS) {
     if (compile_error != NULL) {
-      const char *message = compile_error->message == NULL
-                                ? "unknown compiler error"
-                                : compile_error->message;
+      /* Copy the message out first: it belongs to compile_error, which must
+         be freed before Rf_error() longjmps away. */
+      char message[1024];
+      snprintf(message, sizeof(message), "%s",
+               compile_error->message == NULL ? "unknown compiler error"
+                                              : compile_error->message);
       int expression = compile_error->expression;
       hs_free_compile_error(compile_error);
       Rf_error("Vectorscan compile error at expression %d: %s", expression,
