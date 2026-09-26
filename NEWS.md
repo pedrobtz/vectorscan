@@ -13,6 +13,11 @@
   element to the formats that can match it (prefilter mode), so PCRE2 runs
   only there: 2.7 times faster than trying 20 formats in order on a million
   lines.
+- `hs_capture()` gains `match_limit` and `depth_limit`, so a pathological
+  line on untrusted input gives an `NA` row and a warning instead of a
+  runaway match; warnings now name PCRE2's error. An element that overflows
+  the just-in-time compiler's stack is retried in the interpreter, and
+  `hs_capture_compile(jit = FALSE)` runs the interpreter throughout.
 - PCRE2 is now part of the build, for the upcoming `hs_capture()`: a system
   PCRE2 (>= 10.34) when available, else a bundled PCRE2 10.48 compiled with
   its symbols hidden so it cannot clash with the PCRE2 R itself loads.

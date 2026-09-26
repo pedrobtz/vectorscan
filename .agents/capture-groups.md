@@ -69,6 +69,13 @@ M4, rule sets: 20 formats, 1M lines that all match the last format (the
 worst case for trying formats in order): trying each format with PCRE2 in
 order 4.14 s, routed through Vectorscan's prefilter 1.53 s (2.7x).
 
+M5 is done too: `match_limit` / `depth_limit` through a PCRE2 match
+context, errors as `NA` rows plus one warning with PCRE2's message, an
+interpreter retry for an element that overflows the JIT stack, and
+`jit = FALSE` for the interpreter throughout (tested identical to JIT).
+Invalid UTF-8 keeps the `NA` row and warning (open question 2 settled that
+way; `PCRE2_MATCH_INVALID_UTF` stays an option if users ask).
+
 A prefilter for a single pattern was measured and dropped: Vectorscan's
 pass over 1M lines (0.24-0.30 s) costs about half of a whole capture, so it
 cannot pay for itself when there is only one pattern to rule out.
