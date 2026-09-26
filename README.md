@@ -1,1 +1,217 @@
 # vectorscan
+
+`vectorscan` is an R package that wraps
+[Vectorscan](https://github.com/VectorCamp/vectorscan), the portable fork of
+Intel Hyperscan, for high-performance multi-pattern regular expression
+matching from R.
+
+The package is self-contained: the Vectorscan source code is vendored under
+`src/vendor/vectorscan` and built during package installation. A system
+`libhs` can still be used explicitly for development, but the default install
+path builds the bundled source.
+
+## Features
+
+- Compile Vectorscan/Hyperscan databases from R with `hs_database()` and
+  `hs_compile()`.
+- Scan block, vectored, and streaming data with `hs_scan()`,
+  `hs_scan_vector()`, `hs_stream_open()`, `hs_stream_scan()`, and
+  `hs_stream_close()`.
+- Return R data frames of match events by default.
+- Support Python-style callbacks for low-allocation scanning and early
+  termination.
+- Expose common Hyperscan flags and modes as R constants.
+- Support extended expression parameters with `hs_ext()`.
+- Serialize and deserialize compiled databases with `hs_serialize()`,
+  `hs_deserialize()`, `hs_save()`, and `hs_load()`.
+
+## Installation Requirements
+
+The bundled Vectorscan build needs these build-time tools:
+
+- CMake
+- Ragel (a state-machine compiler used by Vectorscan's frontend)
+- Boost headers (header-only; no Boost libraries are linked)
+- a C and C++ compiler supported by R
+
+All three are standard packages on every mainstream platform. They are
+only needed at install time — once the package is built, the runtime
+machine does not need them.
+
+### Linux
+
+Debian / Ubuntu:
+
+```sh
+sudo apt-get install cmake ragel libboost-dev
+```
+
+Fedora / RHEL / Rocky (RHEL/Rocky may need EPEL for `ragel`):
+
+```sh
+sudo dnf install cmake ragel boost-devel
+```
+
+Arch:
+
+```sh
+sudo pacman -S cmake ragel boost
+```
+
+Alpine:
+
+```sh
+apk add cmake ragel boost-dev
+```
+
+### macOS
+
+Homebrew:
+
+```sh
+brew install cmake ragel boost
+```
+
+MacPorts:
+
+```sh
+sudo port install cmake ragel boost
+```
+
+### Windows
+
+Windows installs are less polished. The recommended path is MSYS2 /
+Rtools:
+
+```sh
+pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-ragel mingw-w64-x86_64-boost
+```
+
+Alternatively, install CMake from cmake.org, a Ragel binary from its
+project page, and Boost from boost.org (or `vcpkg install boost`), then
+point `VECTORSCAN_BOOST_ROOT` at the Boost include directory.
+
+### Notes
+
+- Boost headers are large on disk (~150 MB after install) but
+  header-only, so there is no runtime cost.
+- The package builds the bundled Vectorscan source into a private static
+  `libhs` during installation. Generated build outputs live under
+  `src/vendor/vectorscan-install` while compiling and are removed by
+  `cleanup`.
+
+## Usage
+
+```r
+library(vectorscan)
+
+db <- hs_database(mode = HS_MODE_BLOCK)
+hs_compile(
+  db,
+  expressions = c("foo", "^foobar$", "BAR"),
+  ids = c(0L, 1L, 2L),
+  flags = c(
+    HS_FLAG_NONE,
+    HS_FLAG_NONE,
+    HS_FLAG_CASELESS | HS_FLAG_SOM_LEFTMOST
+  )
+)
+
+hs_scan(db, "foobar")
+#>   id from to flags
+#> 1  0   NA  3     0
+#> 2  1   NA  6     0
+#> 3  2    3  6     0
+```
+
+Use a callback to handle matches as they are reported by Vectorscan. Return
+`TRUE` from the callback to terminate scanning early.
+
+```r
+hs_scan(
+  db,
+  "foobar",
+  callback = function(id, from, to, flags, context) {
+    print(list(id = id, from = from, to = to, source = context$source))
+    FALSE
+  },
+  context = list(source = "example")
+)
+```
+
+Vectored mode scans adjacent buffers as one logical input:
+
+```r
+db <- hs_database(HS_MODE_VECTORED)
+hs_compile(db, "foobar")
+hs_scan_vector(db, c("foo", "bar"))
+```
+
+Streaming mode keeps scan state across chunks:
+
+```r
+db <- hs_database(HS_MODE_STREAM)
+hs_compile(db, "foo.*bar")
+
+stream <- hs_stream_open(db)
+hs_stream_scan(stream, "foo")
+hs_stream_scan(stream, " and then bar")
+hs_stream_close(stream)
+```
+
+Compiled databases can be serialized:
+
+```r
+db <- hs_database()
+hs_compile(db, "foo")
+
+bytes <- hs_serialize(db)
+restored <- hs_deserialize(bytes)
+hs_scan(restored, "foo")
+```
+
+## Build Configuration
+
+By default, `configure` builds the bundled source in `src/vendor/vectorscan`.
+The following environment variables are available for development and CI:
+
+- `VECTORSCAN_USE_SYSTEM=true`: link against an installed compatible `libhs`
+  instead of the bundled source.
+- `VECTORSCAN_INCLUDE_DIR` and `VECTORSCAN_LIB_DIR`: point to a custom system
+  install.
+- `VECTORSCAN_BOOST_ROOT`: point CMake at Boost headers.
+- `VECTORSCAN_BUILD_JOBS`: set the bundled build parallelism, defaulting to
+  `2`.
+- `VECTORSCAN_CMAKE_ARGS`: append extra CMake arguments for the bundled build.
+- `VECTORSCAN_ALLOW_STUBS=true`: build runtime stubs when native Vectorscan is
+  unavailable. This is only intended for wrapper development.
+
+## Vendored Source
+
+The vendored tree is Vectorscan 5.4.12 from:
+
+<https://github.com/VectorCamp/vectorscan/tree/vectorscan/5.4.12>
+
+Only the source and CMake files needed to build `libhs` are included. Upstream
+unit tests, command-line tools, examples, benchmarks, documentation, and
+Chimera sources are intentionally omitted from the vendored tree.
+
+Vectorscan is licensed under the BSD 3-Clause license. See
+`src/vendor/vectorscan/LICENSE` and `src/vendor/vectorscan/COPYING` for the
+upstream license text.
+
+## Development
+
+Useful package checks:
+
+```sh
+air format .
+Rscript -e "devtools::document()"
+Rscript -e "devtools::test()"
+Rscript -e "pkgdown::check_pkgdown()"
+Rscript -e "devtools::check()"
+```
+
+The native extension uses `.Call` and external pointers to manage
+`hs_database_t`, `hs_scratch_t`, and `hs_stream_t` objects. Native calls check
+`hs_error_t` values and convert failures to typed R conditions.

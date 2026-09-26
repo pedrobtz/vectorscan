@@ -1,0 +1,156 @@
+#!/bin/sh
+
+set -e
+
+mkdir -p src
+
+PKG_CPPFLAGS=""
+PKG_LIBS=""
+FOUND_HS=no
+BUNDLED_SOURCE_DIR="src/vendor/vectorscan"
+BUNDLED_BUILD_DIR="${TMPDIR:-/tmp}/vectorscan-build-$$"
+BUNDLED_INSTALL_DIR="src/vendor/vectorscan-install"
+
+append_flags_from_prefix() {
+  prefix="$1"
+  if [ -f "$prefix/include/hs/hs.h" ] && [ -d "$prefix/lib" ]; then
+    PKG_CPPFLAGS="-DHAVE_HS -I$prefix/include"
+    PKG_LIBS="-L$prefix/lib -lhs"
+    FOUND_HS=yes
+  fi
+}
+
+find_system_vectorscan() {
+  if [ -n "$VECTORSCAN_INCLUDE_DIR" ] && [ -n "$VECTORSCAN_LIB_DIR" ]; then
+    if [ -f "$VECTORSCAN_INCLUDE_DIR/hs/hs.h" ]; then
+      PKG_CPPFLAGS="-DHAVE_HS -I$VECTORSCAN_INCLUDE_DIR"
+      PKG_LIBS="-L$VECTORSCAN_LIB_DIR -lhs"
+      FOUND_HS=yes
+      return
+    fi
+  fi
+
+  if command -v pkg-config >/dev/null 2>&1; then
+    if pkg-config --exists libhs; then
+      PKG_CPPFLAGS="-DHAVE_HS $(pkg-config --cflags libhs)"
+      PKG_LIBS="$(pkg-config --libs libhs)"
+      FOUND_HS=yes
+      return
+    elif pkg-config --exists vectorscan; then
+      PKG_CPPFLAGS="-DHAVE_HS $(pkg-config --cflags vectorscan)"
+      PKG_LIBS="$(pkg-config --libs vectorscan)"
+      FOUND_HS=yes
+      return
+    fi
+  fi
+
+  if command -v brew >/dev/null 2>&1; then
+    brew_prefix="$(brew --prefix vectorscan 2>/dev/null || true)"
+    if [ -n "$brew_prefix" ]; then
+      append_flags_from_prefix "$brew_prefix"
+      if [ "$FOUND_HS" = yes ]; then
+        return
+      fi
+    fi
+  fi
+
+  for prefix in /opt/homebrew /usr/local /usr /opt/local; do
+    append_flags_from_prefix "$prefix"
+    if [ "$FOUND_HS" = yes ]; then
+      return
+    fi
+  done
+}
+
+build_bundled_vectorscan() {
+  if [ ! -f "$BUNDLED_SOURCE_DIR/src/hs.h" ]; then
+    echo "configure: bundled Vectorscan source is missing at $BUNDLED_SOURCE_DIR"
+    return 1
+  fi
+
+  if ! command -v cmake >/dev/null 2>&1; then
+    echo "configure: cmake is required to build bundled Vectorscan"
+    return 1
+  fi
+
+  if ! command -v ragel >/dev/null 2>&1; then
+    echo "configure: ragel is required to build bundled Vectorscan"
+    return 1
+  fi
+
+  cmake_args="
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    -DBUILD_SHARED_LIBS=OFF
+    -DBUILD_STATIC_LIBS=ON
+    -DBUILD_UNIT=OFF
+    -DBUILD_TOOLS=OFF
+    -DBUILD_EXAMPLES=OFF
+    -DBUILD_BENCHMARKS=OFF
+    -DBUILD_DOC=OFF
+    -DHS_C_FLAGS=-Wno-error
+    -DHS_CXX_FLAGS=-Wno-error
+  "
+
+  if [ -n "$VECTORSCAN_BOOST_ROOT" ]; then
+    cmake_args="$cmake_args -DBOOST_ROOT=$VECTORSCAN_BOOST_ROOT"
+  elif command -v brew >/dev/null 2>&1; then
+    boost_prefix="$(brew --prefix boost 2>/dev/null || true)"
+    if [ -n "$boost_prefix" ]; then
+      cmake_args="$cmake_args -DBOOST_ROOT=$boost_prefix"
+    fi
+  fi
+
+  if [ -n "$VECTORSCAN_CMAKE_ARGS" ]; then
+    cmake_args="$cmake_args $VECTORSCAN_CMAKE_ARGS"
+  fi
+
+  jobs="${VECTORSCAN_BUILD_JOBS:-2}"
+  install_prefix="$(pwd)/$BUNDLED_INSTALL_DIR"
+
+  rm -rf "$BUNDLED_BUILD_DIR" "$BUNDLED_INSTALL_DIR"
+
+  echo "configure: building bundled Vectorscan"
+  # shellcheck disable=SC2086
+  cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args
+  cmake --build "$BUNDLED_BUILD_DIR" --target hs --config Release -j "$jobs"
+  cmake --build "$BUNDLED_BUILD_DIR" --target hs_runtime --config Release -j "$jobs"
+  cmake --install "$BUNDLED_BUILD_DIR" --prefix "$install_prefix"
+  rm -rf "$BUNDLED_BUILD_DIR"
+
+  if [ ! -f "$BUNDLED_INSTALL_DIR/lib/libhs.a" ]; then
+    echo "configure: bundled Vectorscan build did not produce install/lib/libhs.a"
+    return 1
+  fi
+
+  PKG_CPPFLAGS="-DHAVE_HS -Ivendor/vectorscan-install/include"
+  PKG_LIBS="vendor/vectorscan-install/lib/libhs.a vendor/vectorscan-install/lib/libhs_runtime.a"
+  FOUND_HS=yes
+}
+
+if [ "$VECTORSCAN_USE_SYSTEM" = "true" ] || [ "$VECTORSCAN_USE_SYSTEM" = "1" ]; then
+  find_system_vectorscan
+else
+  if ! build_bundled_vectorscan; then
+    if [ "$VECTORSCAN_ALLOW_STUBS" = "true" ] || [ "$VECTORSCAN_ALLOW_STUBS" = "1" ]; then
+      echo "configure: falling back to runtime stubs because VECTORSCAN_ALLOW_STUBS is set"
+    else
+      echo "configure: failed to build bundled Vectorscan"
+      echo "configure: install cmake, ragel, and Boost headers, or set VECTORSCAN_USE_SYSTEM=true"
+      exit 1
+    fi
+  fi
+fi
+
+cat > src/Makevars <<EOF
+CXX_STD = CXX17
+PKG_CPPFLAGS = $PKG_CPPFLAGS
+PKG_LIBS = $PKG_LIBS
+EOF
+
+if [ "$FOUND_HS" = yes ]; then
+  echo "configure: Vectorscan/Hyperscan support enabled"
+else
+  echo "configure: Vectorscan/Hyperscan not found; building package with runtime stubs"
+  echo "configure: set VECTORSCAN_ALLOW_STUBS only for wrapper development"
+fi
