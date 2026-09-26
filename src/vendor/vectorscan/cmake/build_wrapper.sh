@@ -52,12 +52,6 @@ if [ ! -f "${OUT}" ]; then
 fi
 # rename the symbols in the object
 ${NM} ${NM_FLAG} posix -g ${OUT} | cut -f1 -d' ' | grep -v -f ${KEEPSYMS} | sed -e "s/\(.*\)/\1\ ${PREFIX}_\1/" >> ${SYMSFILE}
-# R package patch: under AddressSanitizer, clang defines an ODR indicator,
-# __odr_asan_gen_<name>, for every instrumented global. The ^_ rule in
-# keep.syms keeps it unrenamed, so each microarchitecture's copy of an object
-# defines the same symbol and the fat runtime fails to link. Rename the ones
-# this object defines, as the globals they stand for are renamed.
-${NM} ${NM_FLAG} posix -g ${OUT} | awk '$1 ~ /^__odr_asan_gen_/ && $2 != "U" { print $1 }' | sed -e "s/\(.*\)/\1\ ${PREFIX}_\1/" >> ${SYMSFILE}
 if test -s ${SYMSFILE}
 then
     ${OBJCOPY} --redefine-syms=${SYMSFILE} ${OUT}
