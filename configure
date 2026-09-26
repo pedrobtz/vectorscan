@@ -159,16 +159,37 @@ build_bundled_vectorscan() {
   rm -rf "$BUNDLED_BUILD_DIR" "$BUNDLED_INSTALL_DIR"
 
   echo "configure: building bundled Vectorscan"
+  echo "configure: C compiler: ${cc_line:-cmake default}"
+  echo "configure: C++ compiler: ${cxx_line:-cmake default}"
+  echo "configure: Boost root: ${boost_root:-none}"
+  # The function runs in an `if !` context, where set -e is off, so every
+  # step checks its own status.
   # shellcheck disable=SC2086
-  cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args \
+  if ! cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args \
     ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
     ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
     ${cc_flags:+"-DCMAKE_C_FLAGS=$cc_flags"} \
-    ${cxx_flags:+"-DCMAKE_CXX_FLAGS=$cxx_flags"}
-  cmake --build "$BUNDLED_BUILD_DIR" --target hs --config Release -j "$jobs"
-  cmake --build "$BUNDLED_BUILD_DIR" --target hs_runtime --config Release -j "$jobs"
-  cmake --install "$BUNDLED_BUILD_DIR" --prefix "$install_prefix"
+    ${cxx_flags:+"-DCMAKE_CXX_FLAGS=$cxx_flags"}; then
+    # The failing compiler check is the last one CMake ran; show its log.
+    for log in "$BUNDLED_BUILD_DIR/CMakeFiles/CMakeConfigureLog.yaml" \
+      "$BUNDLED_BUILD_DIR/CMakeFiles/CMakeError.log"; do
+      if [ -f "$log" ]; then
+        echo "configure: last lines of $log:"
+        tail -n 80 "$log"
+        break
+      fi
+    done
+    rm -rf "$BUNDLED_BUILD_DIR"
+    return 1
+  fi
+  cmake --build "$BUNDLED_BUILD_DIR" --target hs --config Release -j "$jobs" &&
+    cmake --build "$BUNDLED_BUILD_DIR" --target hs_runtime --config Release -j "$jobs" &&
+    cmake --install "$BUNDLED_BUILD_DIR" --prefix "$install_prefix"
+  status=$?
   rm -rf "$BUNDLED_BUILD_DIR"
+  if [ "$status" -ne 0 ]; then
+    return 1
+  fi
 
   if [ ! -f "$BUNDLED_INSTALL_DIR/lib/libhs.a" ]; then
     echo "configure: bundled Vectorscan build did not produce install/lib/libhs.a"
