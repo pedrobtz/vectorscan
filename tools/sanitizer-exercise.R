@@ -166,6 +166,21 @@ check("many elements", sum(hs_detect("foo", rep(words, 500)), na.rm = TRUE) > 0)
 check("no elements", identical(hs_detect("foo", character()), logical()))
 check("verbs on a stream db", raises(hs_detect(sdb, "foo")))
 
+cat("-- PCRE2 capture loop --------------------------------------------\n")
+
+# vctrsn_pcre2_capture_many(): columns filled in place, match data from
+# R_alloc(), unset groups and errors per element.
+if (!is.null(vectorscan:::pcre2_info())) {
+  cap <- vectorscan:::capture_many
+  lines <- c("a=1", NA, "", "bad \xff utf", "caf\u00e9=\u00e9t\u00e9", strrep("k=v;", 3000))
+  check("capture", is.list(cap("^(\\w+)=(\\S*)(;)?", lines)))
+  check("capture no groups", is.list(cap("=", lines)))
+  check("capture many elements", sum(cap("(k)=(v)", rep(lines, 400))$matched, na.rm = TRUE) > 0)
+  check("capture bad pattern", raises(cap("(", "x")))
+  for (i in 1:50) cap("(a)(b)?(c)", c("abc", "ac", NA))
+  invisible(gc())
+}
+
 cat("-- serialization -------------------------------------------------\n")
 
 bytes <- hs_serialize(db)
