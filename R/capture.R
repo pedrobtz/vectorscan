@@ -3,7 +3,7 @@
 #' `hs_capture()` matches a regular expression with capture groups against
 #' every element of a character vector and returns the groups as the columns
 #' of a data frame, one row per element: what [utils::strcapture()] does, in
-#' C, typically 10-50 times faster on large inputs.
+#' C, about 20 times faster on large inputs.
 #'
 #' The pattern is a PCRE2 regular expression, compiled as base R's
 #' `regexec(perl = TRUE)` compiles it, so the two agree on what matches.

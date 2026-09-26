@@ -3,7 +3,7 @@
 - New `hs_capture()` turns text into a data frame with one regular
   expression: one row per element, one column per capture group, named after
   named groups or typed by a `proto` as in `utils::strcapture()`. It returns
-  the same data frame as `strcapture(perl = TRUE)` about 25-60 times faster on
+  the same data frame as `strcapture(perl = TRUE)` about 20-27 times faster on
   a million log lines, by matching with PCRE2 (with JIT) and filling the
   columns in C. `hs_capture_compile()` compiles a pattern once for reuse. See
   the "Parsing logs" article.

@@ -80,12 +80,17 @@ hs_capture(fmt, lines[keep], proto)
 ## How fast
 
 On a 1,000,000-line log (72 MB) in the format above, on an Apple M-series
-laptop (script in `tools/bench-capture/` in the source repository):
+laptop, each timed in a fresh R session (script in `tools/bench-capture/` in
+the source repository):
 
 | | every line matches | 1% of lines match |
 |---|---|---|
-| `utils::strcapture(perl = TRUE)` | 12.7 s | 6.1 s |
-| `hs_capture()` | 0.49 s | 0.11 s |
+| `utils::strcapture(perl = TRUE)` | 12.8 s | 6.5 s |
+| `hs_capture()` | 0.60 s | 0.24 s |
+
+That is 21 and 27 times faster. (Timing both in one session flatters
+whichever runs second: R caches strings globally, and the second run finds
+most of its 5 million field values already made.)
 
 The two return identical data frames. The difference is not the regex
 engine: both use PCRE2. `strcapture()` goes through `regexec()` and

@@ -53,6 +53,18 @@ changes the numbers above.
 The benchmark scripts are in `tools/bench-capture/`. M3 turns them into a
 benchmark vignette section.
 
+### Results so far
+
+Timed in fresh R sessions on the same 1M-line logs. Timing two methods in
+one session flatters whichever runs second, because R caches strings
+globally and the second run finds most of its 5 million field values
+already made; the earlier numbers in this file's history had that bias.
+
+| 1M lines | all lines match | 1% match |
+|---|---|---|
+| `utils::strcapture(perl = TRUE)` | 12.8 s | 6.5 s |
+| `hs_capture()` (M3) | 0.60 s (21x) | 0.24 s (27x) |
+
 ## Decisions
 
 - **PCRE2, preferably the one R itself uses.**
