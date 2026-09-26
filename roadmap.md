@@ -192,7 +192,7 @@ uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers:
       `regexec(perl = TRUE)`; sanitizers clean.
 - [x] M3 R API: `hs_capture(pattern, x, proto)` like `strcapture()`, at least
       10× faster; docs, a "Parsing logs" article, benchmarks.
-- [ ] M4 Vectorscan prefilter and rule sets: route lines to formats with
+- [x] M4 Vectorscan prefilter and rule sets: route lines to formats with
       `hs_match()`, capture with PCRE2.
 - [ ] M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.
 

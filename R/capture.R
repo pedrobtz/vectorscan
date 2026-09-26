@@ -16,20 +16,39 @@
 #' `utils::strcapture()` converts it (`as.integer()` for an integer column,
 #' and so on); without it every column is character.
 #'
+#' @section Several formats:
+#' `pattern` can also be a character vector of formats, typically named, for
+#' input that mixes them (log lines from several services, say). Each element
+#' is captured by the first format, in order, that matches it. The result
+#' gains a first column, `pattern`, with the name of that format (or the
+#' expression, for an unnamed one), and has one column per group name across
+#' all formats: groups with the same name share a column, and a format that
+#' lacks a group leaves it `NA`.
+#'
+#' Formats are routed with Vectorscan: one pass over `x` finds, for each
+#' element, the formats that can match it (Vectorscan's prefilter mode, which
+#' never misses a match), and PCRE2 then runs only there. The result is the
+#' same as trying every format on every element in order, but with many
+#' formats it is several times faster. A format Vectorscan cannot compile
+#' even in prefilter mode (PCRE2's branch reset `(?|...)`, for example) is
+#' simply tried on every element that is still unmatched.
+#'
 #' Elements that do not match, and `NA` elements, give a row of `NA`. A group
 #' that does not take part in the match (an optional group, or a branch not
 #' taken) is `NA`, where `utils::strcapture()` gives `""`. An element PCRE2
 #' cannot match at all (for example invalid UTF-8) also gives an `NA` row, and
 #' `hs_capture()` warns once with the number of such elements.
 #'
-#' @param pattern A single regular expression with capture groups, or a
-#'   pattern compiled with `hs_capture_compile()` to reuse across calls.
+#' @param pattern A single regular expression with capture groups, a
+#'   character vector of formats (see "Several formats"), or either compiled
+#'   with `hs_capture_compile()` to reuse across calls.
 #' @param x A character vector.
 #' @param proto Optional data frame (typically with zero rows) giving the
 #'   names and types of the columns, as in [utils::strcapture()]. It must have
-#'   one column per capture group.
+#'   one column per capture group; for several formats, one column per group
+#'   name, matched by name.
 #' @return A data frame with `length(x)` rows and one column per capture
-#'   group.
+#'   group, plus a `pattern` column first for several formats.
 #' @seealso [hs_detect()][hs_verbs] and friends for matching many patterns at once.
 #' @export
 #' @examples
@@ -50,12 +69,22 @@
 #' compiled <- hs_capture_compile(fmt)
 #' compiled
 #' hs_capture(compiled, lines)
+#'
+#' # Several formats
+#' mixed <- c("GET /index.html 200", "user=ada action=login", "GET /api 500")
+#' hs_capture(c(
+#'   http = "^(?<method>[A-Z]+) (?<path>\\S+) (?<status>\\d{3})$",
+#'   audit = "^user=(?<user>\\w+) action=(?<action>\\w+)$"
+#' ), mixed)
 hs_capture <- function(pattern, x, proto = NULL) {
-  if (!inherits(pattern, "hs_capture_pattern")) {
+  if (!inherits(pattern, c("hs_capture_pattern", "hs_capture_rules"))) {
     pattern <- hs_capture_compile(pattern)
   }
   if (!is.character(x)) {
     stop_vectorscan("`x` must be a character vector.")
+  }
+  if (inherits(pattern, "hs_capture_rules")) {
+    return(capture_rules(pattern, x, proto))
   }
   ncap <- length(pattern$names)
   if (!is.null(proto)) {
@@ -94,6 +123,9 @@ hs_capture <- function(pattern, x, proto = NULL) {
 #' @rdname hs_capture
 #' @export
 hs_capture_compile <- function(pattern) {
+  if (is.character(pattern) && length(pattern) > 1L) {
+    return(compile_capture_rules(pattern))
+  }
   compiled <- pcre2_compile_pattern(pattern)
   structure(
     list(
@@ -143,6 +175,162 @@ conform_to_proto <- function(columns, proto) {
   })
   names(out) <- names(proto)
   as.data.frame(out, optional = TRUE, stringsAsFactors = FALSE)
+}
+
+# -- rule sets (capture-groups plan, M4) ---------------------------------------
+
+# Several formats, each line captured by the first rule, in order, that
+# matches it. Vectorscan, compiled in prefilter mode, finds each line's
+# candidate rules in one pass; PCRE2 then runs only on candidates. Prefilter
+# mode reports a superset of PCRE2's matches, so the result is exactly that
+# of trying every rule on every line in order. A rule Vectorscan cannot
+# compile even in prefilter mode is tried on every remaining line.
+compile_capture_rules <- function(patterns) {
+  if (anyNA(patterns)) {
+    stop_vectorscan("`pattern` must not contain missing values.")
+  }
+  labels <- names(patterns)
+  if (is.null(labels)) {
+    labels <- patterns
+  } else {
+    labels[is.na(labels) | labels == ""] <- patterns[is.na(labels) | labels == ""]
+  }
+  patterns <- unname(patterns)
+
+  compiled <- lapply(patterns, pcre2_compile_pattern)
+  group_names <- lapply(compiled, function(cmp) capture_column_names(cmp$names))
+  columns <- unique(unlist(group_names))
+  if ("pattern" %in% columns) {
+    stop_vectorscan("A capture group cannot be called `pattern` in a rule set.")
+  }
+
+  prefilter_flags <- Reduce(bitwOr, c(
+    HS_FLAG_PREFILTER, HS_FLAG_SINGLEMATCH, HS_FLAG_UTF8, HS_FLAG_ALLOWEMPTY
+  ))
+  prefiltered <- vapply(patterns, function(p) {
+    ok <- tryCatch({
+      hs_compile(hs_database(), p, flags = prefilter_flags)
+      TRUE
+    }, error = function(e) FALSE)
+    ok
+  }, logical(1), USE.NAMES = FALSE)
+
+  prefilter <- NULL
+  if (any(prefiltered) && isTRUE(hs_available())) {
+    prefilter <- hs_database()
+    hs_compile(
+      prefilter,
+      patterns[prefiltered],
+      ids = which(prefiltered) - 1L,
+      flags = prefilter_flags
+    )
+  }
+
+  structure(
+    list(
+      patterns = patterns,
+      labels = unname(labels),
+      compiled = compiled,
+      group_names = group_names,
+      columns = columns,
+      prefiltered = prefiltered & !is.null(prefilter),
+      prefilter = prefilter
+    ),
+    class = "hs_capture_rules"
+  )
+}
+
+capture_rules <- function(rules, x, proto) {
+  n <- length(x)
+  if (!is.null(proto)) {
+    if (!setequal(names(proto), rules$columns) || length(proto) != length(rules$columns)) {
+      stop_vectorscan(sprintf(
+        "`proto` must have one column per group name in the rules: %s.",
+        paste(rules$columns, collapse = ", ")
+      ))
+    }
+  }
+
+  label <- rep(NA_character_, n)
+  columns <- rep(list(rep(NA_character_, n)), length(rules$columns))
+  names(columns) <- rules$columns
+  unassigned <- !is.na(x)
+  errored <- rep(FALSE, n)
+  first_error <- NA_integer_
+
+  # Candidate lines per rule from one Vectorscan pass. The prefilter is
+  # compiled with HS_FLAG_SINGLEMATCH, so each rule reports a line at most
+  # once and the candidates need no de-duplication.
+  candidates <- vector("list", length(rules$patterns))
+  if (!is.null(rules$prefilter)) {
+    hits <- scan_many(rules$prefilter, x, first_only = FALSE)
+    candidates <- split(hits$input, factor(hits$id + 1L, levels = seq_along(rules$patterns)))
+  }
+
+  # Each rule touches only its own candidates, so the cost follows the
+  # number of candidate lines, not rules x lines.
+  for (r in seq_along(rules$patterns)) {
+    if (rules$prefiltered[[r]]) {
+      idx <- candidates[[r]]
+      if (length(idx) == 0L) {
+        next
+      }
+      idx <- idx[unassigned[idx]]
+    } else {
+      idx <- which(unassigned)
+    }
+    if (length(idx) == 0L) {
+      next
+    }
+
+    out <- .Call(vctrsn_pcre2_capture_many, rules$compiled[[r]]$ptr, x[idx])
+    bad <- out$errors != 0L
+    if (any(bad)) {
+      errored[idx[bad]] <- TRUE
+      if (is.na(first_error)) first_error <- out$errors[bad][[1]]
+    }
+    hit <- which(out$matched %in% TRUE)
+    if (length(hit) == 0L) {
+      next
+    }
+    rows <- idx[hit]
+    label[rows] <- rules$labels[[r]]
+    for (g in seq_along(out$groups)) {
+      column <- rules$group_names[[r]][[g]]
+      columns[[column]][rows] <- out$groups[[g]][hit]
+    }
+    unassigned[rows] <- FALSE
+  }
+
+  failed <- sum(errored & is.na(label))
+  if (failed > 0L) {
+    warning(sprintf(
+      "%d element%s could not be matched (PCRE2 error %d); %s NA.",
+      failed, if (failed == 1L) "" else "s", first_error,
+      if (failed == 1L) "its row is" else "their rows are"
+    ), call. = FALSE)
+  }
+
+  if (!is.null(proto)) {
+    columns <- as.list(conform_to_proto(columns[names(proto)], proto))
+  }
+  # One list, so that rules without groups and zero-length input still give
+  # length(x) rows.
+  as.data.frame(
+    c(list(pattern = label), columns),
+    optional = TRUE,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @export
+print.hs_capture_rules <- function(x, ...) {
+  cat(sprintf(
+    "<hs_capture_rules: %d rules, %d columns (%s), %d prefiltered by Vectorscan>\n",
+    length(x$patterns), length(x$columns), paste(x$columns, collapse = ", "),
+    sum(x$prefiltered)
+  ))
+  invisible(x)
 }
 
 # -- engine (capture-groups plan, M2) -----------------------------------------

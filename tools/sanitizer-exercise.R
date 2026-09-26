@@ -181,6 +181,10 @@ if (!is.null(vectorscan:::pcre2_info())) {
     "^(\\w+)=(\\d+)", lines, data.frame(k = character(), v = integer())
   ))))
   for (i in 1:50) cap("(a)(b)?(c)", c("abc", "ac", NA))
+  check("hs_capture rules", is.data.frame(suppressWarnings(hs_capture(
+    c(kv = "^(?<k>\\w+)=(?<v>\\S*)", reset = "^(?|(\\d+)|([a-z]+))$", "(x)"),
+    rep(lines, 50)
+  ))))
   invisible(gc())
 }
 
