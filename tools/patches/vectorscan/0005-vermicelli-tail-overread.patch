@@ -1,0 +1,44 @@
+Fix vermicelliExec reading past the end of the buffer
+
+vermicelliExecReal() finishes its scan with
+
+    loadu_maskz(d, buf_end - d)
+
+which on SSE, NEON and every other non-AVX-512 target is an ordinary
+unaligned S-byte load followed by a mask: when fewer than S bytes remain
+it reads up to S - 1 bytes beyond buf_end. AddressSanitizer reports it as
+a heap-buffer-overflow in vermicelliExec, reached through the LBR repeat
+engine (nfaExecLbrVerm_QR -> lbrFwdScanVerm) when scanning a stream whose
+chunk ends in a run of the repeated character, e.g. "foo.*bar" over a
+1000-byte chunk of "x". Outside ASan the over-read is silent unless it
+crosses into an unmapped page, where it is a crash.
+
+vermicelliExec() handles ranges shorter than VECTORSIZE bytewise, so the
+vector path always has at least S bytes. Re-scan the last S bytes, ending
+exactly at buf_end, as nvermicelliExecReal() already does; the part of
+that window before d was scanned already and held no match, so the first
+match found is still the first match in the range.
+
+Reproduced and verified with a plain C program against libhs built with
+-fsanitize=address, on arm64 (NEON) and in CI on x86-64 (SSE4.2).
+
+Local, not upstream yet.
+
+--- a/src/nfa/vermicelli_simd.cpp
++++ b/src/nfa/vermicelli_simd.cpp
+@@ -124,8 +124,13 @@
+     // finish off tail
+ 
+     if (d != buf_end) {
+-        SuperVector<S> data = SuperVector<S>::loadu_maskz(d, buf_end - d);
+-        rv = vermicelliBlock(data, chars, casemask, d, buf_end - d);
++        // R package patch: loadu_maskz() loads S bytes from d and masks the
++        // excess, reading up to S - 1 bytes past buf_end. vermicelliExec()
++        // only gets here for ranges of at least S bytes, so re-scan the last
++        // S bytes ending at buf_end instead, as nvermicelliExecReal() does;
++        // the overlap before d was already scanned without a match.
++        SuperVector<S> data = SuperVector<S>::loadu(buf_end - S);
++        rv = vermicelliBlock(data, chars, casemask, buf_end - S, S);
+         DEBUG_PRINTF("rv %p \n", rv);
+         if (rv && rv < buf_end) return rv;
+     }

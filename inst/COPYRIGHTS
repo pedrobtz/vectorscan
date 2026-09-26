@@ -25,6 +25,8 @@ src/vendor/vectorscan/
                                           without rev(1)
     0004-drop-diagnostic-pragmas.patch    remove the pragmas R CMD check
                                           notes
+    0005-vermicelli-tail-overread.patch   stop vermicelliExec reading past
+                                          the end of the input buffer
 
   The patches carry the same licence as the files they change.
 
