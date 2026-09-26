@@ -181,6 +181,13 @@ if (!is.null(vectorscan:::pcre2_info())) {
     "^(\\w+)=(\\d+)", lines, data.frame(k = character(), v = integer())
   ))))
   for (i in 1:50) cap("(a)(b)?(c)", c("abc", "ac", NA))
+  check("hs_capture match limit", is.data.frame(suppressWarnings(hs_capture(
+    "^(a+)+$", c(paste0(strrep("a", 26), "!"), "aa"), match_limit = 5000
+  ))))
+  check("hs_capture depth limit, interpreter", is.data.frame(suppressWarnings(hs_capture(
+    hs_capture_compile("^(a(?1)?b)$", jit = FALSE),
+    paste0(strrep("a", 2000), strrep("b", 2000)), depth_limit = 20
+  ))))
   check("hs_capture rules", is.data.frame(suppressWarnings(hs_capture(
     c(kv = "^(?<k>\\w+)=(?<v>\\S*)", reset = "^(?|(\\d+)|([a-z]+))$", "(x)"),
     rep(lines, 50)

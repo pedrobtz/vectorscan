@@ -194,7 +194,7 @@ uses), with Vectorscan as our own prefilter for rule sets. Plan and numbers:
       10× faster; docs, a "Parsing logs" article, benchmarks.
 - [x] M4 Vectorscan prefilter and rule sets: route lines to formats with
       `hs_match()`, capture with PCRE2.
-- [ ] M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.
+- [x] M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.
 
 *Exit criteria: `hs_capture()` on all platforms, sanitizer-clean, identical
 to `strcapture()` on its tests and at least 10× faster.*

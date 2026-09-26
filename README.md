@@ -7,10 +7,89 @@
 [![coverage](https://raw.githubusercontent.com/pedrobtz/vectorscan/main/.github/badges/coverage.svg)](https://github.com/pedrobtz/vectorscan/actions/workflows/coverage.yaml)
 <!-- badges: end -->
 
-`vectorscan` is an R package that wraps
-[Vectorscan](https://github.com/VectorCamp/vectorscan), the portable fork of
-Intel Hyperscan, for high-performance multi-pattern regular expression
-matching from R.
+`vectorscan` brings fast regular expressions to large text in R:
+
+- **Parse text into a data frame, about 20 times faster than base R.**
+  `hs_capture()` turns every line of a log (or any text with a format) into a
+  row, one column per capture group, and returns the same data frame as
+  `utils::strcapture()`.
+- **Match thousands of patterns in one pass** with
+  [Vectorscan](https://github.com/VectorCamp/vectorscan), the portable fork of
+  Intel Hyperscan: which lines match any rule, which rule, and what text.
+
+## Parse a log into a data frame
+
+One regular expression with named groups is the whole parser. Lines that do
+not fit the format come back as `NA` rows, so they are easy to find:
+
+```r
+library(vectorscan)
+
+log <- c(
+  "2026-09-26 10:15:02.117 [INFO]  api.server:42 - listening on :8080",
+  "2026-09-26 10:15:07.901 [WARN]  db.pool:118 - slow query took 1.8s",
+  "--- log rotated ---",
+  "2026-09-26 10:16:00.004 [ERROR] auth.jwt:77 - token expired for user 12"
+)
+fmt <- "^(?<time>\\S+ \\S+) \\[(?<level>\\w+)\\]\\s+(?<location>[^ :]+):(?<line>\\d+) - (?<text>.*)$"
+
+hs_capture(fmt, log)
+#>                      time level   location line                      text
+#> 1 2026-09-26 10:15:02.117  INFO api.server   42        listening on :8080
+#> 2 2026-09-26 10:15:07.901  WARN    db.pool  118      slow query took 1.8s
+#> 3                    <NA>  <NA>       <NA> <NA>                      <NA>
+#> 4 2026-09-26 10:16:00.004 ERROR   auth.jwt   77 token expired for user 12
+```
+
+For a real file, `hs_capture(fmt, readLines("app.log"))`. Pass a `proto`, as
+for `utils::strcapture()`, to get typed columns:
+
+```r
+proto <- data.frame(time = character(), level = character(), location = character(),
+                    line = integer(), text = character())
+str(hs_capture(fmt, log, proto)$line)
+#>  int [1:4] 42 118 NA 77
+```
+
+Log files that mix formats take a named vector of formats. Each line is
+parsed by the first format that fits, and a `pattern` column says which:
+
+```r
+mixed <- c(
+  "2026-09-26 10:15:02.117 [INFO]  api.server:42 - listening on :8080",
+  "GET /index.html 200",
+  "2026-09-26 10:16:00.004 [ERROR] auth.jwt:77 - token expired for user 12",
+  "POST /login 401"
+)
+formats <- c(app = fmt, http = "^(?<method>[A-Z]+) (?<path>\\S+) (?<status>\\d{3})$")
+hs_capture(formats, mixed)[, c("pattern", "level", "location", "method", "path", "status")]
+#>   pattern level   location method        path status
+#> 1     app  INFO api.server   <NA>        <NA>   <NA>
+#> 2    http  <NA>       <NA>    GET /index.html    200
+#> 3     app ERROR   auth.jwt   <NA>        <NA>   <NA>
+#> 4    http  <NA>       <NA>   POST      /login    401
+```
+
+### How fast
+
+A 1,000,000-line log (72 MB) in the format above, each method timed in a
+fresh R session on an Apple M-series laptop (the script is in
+[`tools/bench-capture/`](https://github.com/pedrobtz/vectorscan/tree/main/tools/bench-capture)):
+
+| | `utils::strcapture()` | `hs_capture()` | |
+|---|---|---|---|
+| every line matches | 12.8 s | 0.60 s | **21× faster** |
+| 1% of lines match | 6.5 s | 0.24 s | **27× faster** |
+| 20 formats, lines in the last one | 4.1 s ¹ | 1.5 s | **2.7× faster** |
+
+¹ `hs_capture()` trying the formats one by one, without Vectorscan's routing.
+
+Both return identical data frames. The regex engine is the same, PCRE2, with
+its just-in-time compiler. The speed comes from matching and filling the
+columns in C instead of building R objects for every line, and, with several
+formats, from Vectorscan deciding in one pass which formats can match each
+line. See the [Parsing logs](https://github.com/pedrobtz/vectorscan/blob/main/vignettes/articles/parsing-logs.Rmd)
+article for more, including limits for untrusted input.
 
 The package is self-contained: the Vectorscan source code is vendored under
 `src/vendor/vectorscan` and built during package installation. A system
@@ -19,6 +98,9 @@ path builds the bundled source.
 
 ## Features
 
+- Parse text into typed data frame columns with `hs_capture()`: named
+  groups, `strcapture()`-style prototypes, several formats per call, and
+  match limits for untrusted input.
 - Scan a whole character vector against many patterns at once with
   `hs_detect()`, `hs_count()`, `hs_match()` and `hs_extract()`, with named
   patterns or rule tables carried through to the results.
@@ -63,7 +145,7 @@ runtime machine does not need it.
   outputs live under `src/vendor/vectorscan-install` while compiling and are
   removed by `cleanup`.
 
-## Usage
+## Matching many patterns
 
 Scan a whole character vector against a set of patterns in one call. Names
 label the patterns in the results:
@@ -108,23 +190,6 @@ hs_detect(db, c("banana", "kiwi"))
 ```
 
 Offsets are zero-based byte offsets into the UTF-8 encoding of each string.
-
-### Capture groups
-
-`hs_capture()` turns text into columns with one regular expression, like
-`utils::strcapture()` but much faster on large inputs:
-
-```r
-lines <- c("2026-09-26 10:15:02 [INFO] api.server:42 - listening",
-           "2026-09-26 10:16:00 [ERROR] auth.jwt:77 - token expired")
-fmt <- "^(?<time>\\S+ \\S+) \\[(?<level>\\w+)\\] (?<location>[^:]+):(?<line>\\d+) - (?<text>.*)$"
-hs_capture(fmt, lines)
-#>                  time level   location line          text
-#> 1 2026-09-26 10:15:02  INFO api.server   42     listening
-#> 2 2026-09-26 10:16:00 ERROR   auth.jwt   77 token expired
-```
-
-It runs on PCRE2 rather than Vectorscan, whose engine cannot report groups.
 
 ### Low-level interface
 

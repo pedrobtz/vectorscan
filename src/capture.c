@@ -66,7 +66,7 @@ static pcre2_code *pcre2_code_addr(SEXP xptr) {
 
    Returns list(ptr, names, jit): `names` has one entry per capture group,
    "" for unnamed groups. */
-SEXP vctrsn_pcre2_compile(SEXP pattern) {
+SEXP vctrsn_pcre2_compile(SEXP pattern, SEXP use_jit) {
   const char *text = Rf_translateCharUTF8(STRING_ELT(pattern, 0));
   int errcode = 0;
   PCRE2_SIZE erroffset = 0;
@@ -82,7 +82,8 @@ SEXP vctrsn_pcre2_compile(SEXP pattern) {
   SEXP xptr = PROTECT(R_MakeExternalPtr(code, R_NilValue, R_NilValue));
   R_RegisterCFinalizerEx(xptr, pcre2_code_finalizer, TRUE);
 
-  int jit = pcre2_jit_compile(code, PCRE2_JIT_COMPLETE) == 0;
+  int jit = Rf_asLogical(use_jit) == TRUE &&
+            pcre2_jit_compile(code, PCRE2_JIT_COMPLETE) == 0;
 
   uint32_t ncap = 0;
   pcre2_pattern_info(code, PCRE2_INFO_CAPTURECOUNT, &ncap);
@@ -143,7 +144,8 @@ static void r_free_for_pcre2(void *ptr, void *unused) {
    - groups:  list of character vectors, NA where the element did not match
               or the group did not participate;
    - errors:  the PCRE2 error code per element, 0 where there was none. */
-SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x) {
+SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
+                               SEXP depth_limit) {
   pcre2_code *code = pcre2_code_addr(code_xptr);
   R_xlen_t n = XLENGTH(x);
 
@@ -162,8 +164,18 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x) {
   pcre2_general_context *gcontext =
       pcre2_general_context_create(r_alloc_for_pcre2, r_free_for_pcre2, NULL);
   pcre2_match_data *md = pcre2_match_data_create_from_pattern(code, gcontext);
-  if (gcontext == NULL || md == NULL) {
+  pcre2_match_context *mcontext = pcre2_match_context_create(gcontext);
+  if (gcontext == NULL || md == NULL || mcontext == NULL) {
     Rf_error("Out of memory while preparing a PCRE2 match.");
+  }
+  /* NA leaves PCRE2's default. The match limit bounds the work per element
+     in both the interpreter and JIT; the depth limit (a heap limit since
+     PCRE2 10.30) applies to the interpreter. */
+  if (Rf_asInteger(match_limit) != NA_INTEGER) {
+    pcre2_set_match_limit(mcontext, (uint32_t)Rf_asInteger(match_limit));
+  }
+  if (Rf_asInteger(depth_limit) != NA_INTEGER) {
+    pcre2_set_depth_limit(mcontext, (uint32_t)Rf_asInteger(depth_limit));
   }
 
   /* Each subject is scanned from our own buffer with zeroed padding after
@@ -209,7 +221,13 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x) {
       memcpy(buffer, utf8, length);
       memset(buffer + length, 0, padding);
       text = buffer;
-      rc = pcre2_match(code, (PCRE2_SPTR)text, length, 0, 0, md, NULL);
+      rc = pcre2_match(code, (PCRE2_SPTR)text, length, 0, 0, md, mcontext);
+      /* JIT code has a fixed-size stack; a deeply nested match that
+         exhausts it is retried in the interpreter, which has none. */
+      if (rc == PCRE2_ERROR_JIT_STACKLIMIT) {
+        rc = pcre2_match(code, (PCRE2_SPTR)text, length, 0, PCRE2_NO_JIT, md,
+                         mcontext);
+      }
       if (rc > 0) {
         matched_p[i] = TRUE;
         ov = pcre2_get_ovector_pointer(md);
@@ -250,17 +268,32 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x) {
   return out;
 }
 
+/* PCRE2's message for an error code, for the warning hs_capture() gives. */
+SEXP vctrsn_pcre2_error_message(SEXP code) {
+  PCRE2_UCHAR message[256];
+  int rc = pcre2_get_error_message(Rf_asInteger(code), message, sizeof(message));
+  if (rc < 0) {
+    return Rf_mkString("unknown PCRE2 error");
+  }
+  return Rf_mkString((const char *)message);
+}
+
 #else
 
 SEXP vctrsn_pcre2_info(void) { return R_NilValue; }
+
+SEXP vctrsn_pcre2_error_message(SEXP code) { return Rf_mkString("PCRE2 unavailable"); }
 
 static SEXP no_pcre2(void) {
   Rf_error("This build of vectorscan has no PCRE2, so capture groups are unavailable.");
   return R_NilValue;
 }
 
-SEXP vctrsn_pcre2_compile(SEXP pattern) { return no_pcre2(); }
+SEXP vctrsn_pcre2_compile(SEXP pattern, SEXP use_jit) { return no_pcre2(); }
 
-SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x) { return no_pcre2(); }
+SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
+                               SEXP depth_limit) {
+  return no_pcre2();
+}
 
 #endif

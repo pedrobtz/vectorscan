@@ -5,9 +5,9 @@
 \alias{hs_capture_compile}
 \title{Capture groups into a data frame}
 \usage{
-hs_capture(pattern, x, proto = NULL)
+hs_capture(pattern, x, proto = NULL, match_limit = NULL, depth_limit = NULL)
 
-hs_capture_compile(pattern)
+hs_capture_compile(pattern, jit = TRUE)
 }
 \arguments{
 \item{pattern}{A single regular expression with capture groups, a
@@ -20,6 +20,14 @@ with \code{hs_capture_compile()} to reuse across calls.}
 names and types of the columns, as in \code{\link[utils:strcapture]{utils::strcapture()}}. It must have
 one column per capture group; for several formats, one column per group
 name, matched by name.}
+
+\item{match_limit, depth_limit}{Optional positive whole numbers: PCRE2's
+match limit and depth limit per element (see "Untrusted input"). \code{NULL}
+keeps PCRE2's defaults.}
+
+\item{jit}{For \code{hs_capture_compile()}: use PCRE2's just-in-time compiler
+when available. \code{FALSE} runs PCRE2's interpreter, which is slower but
+gives the same results.}
 }
 \value{
 A data frame with \code{length(x)} rows and one column per capture
@@ -60,6 +68,18 @@ same as trying every format on every element in order, but with many
 formats it is several times faster. A format Vectorscan cannot compile
 even in prefilter mode (PCRE2's branch reset \verb{(?|...)}, for example) is
 simply tried on every element that is still unmatched.
+}
+
+\section{Untrusted input}{
+
+Some patterns can take exponential time on some inputs (nested
+quantifiers such as \verb{(a+)+$}, for example). \code{match_limit} bounds the work
+PCRE2 may do per element, and \code{depth_limit} its backtracking memory (in the
+interpreter; the just-in-time compiled code has its own fixed stack, and an
+element that exhausts it is retried in the interpreter). An element that
+hits a limit gives an \code{NA} row and counts towards the warning, so one
+pathological line cannot stall or abort a scan. Both default to PCRE2's
+own defaults (a match limit of 10,000,000).
 
 Elements that do not match, and \code{NA} elements, give a row of \code{NA}. A group
 that does not take part in the match (an optional group, or a branch not

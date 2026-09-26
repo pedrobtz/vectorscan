@@ -33,6 +33,16 @@
 #' even in prefilter mode (PCRE2's branch reset `(?|...)`, for example) is
 #' simply tried on every element that is still unmatched.
 #'
+#' @section Untrusted input:
+#' Some patterns can take exponential time on some inputs (nested
+#' quantifiers such as `(a+)+$`, for example). `match_limit` bounds the work
+#' PCRE2 may do per element, and `depth_limit` its backtracking memory (in the
+#' interpreter; the just-in-time compiled code has its own fixed stack, and an
+#' element that exhausts it is retried in the interpreter). An element that
+#' hits a limit gives an `NA` row and counts towards the warning, so one
+#' pathological line cannot stall or abort a scan. Both default to PCRE2's
+#' own defaults (a match limit of 10,000,000).
+#'
 #' Elements that do not match, and `NA` elements, give a row of `NA`. A group
 #' that does not take part in the match (an optional group, or a branch not
 #' taken) is `NA`, where `utils::strcapture()` gives `""`. An element PCRE2
@@ -47,6 +57,12 @@
 #'   names and types of the columns, as in [utils::strcapture()]. It must have
 #'   one column per capture group; for several formats, one column per group
 #'   name, matched by name.
+#' @param match_limit,depth_limit Optional positive whole numbers: PCRE2's
+#'   match limit and depth limit per element (see "Untrusted input"). `NULL`
+#'   keeps PCRE2's defaults.
+#' @param jit For `hs_capture_compile()`: use PCRE2's just-in-time compiler
+#'   when available. `FALSE` runs PCRE2's interpreter, which is slower but
+#'   gives the same results.
 #' @return A data frame with `length(x)` rows and one column per capture
 #'   group, plus a `pattern` column first for several formats.
 #' @seealso [hs_detect()][hs_verbs] and friends for matching many patterns at once.
@@ -76,15 +92,17 @@
 #'   http = "^(?<method>[A-Z]+) (?<path>\\S+) (?<status>\\d{3})$",
 #'   audit = "^user=(?<user>\\w+) action=(?<action>\\w+)$"
 #' ), mixed)
-hs_capture <- function(pattern, x, proto = NULL) {
+hs_capture <- function(pattern, x, proto = NULL, match_limit = NULL,
+                       depth_limit = NULL) {
   if (!inherits(pattern, c("hs_capture_pattern", "hs_capture_rules"))) {
     pattern <- hs_capture_compile(pattern)
   }
   if (!is.character(x)) {
     stop_vectorscan("`x` must be a character vector.")
   }
+  limits <- capture_limits(match_limit, depth_limit)
   if (inherits(pattern, "hs_capture_rules")) {
-    return(capture_rules(pattern, x, proto))
+    return(capture_rules(pattern, x, proto, limits))
   }
   ncap <- length(pattern$names)
   if (!is.null(proto)) {
@@ -100,17 +118,11 @@ hs_capture <- function(pattern, x, proto = NULL) {
     }
   }
 
-  out <- .Call(vctrsn_pcre2_capture_many, pattern$ptr, x)
-
-  failed <- sum(out$errors != 0L)
-  if (failed > 0L) {
-    warning(sprintf(
-      "%d element%s could not be matched (PCRE2 error %d); %s NA.",
-      failed, if (failed == 1L) "" else "s",
-      out$errors[out$errors != 0L][[1]],
-      if (failed == 1L) "its row is" else "their rows are"
-    ), call. = FALSE)
-  }
+  out <- .Call(
+    vctrsn_pcre2_capture_many, pattern$ptr, x,
+    limits$match_limit, limits$depth_limit
+  )
+  warn_capture_errors(sum(out$errors != 0L), out$errors[out$errors != 0L][1])
 
   columns <- out$groups
   if (is.null(proto)) {
@@ -122,11 +134,11 @@ hs_capture <- function(pattern, x, proto = NULL) {
 
 #' @rdname hs_capture
 #' @export
-hs_capture_compile <- function(pattern) {
+hs_capture_compile <- function(pattern, jit = TRUE) {
   if (is.character(pattern) && length(pattern) > 1L) {
-    return(compile_capture_rules(pattern))
+    return(compile_capture_rules(pattern, jit))
   }
-  compiled <- pcre2_compile_pattern(pattern)
+  compiled <- pcre2_compile_pattern(pattern, jit)
   structure(
     list(
       pattern = pattern,
@@ -185,7 +197,7 @@ conform_to_proto <- function(columns, proto) {
 # mode reports a superset of PCRE2's matches, so the result is exactly that
 # of trying every rule on every line in order. A rule Vectorscan cannot
 # compile even in prefilter mode is tried on every remaining line.
-compile_capture_rules <- function(patterns) {
+compile_capture_rules <- function(patterns, jit = TRUE) {
   if (anyNA(patterns)) {
     stop_vectorscan("`pattern` must not contain missing values.")
   }
@@ -197,7 +209,7 @@ compile_capture_rules <- function(patterns) {
   }
   patterns <- unname(patterns)
 
-  compiled <- lapply(patterns, pcre2_compile_pattern)
+  compiled <- lapply(patterns, pcre2_compile_pattern, jit = jit)
   group_names <- lapply(compiled, function(cmp) capture_column_names(cmp$names))
   columns <- unique(unlist(group_names))
   if ("pattern" %in% columns) {
@@ -240,7 +252,7 @@ compile_capture_rules <- function(patterns) {
   )
 }
 
-capture_rules <- function(rules, x, proto) {
+capture_rules <- function(rules, x, proto, limits) {
   n <- length(x)
   if (!is.null(proto)) {
     if (!setequal(names(proto), rules$columns) || length(proto) != length(rules$columns)) {
@@ -283,7 +295,10 @@ capture_rules <- function(rules, x, proto) {
       next
     }
 
-    out <- .Call(vctrsn_pcre2_capture_many, rules$compiled[[r]]$ptr, x[idx])
+    out <- .Call(
+      vctrsn_pcre2_capture_many, rules$compiled[[r]]$ptr, x[idx],
+      limits$match_limit, limits$depth_limit
+    )
     bad <- out$errors != 0L
     if (any(bad)) {
       errored[idx[bad]] <- TRUE
@@ -302,14 +317,7 @@ capture_rules <- function(rules, x, proto) {
     unassigned[rows] <- FALSE
   }
 
-  failed <- sum(errored & is.na(label))
-  if (failed > 0L) {
-    warning(sprintf(
-      "%d element%s could not be matched (PCRE2 error %d); %s NA.",
-      failed, if (failed == 1L) "" else "s", first_error,
-      if (failed == 1L) "its row is" else "their rows are"
-    ), call. = FALSE)
-  }
+  warn_capture_errors(sum(errored & is.na(label)), first_error)
 
   if (!is.null(proto)) {
     columns <- as.list(conform_to_proto(columns[names(proto)], proto))
@@ -335,11 +343,42 @@ print.hs_capture_rules <- function(x, ...) {
 
 # -- engine (capture-groups plan, M2) -----------------------------------------
 
-pcre2_compile_pattern <- function(pattern) {
+pcre2_compile_pattern <- function(pattern, jit = TRUE) {
   if (!is.character(pattern) || length(pattern) != 1L || is.na(pattern)) {
     stop_vectorscan("`pattern` must be a single string.")
   }
-  .Call(vctrsn_pcre2_compile, enc2utf8(pattern))
+  .Call(vctrsn_pcre2_compile, enc2utf8(pattern), isTRUE(jit))
+}
+
+# NA_integer_ keeps PCRE2's default for a limit.
+capture_limits <- function(match_limit, depth_limit) {
+  limit <- function(value, name) {
+    if (is.null(value)) {
+      return(NA_integer_)
+    }
+    value <- check_integerish(value, name, len = 1L)
+    if (value < 1L) {
+      stop_vectorscan(sprintf("`%s` must be a positive whole number.", name))
+    }
+    value
+  }
+  list(
+    match_limit = limit(match_limit, "match_limit"),
+    depth_limit = limit(depth_limit, "depth_limit")
+  )
+}
+
+# One warning for all elements PCRE2 gave up on, naming the first error.
+warn_capture_errors <- function(failed, first_error) {
+  if (failed == 0L) {
+    return(invisible())
+  }
+  warning(sprintf(
+    "%d element%s could not be matched (%s); %s NA.",
+    failed, if (failed == 1L) "" else "s",
+    .Call(vctrsn_pcre2_error_message, first_error),
+    if (failed == 1L) "its row is" else "their rows are"
+  ), call. = FALSE)
 }
 
 # list(matched, groups, errors) for every element of `x`: see
@@ -349,7 +388,7 @@ capture_many <- function(pattern, x) {
     stop_vectorscan("`x` must be a character vector.")
   }
   compiled <- pcre2_compile_pattern(pattern)
-  out <- .Call(vctrsn_pcre2_capture_many, compiled$ptr, x)
+  out <- .Call(vctrsn_pcre2_capture_many, compiled$ptr, x, NA_integer_, NA_integer_)
   names(out$groups) <- compiled$names
   out
 }
