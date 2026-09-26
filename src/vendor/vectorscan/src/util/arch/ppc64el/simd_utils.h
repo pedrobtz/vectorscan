@@ -43,10 +43,6 @@
 
 #include <string.h> // for memcpy
 
-#if defined(__clang__) && (__clang_major__ == 15)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecate-lax-vec-conv-all"
-#endif // defined(__clang__) && (__clang_major__ == 15)
 
 typedef __vector unsigned long long int  uint64x2_t;
 typedef __vector   signed long long int   int64x2_t;
@@ -429,8 +425,5 @@ m128 set2x64(u64a hi, u64a lo) {
     return (m128) v;
 }
 
-#if defined(__clang__) && (__clang_major__ == 15)
-#pragma clang diagnostic pop
-#endif // defined(__clang__) && (__clang_major__ == 15)
 
 #endif // ARCH_PPC64EL_SIMD_UTILS_H

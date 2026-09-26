@@ -1,0 +1,163 @@
+#!/bin/sh
+# Offline check that the vendored tree is exactly what the manifest describes.
+#
+# Fails if a vendored file was edited, added or removed without going through
+# `tools/vendor/fetch`, if the vendored version and the manifest disagree, if
+# a path is too long for a tarball, or if the licence and patch set are not
+# disclosed in inst/COPYRIGHTS. Needs no network, compiler or Ragel.
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+cd "$ROOT"
+MANIFEST=tools/vendor/manifest.tsv
+. tools/vendor/common.sh
+
+status=0
+sums=tools/vendor/checksums.sha256
+
+if [ ! -f "$sums" ]; then
+    echo "FAIL missing $sums; run tools/vendor/record" >&2
+    exit 1
+fi
+
+# 1. every recorded file still hashes to the recorded value
+while read -r want path; do
+    [ -n "$want" ] || continue
+    if [ ! -f "$path" ]; then
+        printf 'FAIL missing vendored file: %s\n' "$path" >&2
+        status=1
+        continue
+    fi
+    got=$(sha256_of "$path")
+    if [ "$got" != "$want" ]; then
+        printf 'FAIL modified vendored file: %s\n      expected %s\n      got      %s\n' \
+            "$path" "$want" "$got" >&2
+        status=1
+    fi
+done < "$sums"
+
+# 2. no vendored file that the checksums do not know about
+for src in $(manifest_sources); do
+    for f in $(vendored_files "$src"); do
+        if ! grep -qF "  $f" "$sums"; then
+            printf 'FAIL unrecorded vendored file: %s\n' "$f" >&2
+            status=1
+        fi
+    done
+done
+
+# 3. the tree is exactly the keep list plus the generated files, both ways
+#
+# The checksums say "these files are unmodified"; they cannot say "these are
+# the files we meant to keep". Without this, dropping a path from the keep
+# list and re-recording looks clean, and the next fetch silently produces a
+# different tree.
+for src in $(manifest_sources); do
+    expected=$(
+        {
+            keep_list "$src" | sed 's/:.*//'
+            split_field "$(manifest_field "$src" generated)"
+        } | LC_ALL=C sort
+    )
+    present=$(vendored_files "$src" | sed "s|^src/vendor/$src/||" | LC_ALL=C sort)
+    if [ "$expected" != "$present" ]; then
+        printf 'FAIL src/vendor/%s does not match its keep list and generated files\n' "$src" >&2
+        printf '%s\n' "$expected" > "$ROOT/.verify-a.$$"
+        printf '%s\n' "$present" > "$ROOT/.verify-b.$$"
+        printf '  < expected, > present\n' >&2
+        diff "$ROOT/.verify-a.$$" "$ROOT/.verify-b.$$" >&2 || true
+        rm -f "$ROOT/.verify-a.$$" "$ROOT/.verify-b.$$"
+        status=1
+    fi
+    for g in $(split_field "$(manifest_field "$src" generated)"); do
+        if ! keep_list "$src" | grep -q "^${g%.cpp}:"; then
+            printf 'FAIL generated file %s has no kept source %s\n' "$g" "${g%.cpp}" >&2
+            status=1
+        fi
+    done
+done
+
+# 4. the version the vendored CMakeLists.txt declares matches the manifest
+declared=$(manifest_field vectorscan version_string)
+cmake=src/vendor/vectorscan/CMakeLists.txt
+major=$(sed -n 's/^set (HS_MAJOR_VERSION \([0-9]*\))/\1/p' "$cmake")
+minor=$(sed -n 's/^set (HS_MINOR_VERSION \([0-9]*\))/\1/p' "$cmake")
+patchv=$(sed -n 's/^set (HS_PATCH_VERSION \([0-9]*\))/\1/p' "$cmake")
+if [ "$major.$minor.$patchv" != "$declared" ]; then
+    printf 'FAIL %s declares %s.%s.%s, manifest declares %s\n' \
+        "$cmake" "$major" "$minor" "$patchv" "$declared" >&2
+    status=1
+fi
+
+# 5. no vendored path is too long for a tarball
+#
+# R CMD check rejects a path over 100 bytes, measured with the package
+# directory in front of it.
+pkg=$(awk '/^Package:/ { print $2 }' DESCRIPTION)
+for src in $(manifest_sources); do
+    for f in $(vendored_files "$src"); do
+        n=$(printf '%s/%s' "$pkg" "$f" | wc -c | tr -d ' ')
+        if [ "$n" -gt 100 ]; then
+            printf 'FAIL vendored path is %s bytes, over the 100-byte tarball limit:\n      %s/%s\n' \
+                "$n" "$pkg" "$f" >&2
+            status=1
+        fi
+    done
+done
+
+# 6. licensing is disclosed for every vendored source
+for src in $(manifest_sources); do
+    lic=$(manifest_field "$src" license)
+    if ! grep -qF "src/vendor/$src" inst/COPYRIGHTS; then
+        printf 'FAIL inst/COPYRIGHTS does not mention src/vendor/%s\n' "$src" >&2
+        status=1
+    fi
+    if ! grep -qF "$lic" inst/COPYRIGHTS; then
+        printf 'FAIL inst/COPYRIGHTS does not mention the %s licence of %s\n' \
+            "$lic" "$src" >&2
+        status=1
+    fi
+done
+
+# 7. the patch set agrees across the manifest, tools/patches/ and
+#    inst/COPYRIGHTS -- in all three directions, because a one-way check
+#    passes happily while the other side rots
+declared_patches=$(
+    for src in $(manifest_sources); do
+        split_field "$(manifest_field "$src" patches)"
+    done | LC_ALL=C sort -u
+)
+
+for p in $declared_patches; do
+    if ! find tools/patches -type f -name "$p" | grep -q .; then
+        printf 'FAIL manifest declares patch %s, which does not exist under tools/patches/\n' \
+            "$p" >&2
+        status=1
+    fi
+    if ! grep -qF "$p" inst/COPYRIGHTS; then
+        printf 'FAIL inst/COPYRIGHTS does not mention patch %s\n' "$p" >&2
+        status=1
+    fi
+done
+
+for f in $(find tools/patches -type f -name '*.patch' 2>/dev/null | LC_ALL=C sort); do
+    p=$(basename "$f")
+    if ! printf '%s\n' "$declared_patches" | grep -qxF "$p"; then
+        printf 'FAIL %s is not declared in the manifest, so fetch would not apply it\n' \
+            "$f" >&2
+        status=1
+    fi
+done
+
+for p in $(grep -oE '[0-9]{4}-[A-Za-z0-9._-]+\.patch' inst/COPYRIGHTS | LC_ALL=C sort -u); do
+    if ! printf '%s\n' "$declared_patches" | grep -qxF "$p"; then
+        printf 'FAIL inst/COPYRIGHTS mentions patch %s, which the manifest does not declare\n' \
+            "$p" >&2
+        status=1
+    fi
+done
+
+if [ "$status" -eq 0 ]; then
+    printf 'ok  vendored tree matches %s\n' "$MANIFEST"
+fi
+exit "$status"

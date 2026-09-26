@@ -1,0 +1,61 @@
+Build without Ragel from pre-generated parser sources
+
+Ragel is not installed on CRAN's machines or on the CI runners, and
+upstream stops at configure without it. tools/vendor/fetch generates
+src/parser/Parser.rl.cpp and src/parser/control_verbs.rl.cpp from the
+bundled .rl files; with this patch, when Ragel is not found, the build
+copies those instead of running Ragel. When Ragel is on PATH the build
+behaves as upstream.
+
+Local, not upstream.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,7 +31,8 @@
+ find_program(RAGEL ragel)
+ 
+ if(${RAGEL} STREQUAL "RAGEL-NOTFOUND")
+-    message(FATAL_ERROR "Ragel state machine compiler not found")
++    # R package patch: fall back to the pre-generated parser sources
++    message(STATUS "Ragel not found, using pre-generated parser sources")
+ endif()
+ 
+ # Add ccache to speed builds
+--- a/cmake/ragel.cmake
++++ b/cmake/ragel.cmake
+@@ -1,16 +1,28 @@
+ # function for doing all the dirty work in turning a .rl into C++
++#
++# R package patch: when ragel is not installed, copy the pre-generated
++# ${src_file}.rl.cpp that sits next to the .rl instead of running ragel.
+ 
+ function(ragelmaker src_rl)
+     get_filename_component(src_dir ${src_rl} PATH) # old cmake needs PATH
+     get_filename_component(src_file ${src_rl} NAME_WE)
+     set(rl_out ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}/${src_file}.cpp)
+-    add_custom_command(
+-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}/${src_file}.cpp
+-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}
+-        COMMAND ${RAGEL} ${CMAKE_CURRENT_SOURCE_DIR}/${src_rl} -o ${rl_out} -G0
+-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${src_rl}
+-        )
++    set(rl_pregen ${CMAKE_CURRENT_SOURCE_DIR}/${src_dir}/${src_file}.rl.cpp)
++    if (RAGEL)
++        add_custom_command(
++            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}/${src_file}.cpp
++            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}
++            COMMAND ${RAGEL} ${CMAKE_CURRENT_SOURCE_DIR}/${src_rl} -o ${rl_out} -G0
++            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${src_rl}
++            )
++    else ()
++        add_custom_command(
++            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}/${src_file}.cpp
++            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/${src_dir}
++            COMMAND ${CMAKE_COMMAND} -E copy ${rl_pregen} ${rl_out}
++            DEPENDS ${rl_pregen}
++            )
++    endif ()
+     add_custom_target(ragel_${src_file} DEPENDS ${rl_out})
+     set_source_files_properties(${rl_out} PROPERTIES GENERATED TRUE)
+ endfunction(ragelmaker)
+-

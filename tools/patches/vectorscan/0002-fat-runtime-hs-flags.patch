@@ -1,0 +1,26 @@
+Apply HS_C_FLAGS and HS_CXX_FLAGS to the fat runtime build
+
+Upstream always compiles with -Werror (cmake/cflags-generic.cmake) and
+appends the user's HS_C_FLAGS/HS_CXX_FLAGS only in non-fat builds. The
+package's configure passes -Wno-error there, but on x86-64 Linux the fat
+runtime is on, so -Werror stayed and a new compiler warning failed the
+install: clang 23 with libc++ warns on a deprecated allocator member
+inside Boost headers. Append the flags in the fat branch too.
+
+Local, not upstream.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -257,8 +257,10 @@
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS} ${HS_C_FLAGS}")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS} ${HS_CXX_FLAGS}")
+ else()
+-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS}")
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")
++# R package patch: apply HS_C_FLAGS/HS_CXX_FLAGS (-Wno-error from configure)
++# to the fat runtime build too, so new compiler warnings do not fail it.
++set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS} ${HS_C_FLAGS}")
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_FLAGS} ${HS_CXX_FLAGS}")
+ endif()
+ 
+ SET(hs_HEADERS

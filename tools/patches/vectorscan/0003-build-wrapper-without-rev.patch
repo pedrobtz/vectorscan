@@ -1,0 +1,49 @@
+Find the object in build_wrapper.sh without rev(1)
+
+The fat runtime prefixes each microarchitecture's symbols through
+cmake/build_wrapper.sh, which found the object file by piping the compile
+command through rev(1). Minimal images such as R-hub's clang23 container
+have no rev, so the path came out empty, nm read a.out, and no symbol was
+renamed: libhs built, and the package then failed to load with an
+undefined avx512_hs_serialize_database. Take the path from the argument
+after -o, and fail if the object was not built.
+
+Local, not upstream.
+
+--- a/cmake/build_wrapper.sh
++++ b/cmake/build_wrapper.sh
+@@ -9,7 +9,22 @@
+ KEEPSYMS_IN=$2
+ shift 2
+ # $@ contains the actual build command
+-OUT=$(echo "$@" | rev | cut -d ' ' -f 2- | rev | sed 's/.* -o \(.*\.o\).*/\1/')
++# R package patch: take the object from the argument after -o rather than
++# parsing the command line with rev(1), which minimal images lack; without
++# it the rename silently did nothing and left the dispatcher's prefixed
++# symbols undefined.
++OUT=""
++prev=""
++for arg in "$@"; do
++    if [ "$prev" = "-o" ]; then
++        OUT="$arg"
++    fi
++    prev="$arg"
++done
++if [ -z "$OUT" ]; then
++    echo "build_wrapper.sh: no -o output in: $*" >&2
++    exit 1
++fi
+ trap cleanup INT QUIT EXIT
+ SYMSFILE=$(mktemp -p /tmp ${PREFIX}_rename.syms.XXXXX)
+ KEEPSYMS=$(mktemp -p /tmp keep.syms.XXXXX)
+@@ -28,6 +43,10 @@
+ nm ${NM_FLAG} p -g -D ${LIBC_SO} | sed 's/\([^ @]*\).*/^\1$/' >> ${KEEPSYMS}
+ # build the object
+ "$@"
++if [ ! -f "${OUT}" ]; then
++    echo "build_wrapper.sh: ${OUT} was not built" >&2
++    exit 1
++fi
+ # rename the symbols in the object
+ nm ${NM_FLAG} p -g ${OUT} | cut -f1 -d' ' | grep -v -f ${KEEPSYMS} | sed -e "s/\(.*\)/\1\ ${PREFIX}_\1/" >> ${SYMSFILE}
+ if test -s ${SYMSFILE}

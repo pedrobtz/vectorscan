@@ -1,0 +1,108 @@
+Drop the diagnostic-suppressing pragmas that R CMD check notes
+
+R CMD check reports every file containing `#pragma GCC|clang diagnostic
+ignored` ("Files which contain pragma(s) suppressing diagnostics"), and a
+CRAN reviewer may ask for them to go. Three upstream files carry them:
+
+  src/dispatcher.c                           push/ignore/pop of
+                                             -Wunused-parameter and
+                                             -Wunused-function around the
+                                             fat-runtime dispatch stubs.
+  src/util/arch/ppc64el/simd_utils.h         push/ignore/pop of
+  src/util/supervector/arch/ppc64el/impl.cpp -Wdeprecate-lax-vec-conv-all,
+                                             clang on ppc64el only.
+
+Only the pragma lines (and the #if blocks that exist to hold them) are
+removed; no code changes. Without them the compiler may print those
+warnings during installation, which is harmless: the bundled build runs
+with -Wno-error (see 0002), and none of them is among the warnings
+R CMD check treats as significant.
+
+Local, not upstream.
+
+--- a/src/dispatcher.c
++++ b/src/dispatcher.c
+@@ -182,11 +182,6 @@
+         return (*fat_dispatch_ ## NAME)(__VA_ARGS__);                          \
+     }                                                                          \
+ 
+-
+-#pragma GCC diagnostic push
+-#pragma GCC diagnostic ignored "-Wunused-parameter"
+-#pragma GCC diagnostic push
+-#pragma GCC diagnostic ignored "-Wunused-function"
+ 
+ /* this gets a bit ugly to compose the static redirect functions,
+  * as we necessarily need first the typed arg list and then just the arg
+@@ -359,6 +354,3 @@
+ CONNECT_DISPATCH_2(u32, Crc32c_ComputeBuf, u32 inCrc32, const void *buf, size_t bufLen);
+ CONNECT_ARGS_3(u32, Crc32c_ComputeBuf, inCrc32, buf, bufLen);
+ 
+-#pragma GCC diagnostic pop
+-#pragma GCC diagnostic pop
+-
+--- a/src/util/arch/ppc64el/simd_utils.h
++++ b/src/util/arch/ppc64el/simd_utils.h
+@@ -43,10 +43,6 @@
+ 
+ #include <string.h> // for memcpy
+ 
+-#if defined(__clang__) && (__clang_major__ == 15)
+-#pragma clang diagnostic push
+-#pragma clang diagnostic ignored "-Wdeprecate-lax-vec-conv-all"
+-#endif // defined(__clang__) && (__clang_major__ == 15)
+ 
+ typedef __vector unsigned long long int  uint64x2_t;
+ typedef __vector   signed long long int   int64x2_t;
+@@ -429,8 +425,5 @@
+     return (m128) v;
+ }
+ 
+-#if defined(__clang__) && (__clang_major__ == 15)
+-#pragma clang diagnostic pop
+-#endif // defined(__clang__) && (__clang_major__ == 15)
+ 
+ #endif // ARCH_PPC64EL_SIMD_UTILS_H
+--- a/src/util/supervector/arch/ppc64el/impl.cpp
++++ b/src/util/supervector/arch/ppc64el/impl.cpp
+@@ -158,19 +158,12 @@
+     u.u32x4[0] = vec_splats(static_cast<uint32_t>(other));
+ }
+ 
+-#if defined(__clang__) && (__clang_major__ >= 15)
+-#pragma clang diagnostic push
+-#pragma clang diagnostic ignored "-Wdeprecate-lax-vec-conv-all"
+-#endif // defined(__clang__) && (__clang_major__ == 15)
+ template<>
+ template<>
+ really_inline SuperVector<16>::SuperVector(int64_t const other)
+ {
+     u.s64x2[0] = reinterpret_cast<int64x2_t>(vec_splats(static_cast<ulong64_t>(other)));
+ }
+-#if defined(__clang__) && (__clang_major__ >= 15)
+-#pragma clang diagnostic pop
+-#endif // defined(__clang__) && (__clang_major__ == 15)
+ 
+ template<>
+ template<>
+@@ -273,10 +266,6 @@
+     return (*this == b);
+ }
+ 
+-#if defined(__clang__) && (__clang_major__ >= 15)
+-#pragma clang diagnostic push
+-#pragma clang diagnostic ignored "-Wdeprecate-lax-vec-conv-all"
+-#endif // defined(__clang__) && (__clang_major__ == 15)
+ template <>
+ really_inline typename SuperVector<16>::comparemask_type
+ SuperVector<16>::comparemask(void) const {
+@@ -287,9 +276,6 @@
+     vec_ste(reinterpret_cast<uint32x4_t>(bitmask), 0, &movemask);
+     return movemask;
+ }
+-#if defined(__clang__) && (__clang_major__ >= 15)
+-#pragma clang diagnostic pop
+-#endif // defined(__clang__) && (__clang_major__ == 15)
+ 
+ template <>
+ really_inline typename SuperVector<16>::comparemask_type

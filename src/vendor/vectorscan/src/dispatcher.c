@@ -183,11 +183,6 @@
     }                                                                          \
 
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-
 /* this gets a bit ugly to compose the static redirect functions,
  * as we necessarily need first the typed arg list and then just the arg
  * names, twice in a row, to define the redirect function and the
@@ -358,7 +353,4 @@ CREATE_DISPATCH(u32, Crc32c_ComputeBuf, u32 inCrc32, const void *buf, size_t buf
 CONNECT_ARGS_1(u32, Crc32c_ComputeBuf, inCrc32, buf, bufLen);
 CONNECT_DISPATCH_2(u32, Crc32c_ComputeBuf, u32 inCrc32, const void *buf, size_t bufLen);
 CONNECT_ARGS_3(u32, Crc32c_ComputeBuf, inCrc32, buf, bufLen);
-
-#pragma GCC diagnostic pop
-#pragma GCC diagnostic pop
 

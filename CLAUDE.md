@@ -11,6 +11,13 @@ Vectorscan C/C++ source is **vendored** under `src/vendor/vectorscan` (v5.4.12)
 and compiled into a private static `libhs` during package install; the runtime
 machine needs no system Vectorscan.
 
+Never edit files under `src/vendor/vectorscan` by hand: `tools/vendor/verify`
+(run by the `vendor` workflow) fails on any change that did not come from
+`tools/vendor/fetch`. To change the vendored code, add or edit a patch in
+`tools/patches/vectorscan/`, list it in `tools/vendor/manifest.tsv` and
+`inst/COPYRIGHTS`, and re-run `tools/vendor/fetch` (needs network and
+Ragel). See `src/vendor/README.md`.
+
 ## Common commands
 
 ```sh
