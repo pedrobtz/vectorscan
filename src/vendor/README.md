@@ -27,3 +27,7 @@ Local modifications:
   runtime branch (upstream applies them only to non-fat builds), so the
   `-Wno-error` that `configure` passes overrides upstream's `-Werror` on
   x86-64 Linux too.
+- `cmake/build_wrapper.sh` (fat runtime symbol prefixing) finds the object
+  from the `-o` argument instead of via `rev(1)`, which minimal build images
+  lack; without it the prefixing silently did nothing and the package failed
+  to load with undefined `avx512_*` symbols.

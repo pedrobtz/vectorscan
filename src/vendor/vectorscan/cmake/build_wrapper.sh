@@ -9,7 +9,22 @@ PREFIX=$1
 KEEPSYMS_IN=$2
 shift 2
 # $@ contains the actual build command
-OUT=$(echo "$@" | rev | cut -d ' ' -f 2- | rev | sed 's/.* -o \(.*\.o\).*/\1/')
+# R package patch: take the object from the argument after -o rather than
+# parsing the command line with rev(1), which minimal images lack; without
+# it the rename silently did nothing and left the dispatcher's prefixed
+# symbols undefined.
+OUT=""
+prev=""
+for arg in "$@"; do
+    if [ "$prev" = "-o" ]; then
+        OUT="$arg"
+    fi
+    prev="$arg"
+done
+if [ -z "$OUT" ]; then
+    echo "build_wrapper.sh: no -o output in: $*" >&2
+    exit 1
+fi
 trap cleanup INT QUIT EXIT
 SYMSFILE=$(mktemp -p /tmp ${PREFIX}_rename.syms.XXXXX)
 KEEPSYMS=$(mktemp -p /tmp keep.syms.XXXXX)
@@ -28,6 +43,10 @@ cp ${KEEPSYMS_IN} ${KEEPSYMS}
 nm ${NM_FLAG} p -g -D ${LIBC_SO} | sed 's/\([^ @]*\).*/^\1$/' >> ${KEEPSYMS}
 # build the object
 "$@"
+if [ ! -f "${OUT}" ]; then
+    echo "build_wrapper.sh: ${OUT} was not built" >&2
+    exit 1
+fi
 # rename the symbols in the object
 nm ${NM_FLAG} p -g ${OUT} | cut -f1 -d' ' | grep -v -f ${KEEPSYMS} | sed -e "s/\(.*\)/\1\ ${PREFIX}_\1/" >> ${SYMSFILE}
 if test -s ${SYMSFILE}
