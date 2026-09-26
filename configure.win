@@ -62,11 +62,16 @@ if [ "$FOUND_HS" = no ] && [ "$VECTORSCAN_USE_SYSTEM" != "true" ] && [ "$VECTORS
 
     echo "configure.win: building bundled Vectorscan"
     # shellcheck disable=SC2086
-    cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" -G "Unix Makefiles" $cmake_args \
-      ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
-      ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
-      ${cc_bin:+"-DCMAKE_C_COMPILER=$cc_bin"} \
-      ${cxx_bin:+"-DCMAKE_CXX_COMPILER=$cxx_bin"}
+    # R's package compile flags are for R code, not the vendored build (see
+    # configure); keep them away from CMake.
+    (
+      unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+      cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" -G "Unix Makefiles" $cmake_args \
+        ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
+        ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
+        ${cc_bin:+"-DCMAKE_C_COMPILER=$cc_bin"} \
+        ${cxx_bin:+"-DCMAKE_CXX_COMPILER=$cxx_bin"}
+    )
     cmake --build "$BUNDLED_BUILD_DIR" --target hs --config Release -j "$jobs"
     cmake --build "$BUNDLED_BUILD_DIR" --target hs_runtime --config Release -j "$jobs"
     cmake --install "$BUNDLED_BUILD_DIR" --prefix "$install_prefix"

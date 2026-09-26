@@ -164,12 +164,21 @@ build_bundled_vectorscan() {
   echo "configure: Boost root: ${boost_root:-none}"
   # The function runs in an `if !` context, where set -e is off, so every
   # step checks its own status.
+  #
+  # R exports its package compile flags (e.g. CFLAGS="-g -O2 -Wall
+  # -pedantic") to configure, and CMake would adopt them. They are for R
+  # package code, not the vendored build: Vectorscan's compiler checks run
+  # with -Werror, and -pedantic fails its ifunc check, disabling the fat
+  # runtime build. The subshell drops them for CMake only.
   # shellcheck disable=SC2086
-  if ! cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args \
-    ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
-    ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
-    ${cc_flags:+"-DCMAKE_C_FLAGS=$cc_flags"} \
-    ${cxx_flags:+"-DCMAKE_CXX_FLAGS=$cxx_flags"}; then
+  if ! (
+    unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+    cmake -S "$BUNDLED_SOURCE_DIR" -B "$BUNDLED_BUILD_DIR" $cmake_args \
+      ${boost_root:+"-DBOOST_ROOT=$boost_root"} \
+      ${boost_root:+"-DBoost_NO_SYSTEM_PATHS=ON"} \
+      ${cc_flags:+"-DCMAKE_C_FLAGS=$cc_flags"} \
+      ${cxx_flags:+"-DCMAKE_CXX_FLAGS=$cxx_flags"}
+  ); then
     # The failing compiler check is the last one CMake ran; show its log.
     for log in "$BUNDLED_BUILD_DIR/CMakeFiles/CMakeConfigureLog.yaml" \
       "$BUNDLED_BUILD_DIR/CMakeFiles/CMakeError.log"; do
