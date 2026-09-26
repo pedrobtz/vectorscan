@@ -13,6 +13,15 @@
 - **Arm Limited**. Copyright holder.  
   Vectorscan, bundled in src/vendor/vectorscan
 
+- **University of Cambridge**. Copyright holder.  
+  PCRE2, bundled in src/vendor/pcre2
+
+- **Philip Hazel**. Copyright holder.  
+  PCRE2, bundled in src/vendor/pcre2
+
+- **Zoltan Herczeg**. Copyright holder.  
+  PCRE2 just-in-time compiler, bundled in src/vendor/pcre2
+
 ## Citation
 
 Source:

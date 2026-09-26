@@ -209,6 +209,8 @@
 <code>VECTORSCAN_CMAKE_ARGS</code>: append extra CMake arguments for the bundled build.</li>
 <li>
 <code>VECTORSCAN_ALLOW_STUBS=true</code>: build runtime stubs when native Vectorscan is unavailable. This is only intended for wrapper development.</li>
+<li>
+<code>VECTORSCAN_PCRE2</code>: where the PCRE2 used for capture groups comes from. <code>auto</code> (the default) uses a system PCRE2 (<code>pkg-config libpcre2-8</code>, <code>pcre2-config</code>, or Rtools on Windows) and otherwise builds the bundled copy in <code>src/vendor/pcre2</code>; <code>system</code> and <code>vendored</code> force one of them; <code>none</code> builds without it.</li>
 </ul>
 </div>
 <div class="section level2">
