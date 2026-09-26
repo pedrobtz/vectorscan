@@ -1,0 +1,38 @@
+# The vendored tree matches its manifest, from the shared reusable workflow in
+# pedrobtz/r-actions.
+#
+# Two halves. tools/vendor/verify answers "is this tree internally
+# consistent": every file hashes to its recorded value, the tree is exactly
+# the keep list plus the generated parser sources, the version and the
+# manifest agree, and inst/COPYRIGHTS discloses the licence and every patch.
+# The pull-request half asks what a verifier cannot: did a change under
+# src/vendor/ come with a manifest and checksum change, which is the only way
+# the tree can be reproduced from the upstream archive with tools/vendor/fetch.
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'src/vendor/**'
+      - 'tools/vendor/**'
+      - 'tools/patches/**'
+      - 'inst/COPYRIGHTS'
+      - '.github/workflows/vendor.yaml'
+  pull_request:
+  workflow_dispatch:
+
+name: vendor.yaml
+
+permissions: read-all
+
+jobs:
+  # The defaults -- src/vendor, tools/vendor/verify, and a PR guard requiring
+  # tools/vendor/manifest.tsv and checksums.sha256 to move with the tree --
+  # are the family layout this package follows, so nothing is configured.
+  #
+  # src/vendor/README.md sits outside the vendored source but inside
+  # src/vendor; it is documentation and may change on its own.
+  vendor:
+    uses: pedrobtz/r-actions/.github/workflows/vendor.yml@v1
+    with:
+      paths: |
+        src/vendor/vectorscan

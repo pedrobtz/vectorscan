@@ -13,6 +13,9 @@ concurrency:
 
 jobs:
   coverage:
-    uses: pedrobtz/r-actions/.github/workflows/coverage.yml@v1
+    # Pinned to a commit, not to @v1: this job runs with a repository write
+    # token, and a tag is mutable. Update deliberately, with the tag it
+    # corresponds to.
+    uses: pedrobtz/r-actions/.github/workflows/coverage.yml@68c22c173f9ddbb7e51284fe230053174e941afc # v1.15.0
     permissions:
       contents: write
