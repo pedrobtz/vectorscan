@@ -136,7 +136,8 @@ By default, `configure` builds the bundled source in `src/vendor/vectorscan`.
 The following environment variables are available for development and CI:
 
 - `VECTORSCAN_USE_SYSTEM=true`: link against an installed compatible `libhs`
-  instead of the bundled source.
+  instead of the bundled source. Configure fails if none is found, unless
+  `VECTORSCAN_ALLOW_STUBS=true` is also set.
 - `VECTORSCAN_INCLUDE_DIR` and `VECTORSCAN_LIB_DIR`: point to a custom system
   install.
 - `VECTORSCAN_BOOST_ROOT`: point CMake at Boost headers instead of the BH

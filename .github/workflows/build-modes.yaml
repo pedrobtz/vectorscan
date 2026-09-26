@@ -1,0 +1,101 @@
+# The two build modes R-CMD-check.yaml does not reach: linking a system libhs
+# (VECTORSCAN_USE_SYSTEM) and the runtime-stub build (VECTORSCAN_ALLOW_STUBS).
+#
+# Both are development conveniences, and both rot silently if nothing builds
+# them: the system path is what a distribution packager would use, and the
+# stub path is what keeps hs_available() and the skip_if_not(hs_available())
+# guards in the tests, examples and vignettes honest.
+#
+# Plain r-lib/actions steps rather than pedrobtz/r-actions, because the
+# system job needs an apt package the reusable workflow has no input for.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+name: build-modes
+
+permissions: read-all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-mode:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.mode }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Ubuntu's libhyperscan-dev (Intel Hyperscan 5.4) found through
+          # pkg-config libhs; the bundled source must not be built.
+          - mode: system
+            apt: libhyperscan-dev pkg-config
+            use-system: "true"
+            allow-stubs: ""
+            expect: "Vectorscan/Hyperscan support enabled"
+          # No libhs anywhere and stubs allowed: the package must install,
+          # report hs_available() == FALSE, and skip the native tests.
+          - mode: stubs
+            apt: ""
+            use-system: "true"
+            allow-stubs: "true"
+            expect: "runtime stubs because VECTORSCAN_ALLOW_STUBS is set"
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      VECTORSCAN_USE_SYSTEM: ${{ matrix.use-system }}
+      VECTORSCAN_ALLOW_STUBS: ${{ matrix.allow-stubs }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install the system library
+        if: matrix.apt != ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ${{ matrix.apt }}
+          pkg-config --modversion libhs
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--as-cran")'
+          upload-snapshots: true
+
+      # R CMD check passing is not enough: a stub build also passes, because
+      # every native test is skipped. Check that configure took the intended
+      # path, and that the installed package agrees.
+      - name: Confirm the build mode
+        env:
+          EXPECT: ${{ matrix.expect }}
+          MODE: ${{ matrix.mode }}
+        run: |
+          set -eu
+          log=check/vectorscan.Rcheck/00install.out
+          grep -F "configure:" "$log"
+          grep -qF "$EXPECT" "$log"
+          if grep -qF "building bundled Vectorscan" "$log"; then
+            echo "::error::the bundled source was built in the $MODE job"
+            exit 1
+          fi
+          want=$([ "$MODE" = system ] && echo TRUE || echo FALSE)
+          # rcmdcheck installs the package into the check directory only.
+          got=$(R_LIBS="check/vectorscan.Rcheck" Rscript -e 'cat(vectorscan::hs_available())')
+          echo "hs_available() = $got (expected $want)"
+          [ "$got" = "$want" ]
