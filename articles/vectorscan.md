@@ -298,7 +298,7 @@ base_time <- system.time({
 
 vs_time["elapsed"]
 #> elapsed 
-#>    0.01
+#>   0.011
 base_time["elapsed"]
 #> elapsed 
 #>   0.035

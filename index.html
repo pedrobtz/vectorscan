@@ -59,18 +59,109 @@
 </h1></div>
 <!-- badges: start -->
 
-<p><code>vectorscan</code> is an R package that wraps <a href="https://github.com/VectorCamp/vectorscan" class="external-link">Vectorscan</a>, the portable fork of Intel Hyperscan, for high-performance multi-pattern regular expression matching from R.</p>
+<p><code>vectorscan</code> brings fast regular expressions to large text in R:</p>
+<ul>
+<li>
+<strong>Parse text into a data frame, about 20 times faster than base R.</strong> <code><a href="reference/hs_capture.html">hs_capture()</a></code> turns every line of a log (or any text with a format) into a row, one column per capture group, and returns the same data frame as <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code>.</li>
+<li>
+<strong>Match thousands of patterns in one pass</strong> with <a href="https://github.com/VectorCamp/vectorscan" class="external-link">Vectorscan</a>, the portable fork of Intel Hyperscan: which lines match any rule, which rule, and what text.</li>
+</ul>
+<div class="section level2">
+<h2 id="parse-a-log-into-a-data-frame">Parse a log into a data frame<a class="anchor" aria-label="anchor" href="#parse-a-log-into-a-data-frame"></a>
+</h2>
+<p>One regular expression with named groups is the whole parser. Lines that do not fit the format come back as <code>NA</code> rows, so they are easy to find:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pedrobtz.github.io/vectorscan/">vectorscan</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">log</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"2026-09-26 10:15:02.117 [INFO]  api.server:42 - listening on :8080"</span>,</span>
+<span>  <span class="st">"2026-09-26 10:15:07.901 [WARN]  db.pool:118 - slow query took 1.8s"</span>,</span>
+<span>  <span class="st">"--- log rotated ---"</span>,</span>
+<span>  <span class="st">"2026-09-26 10:16:00.004 [ERROR] auth.jwt:77 - token expired for user 12"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">fmt</span> <span class="op">&lt;-</span> <span class="st">"^(?&lt;time&gt;\\S+ \\S+) \\[(?&lt;level&gt;\\w+)\\]\\s+(?&lt;location&gt;[^ :]+):(?&lt;line&gt;\\d+) - (?&lt;text&gt;.*)$"</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/hs_capture.html">hs_capture</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">log</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                      time level   location line                      text</span></span>
+<span><span class="co">#&gt; 1 2026-09-26 10:15:02.117  INFO api.server   42        listening on :8080</span></span>
+<span><span class="co">#&gt; 2 2026-09-26 10:15:07.901  WARN    db.pool  118      slow query took 1.8s</span></span>
+<span><span class="co">#&gt; 3                    &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt; &lt;NA&gt;                      &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4 2026-09-26 10:16:00.004 ERROR   auth.jwt   77 token expired for user 12</span></span></code></pre></div>
+<p>For a real file, <code>hs_capture(fmt, readLines("app.log"))</code>. Pass a <code>proto</code>, as for <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code>, to get typed columns:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">proto</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>, level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>, location <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                    line <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="op">)</span>, text <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu"><a href="reference/hs_capture.html">hs_capture</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">log</span>, <span class="va">proto</span><span class="op">)</span><span class="op">$</span><span class="va">line</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  int [1:4] 42 118 NA 77</span></span></code></pre></div>
+<p>Log files that mix formats take a named vector of formats. Each line is parsed by the first format that fits, and a <code>pattern</code> column says which:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"2026-09-26 10:15:02.117 [INFO]  api.server:42 - listening on :8080"</span>,</span>
+<span>  <span class="st">"GET /index.html 200"</span>,</span>
+<span>  <span class="st">"2026-09-26 10:16:00.004 [ERROR] auth.jwt:77 - token expired for user 12"</span>,</span>
+<span>  <span class="st">"POST /login 401"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">formats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>app <span class="op">=</span> <span class="va">fmt</span>, http <span class="op">=</span> <span class="st">"^(?&lt;method&gt;[A-Z]+) (?&lt;path&gt;\\S+) (?&lt;status&gt;\\d{3})$"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/hs_capture.html">hs_capture</a></span><span class="op">(</span><span class="va">formats</span>, <span class="va">mixed</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pattern"</span>, <span class="st">"level"</span>, <span class="st">"location"</span>, <span class="st">"method"</span>, <span class="st">"path"</span>, <span class="st">"status"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;   pattern level   location method        path status</span></span>
+<span><span class="co">#&gt; 1     app  INFO api.server   &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2    http  &lt;NA&gt;       &lt;NA&gt;    GET /index.html    200</span></span>
+<span><span class="co">#&gt; 3     app ERROR   auth.jwt   &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4    http  &lt;NA&gt;       &lt;NA&gt;   POST      /login    401</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="how-fast">How fast<a class="anchor" aria-label="anchor" href="#how-fast"></a>
+</h3>
+<p>A 1,000,000-line log (72 MB) in the format above, each method timed in a fresh R session on an Apple M-series laptop (the script is in <a href="https://github.com/pedrobtz/vectorscan/tree/main/tools/bench-capture" class="external-link"><code>tools/bench-capture/</code></a>):</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr>
+<th></th>
+<th><code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code></th>
+<th><code><a href="reference/hs_capture.html">hs_capture()</a></code></th>
+<th></th>
+</tr></thead>
+<tbody>
+<tr>
+<td>every line matches</td>
+<td>12.8 s</td>
+<td>0.60 s</td>
+<td><strong>21× faster</strong></td>
+</tr>
+<tr>
+<td>1% of lines match</td>
+<td>6.5 s</td>
+<td>0.24 s</td>
+<td><strong>27× faster</strong></td>
+</tr>
+<tr>
+<td>20 formats, lines in the last one</td>
+<td>4.1 s ¹</td>
+<td>1.5 s</td>
+<td><strong>2.7× faster</strong></td>
+</tr>
+</tbody>
+</table>
+<p>¹ <code><a href="reference/hs_capture.html">hs_capture()</a></code> trying the formats one by one, without Vectorscan’s routing.</p>
+<p>Both return identical data frames. The regex engine is the same, PCRE2, with its just-in-time compiler. The speed comes from matching and filling the columns in C instead of building R objects for every line, and, with several formats, from Vectorscan deciding in one pass which formats can match each line. See the <a href="https://github.com/pedrobtz/vectorscan/blob/main/vignettes/articles/parsing-logs.Rmd" class="external-link">Parsing logs</a> article for more, including limits for untrusted input.</p>
 <p>The package is self-contained: the Vectorscan source code is vendored under <code>src/vendor/vectorscan</code> and built during package installation. A system <code>libhs</code> can still be used explicitly for development, but the default install path builds the bundled source.</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
 </h2>
 <ul>
+<li>Parse text into typed data frame columns with <code><a href="reference/hs_capture.html">hs_capture()</a></code>: named groups, <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code>-style prototypes, several formats per call, and match limits for untrusted input.</li>
 <li>Scan a whole character vector against many patterns at once with <code><a href="reference/hs_verbs.html">hs_detect()</a></code>, <code><a href="reference/hs_verbs.html">hs_count()</a></code>, <code><a href="reference/hs_verbs.html">hs_match()</a></code> and <code><a href="reference/hs_verbs.html">hs_extract()</a></code>, with named patterns or rule tables carried through to the results.</li>
-<li>Compile Vectorscan/Hyperscan databases from R with <code><a href="reference/hs_database.html">hs_database()</a></code> and <code><a href="reference/hs_compile.html">hs_compile()</a></code>.</li>
+<li>Compile Vectorscan/Hyperscan databases from R with <code><a href="reference/hs_database.html">hs_database()</a></code> and <code><a href="reference/hs_compile.html">hs_compile()</a></code>, from regular expressions or plain strings (<code>literal = TRUE</code>), or load Hyperscan’s <code>id:/regex/flags</code> pattern files with <code><a href="reference/hs_read_patterns.html">hs_read_patterns()</a></code>.</li>
 <li>Scan block, vectored, and streaming data with <code><a href="reference/hs_scan.html">hs_scan()</a></code>, <code><a href="reference/hs_scan_vector.html">hs_scan_vector()</a></code>, <code><a href="reference/hs_stream_open.html">hs_stream_open()</a></code>, <code><a href="reference/hs_stream_scan.html">hs_stream_scan()</a></code>, and <code><a href="reference/hs_stream_close.html">hs_stream_close()</a></code>.</li>
 <li>Return R data frames of match events by default.</li>
 <li>Support Python-style callbacks for low-allocation scanning and early termination.</li>
-<li>Expose common Hyperscan flags and modes as R constants.</li>
+<li>Expose Hyperscan flags and modes as R constants; flags can also be written as letters or names, <code>flags = "i"</code> or <code>"caseless|dotall"</code> (<code><a href="reference/hs_flags.html">hs_flags()</a></code>).</li>
 <li>Support extended expression parameters with <code><a href="reference/hs_ext.html">hs_ext()</a></code>.</li>
 <li>Serialize and deserialize compiled databases with <code><a href="reference/hs_serialize.html">hs_serialize()</a></code>, <code><a href="reference/hs_deserialize.html">hs_deserialize()</a></code>, <code><a href="reference/hs_save.html">hs_save()</a></code>, and <code><a href="reference/hs_load.html">hs_load()</a></code>.</li>
 </ul>
@@ -100,10 +191,10 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="matching-many-patterns">Matching many patterns<a class="anchor" aria-label="anchor" href="#matching-many-patterns"></a>
 </h2>
 <p>Scan a whole character vector against a set of patterns in one call. Names label the patterns in the results:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://pedrobtz.github.io/vectorscan/">vectorscan</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"apple pie"</span>, <span class="st">"banana split"</span>, <span class="cn">NA</span>, <span class="st">"cherry tart"</span><span class="op">)</span></span>
@@ -131,30 +222,16 @@
 <span><span class="fu"><a href="reference/hs_verbs.html">hs_extract</a></span><span class="op">(</span><span class="va">rules</span>, <span class="va">x</span><span class="op">)</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "banana" "split"</span></span></code></pre></div>
 <p><code><a href="reference/hs_verbs.html">hs_detect()</a></code>, <code><a href="reference/hs_verbs.html">hs_count()</a></code>, <code><a href="reference/hs_verbs.html">hs_match()</a></code> and <code><a href="reference/hs_verbs.html">hs_extract()</a></code> take the patterns (a character vector, possibly named, or a data frame of rules) or a database compiled once with <code><a href="reference/hs_compile.html">hs_compile()</a></code> and reused:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">rules</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_verbs.html">hs_detect</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"banana"</span>, <span class="st">"kiwi"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1]  TRUE FALSE</span></span></code></pre></div>
 <p>Offsets are zero-based byte offsets into the UTF-8 encoding of each string.</p>
 <div class="section level3">
-<h3 id="capture-groups">Capture groups<a class="anchor" aria-label="anchor" href="#capture-groups"></a>
-</h3>
-<p><code><a href="reference/hs_capture.html">hs_capture()</a></code> turns text into columns with one regular expression, like <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code> but much faster on large inputs:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2026-09-26 10:15:02 [INFO] api.server:42 - listening"</span>,</span>
-<span>           <span class="st">"2026-09-26 10:16:00 [ERROR] auth.jwt:77 - token expired"</span><span class="op">)</span></span>
-<span><span class="va">fmt</span> <span class="op">&lt;-</span> <span class="st">"^(?&lt;time&gt;\\S+ \\S+) \\[(?&lt;level&gt;\\w+)\\] (?&lt;location&gt;[^:]+):(?&lt;line&gt;\\d+) - (?&lt;text&gt;.*)$"</span></span>
-<span><span class="fu"><a href="reference/hs_capture.html">hs_capture</a></span><span class="op">(</span><span class="va">fmt</span>, <span class="va">lines</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                  time level   location line          text</span></span>
-<span><span class="co">#&gt; 1 2026-09-26 10:15:02  INFO api.server   42     listening</span></span>
-<span><span class="co">#&gt; 2 2026-09-26 10:16:00 ERROR   auth.jwt   77 token expired</span></span></code></pre></div>
-<p>It runs on PCRE2 rather than Vectorscan, whose engine cannot report groups.</p>
-</div>
-<div class="section level3">
 <h3 id="low-level-interface">Low-level interface<a class="anchor" aria-label="anchor" href="#low-level-interface"></a>
 </h3>
 <p>The <code>hs_*</code> scanning functions map one to one onto the Vectorscan API: compile a database in a chosen mode, then scan single blocks, vectored blocks or streams, with the flags and extended parameters Vectorscan offers.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="va">HS_MODE_BLOCK</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span></span>
 <span>  <span class="va">db</span>,</span>
@@ -173,7 +250,7 @@
 <span><span class="co">#&gt; 2  2    3  6     0</span></span>
 <span><span class="co">#&gt; 3  1   NA  6     0</span></span></code></pre></div>
 <p>Use a callback to handle matches as they are reported by Vectorscan. Return <code>TRUE</code> from the callback to terminate scanning early.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/hs_scan.html">hs_scan</a></span><span class="op">(</span></span>
 <span>  <span class="va">db</span>,</span>
 <span>  <span class="st">"foobar"</span>,</span>
@@ -184,12 +261,12 @@
 <span>  context <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>source <span class="op">=</span> <span class="st">"example"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Vectored mode scans adjacent buffers as one logical input:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="va">HS_MODE_VECTORED</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foobar"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_scan_vector.html">hs_scan_vector</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"foo"</span>, <span class="st">"bar"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Streaming mode keeps scan state across chunks:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="va">HS_MODE_STREAM</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foo.*bar"</span><span class="op">)</span></span>
 <span></span>
@@ -198,7 +275,7 @@
 <span><span class="fu"><a href="reference/hs_stream_scan.html">hs_stream_scan</a></span><span class="op">(</span><span class="va">stream</span>, <span class="st">" and then bar"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_stream_close.html">hs_stream_close</a></span><span class="op">(</span><span class="va">stream</span><span class="op">)</span></span></code></pre></div>
 <p>Compiled databases can be serialized:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hs_database.html">hs_database</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/hs_compile.html">hs_compile</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"foo"</span><span class="op">)</span></span>
 <span></span>
@@ -240,11 +317,11 @@
 <h2 id="development">Development<a class="anchor" aria-label="anchor" href="#development"></a>
 </h2>
 <p>Useful package checks:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="ex">air</span> format .</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::document()"</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::test()"</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"pkgdown::check_pkgdown()"</span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::check()"</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="ex">air</span> format .</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::document()"</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::test()"</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"pkgdown::check_pkgdown()"</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">"devtools::check()"</span></span></code></pre></div>
 <p>The native extension uses <code>.Call</code> and external pointers to manage <code>hs_database_t</code>, <code>hs_scratch_t</code>, and <code>hs_stream_t</code> objects. Native calls check <code>hs_error_t</code> values and convert failures to typed R conditions.</p>
 </div>
 </div>

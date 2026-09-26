@@ -54,7 +54,14 @@ data frame of rules with a <code>pattern</code> column and optional <code>id</co
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hs_compile</span><span class="op">(</span><span class="va">database</span>, <span class="va">expressions</span>, ids <span class="op">=</span> <span class="cn">NULL</span>, flags <span class="op">=</span> <span class="cn">NULL</span>, ext <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hs_compile</span><span class="op">(</span></span>
+<span>  <span class="va">database</span>,</span>
+<span>  <span class="va">expressions</span>,</span>
+<span>  ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  flags <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ext <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  literal <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,11 +83,21 @@ of rules (see Details).</p></dd>
 
 
 <dt id="arg-flags">flags<a class="anchor" aria-label="anchor" href="#arg-flags"></a></dt>
-<dd><p>Optional integer flags, recycled from length 1.</p></dd>
+<dd><p>Optional flags, recycled from length 1: integers built from the
+<code>HS_FLAG_*</code> constants, or strings of flag letters or names read by
+<code><a href="hs_flags.html">hs_flags()</a></code>, such as <code>"i"</code> or <code>"caseless|dotall"</code>.</p></dd>
 
 
 <dt id="arg-ext">ext<a class="anchor" aria-label="anchor" href="#arg-ext"></a></dt>
 <dd><p>Optional <code><a href="hs_ext.html">hs_ext()</a></code> object or list of <code><a href="hs_ext.html">hs_ext()</a></code> objects.</p></dd>
+
+
+<dt id="arg-literal">literal<a class="anchor" aria-label="anchor" href="#arg-literal"></a></dt>
+<dd><p>If <code>TRUE</code>, the expressions are plain strings to find, not
+regular expressions: <code>"a.b"</code> matches only <code>"a.b"</code>. Literals compile
+faster and into smaller databases, and only the flags <code>HS_FLAG_CASELESS</code>,
+<code>HS_FLAG_SINGLEMATCH</code> and <code>HS_FLAG_SOM_LEFTMOST</code> apply; <code>ext</code> cannot be
+used.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -103,11 +120,12 @@ block-mode database and returns it.</p>
 <span class="r-in"><span>  <span class="co"># One call, named patterns</span></span></span>
 <span class="r-in"><span>  <span class="va">db</span> <span class="op">&lt;-</span> <span class="fu">hs_compile</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>greeting <span class="op">=</span> <span class="st">"hel+o"</span>, number <span class="op">=</span> <span class="st">"[0-9]+"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="hs_verbs.html">hs_match</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hello 42"</span>, <span class="st">"nothing"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># Flags as letters, and plain strings instead of regular expressions</span></span></span>
+<span class="r-in"><span>  <span class="va">db</span> <span class="op">&lt;-</span> <span class="fu">hs_compile</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Error"</span>, <span class="st">"a.b"</span><span class="op">)</span>, flags <span class="op">=</span> <span class="st">"i"</span>, literal <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="hs_verbs.html">hs_detect</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ERROR: x"</span>, <span class="st">"a.b"</span>, <span class="st">"axb"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   input id  pattern from to match</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1  0 greeting   NA  5  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2     1  1   number   NA  7  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     1  1   number   NA  8  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  TRUE  TRUE FALSE</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

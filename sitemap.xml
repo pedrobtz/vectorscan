@@ -17,8 +17,10 @@
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_database_size.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_deserialize.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_ext.html</loc></url>
+<url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_flags.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_info.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_load.html</loc></url>
+<url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_read_patterns.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_save.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_scan.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_scan_vector.html</loc></url>
@@ -26,9 +28,11 @@
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_stream_close.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_stream_open.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_stream_scan.html</loc></url>
+<url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_stream_size.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/hs_verbs.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/index.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.html</loc></url>
+<url><loc>https://pedrobtz.github.io/vectorscan/reference/vectorscan-errors.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/reference/vectorscan-package.html</loc></url>
 <url><loc>https://pedrobtz.github.io/vectorscan/roadmap.html</loc></url>
 </urlset>

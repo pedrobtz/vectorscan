@@ -40,6 +40,8 @@
   : Scan a stream chunk
 - [`hs_stream_close()`](https://pedrobtz.github.io/vectorscan/reference/hs_stream_close.md)
   : Close a stream
+- [`hs_stream_size()`](https://pedrobtz.github.io/vectorscan/reference/hs_stream_size.md)
+  : Size of a stream's state
 
 ## Serialization
 
@@ -56,7 +58,12 @@
 
 - [`hs_ext()`](https://pedrobtz.github.io/vectorscan/reference/hs_ext.md)
   : Create extended expression parameters
+- [`hs_flags()`](https://pedrobtz.github.io/vectorscan/reference/hs_flags.md)
+  : Flags from letters or names
+- [`hs_read_patterns()`](https://pedrobtz.github.io/vectorscan/reference/hs_read_patterns.md)
+  : Read a Hyperscan pattern file
 - [`hs_available()`](https://pedrobtz.github.io/vectorscan/reference/hs_available.md)
+  [`hs_version()`](https://pedrobtz.github.io/vectorscan/reference/hs_available.md)
   : Is Vectorscan or Hyperscan available?
 - [`HS_FLAG_NONE`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
   [`HS_FLAG_CASELESS`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
@@ -73,4 +80,9 @@
   [`HS_MODE_BLOCK`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
   [`HS_MODE_STREAM`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
   [`HS_MODE_VECTORED`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
+  [`HS_MODE_SOM_HORIZON_LARGE`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
+  [`HS_MODE_SOM_HORIZON_MEDIUM`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
+  [`HS_MODE_SOM_HORIZON_SMALL`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-constants.md)
   : Vectorscan and Hyperscan constants
+- [`vectorscan-errors`](https://pedrobtz.github.io/vectorscan/reference/vectorscan-errors.md)
+  : Errors raised by vectorscan

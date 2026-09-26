@@ -73,9 +73,25 @@
 <span></span>
 <span><span class="va">HS_MODE_STREAM</span></span>
 <span></span>
-<span><span class="va">HS_MODE_VECTORED</span></span></code></pre></div>
+<span><span class="va">HS_MODE_VECTORED</span></span>
+<span></span>
+<span><span class="va">HS_MODE_SOM_HORIZON_LARGE</span></span>
+<span></span>
+<span><span class="va">HS_MODE_SOM_HORIZON_MEDIUM</span></span>
+<span></span>
+<span><span class="va">HS_MODE_SOM_HORIZON_SMALL</span></span></code></pre></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Combine flags with <code><a href="https://rdrr.io/r/base/bitwise.html" class="external-link">bitwOr()</a></code>, not <code>|</code> (which is a logical "or" in R).</p>
+<p>In stream mode, patterns compiled with <code>HS_FLAG_SOM_LEFTMOST</code> need a
+start-of-match horizon, which bounds how far back a start offset is kept:
+<code>HS_MODE_SOM_HORIZON_LARGE</code> (the whole stream), <code>_MEDIUM</code> (32 bits of
+offset) or <code>_SMALL</code> (16 bits), as in
+<code>hs_database(bitwOr(HS_MODE_STREAM, HS_MODE_SOM_HORIZON_LARGE))</code>. A start
+beyond the horizon is reported as <code>NA</code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

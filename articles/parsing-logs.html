@@ -146,6 +146,41 @@ keeps:</p>
 <span><span class="co">#&gt; 2 2026-09-26 10:16:00.004 ERROR auth.jwt   77 token expired for user 12</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="several-formats">Several formats<a class="anchor" aria-label="anchor" href="#several-formats"></a>
+</h2>
+<p>A log that mixes formats (several services writing to one file, say)
+takes a named vector of formats. Each line is captured by the first
+format that matches it; a <code>pattern</code> column says which, and
+groups with the same name share a column:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"2026-09-26 10:15:02.117 [INFO]  api.server:42 - listening on :8080"</span>,</span>
+<span>  <span class="st">"GET /index.html 200 12ms"</span>,</span>
+<span>  <span class="st">"2026-09-26 10:16:00.004 [ERROR] auth.jwt:77 - token expired for user 12"</span>,</span>
+<span>  <span class="st">"POST /login 401 3ms"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">formats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  app <span class="op">=</span> <span class="va">fmt</span>,</span>
+<span>  http <span class="op">=</span> <span class="st">"^(?&lt;method&gt;[A-Z]+) (?&lt;path&gt;\\S+) (?&lt;status&gt;\\d{3}) (?&lt;time&gt;\\d+ms)$"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/hs_capture.html">hs_capture</a></span><span class="op">(</span><span class="va">formats</span>, <span class="va">mixed</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   pattern                    time level   location line</span></span>
+<span><span class="co">#&gt; 1     app 2026-09-26 10:15:02.117  INFO api.server   42</span></span>
+<span><span class="co">#&gt; 2    http                    12ms  &lt;NA&gt;       &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 3     app 2026-09-26 10:16:00.004 ERROR   auth.jwt   77</span></span>
+<span><span class="co">#&gt; 4    http                     3ms  &lt;NA&gt;       &lt;NA&gt; &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                        text method        path status</span></span>
+<span><span class="co">#&gt; 1        listening on :8080   &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2                      &lt;NA&gt;    GET /index.html    200</span></span>
+<span><span class="co">#&gt; 3 token expired for user 12   &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4                      &lt;NA&gt;   POST      /login    401</span></span></code></pre></div>
+<p>Vectorscan finds, in one pass, which formats can match each line, so
+PCRE2 runs only there. The result is the same as trying every format on
+every line in order. With 20 formats and a million lines that all match
+the last one (the worst case for trying in order), that takes 1.5 s
+against 4.1 s.</p>
+</div>
+<div class="section level2">
 <h2 id="how-fast">How fast<a class="anchor" aria-label="anchor" href="#how-fast"></a>
 </h2>
 <p>On a 1,000,000-line log (72 MB) in the format above, on an Apple

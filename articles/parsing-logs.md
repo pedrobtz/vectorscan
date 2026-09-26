@@ -95,6 +95,44 @@ hs_capture(fmt, lines[keep], proto)
 #> 2 2026-09-26 10:16:00.004 ERROR auth.jwt   77 token expired for user 12
 ```
 
+## Several formats
+
+A log that mixes formats (several services writing to one file, say)
+takes a named vector of formats. Each line is captured by the first
+format that matches it; a `pattern` column says which, and groups with
+the same name share a column:
+
+``` r
+
+mixed <- c(
+  "2026-09-26 10:15:02.117 [INFO]  api.server:42 - listening on :8080",
+  "GET /index.html 200 12ms",
+  "2026-09-26 10:16:00.004 [ERROR] auth.jwt:77 - token expired for user 12",
+  "POST /login 401 3ms"
+)
+formats <- c(
+  app = fmt,
+  http = "^(?<method>[A-Z]+) (?<path>\\S+) (?<status>\\d{3}) (?<time>\\d+ms)$"
+)
+hs_capture(formats, mixed)
+#>   pattern                    time level   location line
+#> 1     app 2026-09-26 10:15:02.117  INFO api.server   42
+#> 2    http                    12ms  <NA>       <NA> <NA>
+#> 3     app 2026-09-26 10:16:00.004 ERROR   auth.jwt   77
+#> 4    http                     3ms  <NA>       <NA> <NA>
+#>                        text method        path status
+#> 1        listening on :8080   <NA>        <NA>   <NA>
+#> 2                      <NA>    GET /index.html    200
+#> 3 token expired for user 12   <NA>        <NA>   <NA>
+#> 4                      <NA>   POST      /login    401
+```
+
+Vectorscan finds, in one pass, which formats can match each line, so
+PCRE2 runs only there. The result is the same as trying every format on
+every line in order. With 20 formats and a million lines that all match
+the last one (the worst case for trying in order), that takes 1.5 s
+against 4.1 s.
+
 ## How fast
 
 On a 1,000,000-line log (72 MB) in the format above, on an Apple

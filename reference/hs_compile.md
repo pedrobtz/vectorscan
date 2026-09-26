@@ -10,7 +10,14 @@ and friends.
 ## Usage
 
 ``` r
-hs_compile(database, expressions, ids = NULL, flags = NULL, ext = NULL)
+hs_compile(
+  database,
+  expressions,
+  ids = NULL,
+  flags = NULL,
+  ext = NULL,
+  literal = FALSE
+)
 ```
 
 ## Arguments
@@ -31,7 +38,10 @@ hs_compile(database, expressions, ids = NULL, flags = NULL, ext = NULL)
 
 - flags:
 
-  Optional integer flags, recycled from length 1.
+  Optional flags, recycled from length 1: integers built from the
+  `HS_FLAG_*` constants, or strings of flag letters or names read by
+  [`hs_flags()`](https://pedrobtz.github.io/vectorscan/reference/hs_flags.md),
+  such as `"i"` or `"caseless|dotall"`.
 
 - ext:
 
@@ -40,6 +50,14 @@ hs_compile(database, expressions, ids = NULL, flags = NULL, ext = NULL)
   object or list of
   [`hs_ext()`](https://pedrobtz.github.io/vectorscan/reference/hs_ext.md)
   objects.
+
+- literal:
+
+  If `TRUE`, the expressions are plain strings to find, not regular
+  expressions: `"a.b"` matches only `"a.b"`. Literals compile faster and
+  into smaller databases, and only the flags `HS_FLAG_CASELESS`,
+  `HS_FLAG_SINGLEMATCH` and `HS_FLAG_SOM_LEFTMOST` apply; `ext` cannot
+  be used.
 
 ## Value
 
@@ -61,9 +79,10 @@ if (hs_available()) {
   # One call, named patterns
   db <- hs_compile(c(greeting = "hel+o", number = "[0-9]+"))
   hs_match(db, c("hello 42", "nothing"))
+
+  # Flags as letters, and plain strings instead of regular expressions
+  db <- hs_compile(c("Error", "a.b"), flags = "i", literal = TRUE)
+  hs_detect(db, c("ERROR: x", "a.b", "axb"))
 }
-#>   input id  pattern from to match
-#> 1     1  0 greeting   NA  5  <NA>
-#> 2     1  1   number   NA  7  <NA>
-#> 3     1  1   number   NA  8  <NA>
+#> [1]  TRUE  TRUE FALSE
 ```

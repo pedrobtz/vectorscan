@@ -105,8 +105,8 @@
 <li><label><input type="checkbox" checked>M1 PCRE2 in the build: system PCRE2 (Rtools, <code>pkg-config</code>) or a vendored 10.48 fallback with hidden symbols; a build-modes job for the symbol-collision setting.</label></li>
 <li><label><input type="checkbox" checked>M2 C capture loop: columns filled in place; differential test against <code>regexec(perl = TRUE)</code>; sanitizers clean.</label></li>
 <li><label><input type="checkbox" checked>M3 R API: <code>hs_capture(pattern, x, proto)</code> like <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code>, at least 10× faster; docs, a “Parsing logs” article, benchmarks.</label></li>
-<li><label><input type="checkbox">M4 Vectorscan prefilter and rule sets: route lines to formats with <code><a href="reference/hs_verbs.html">hs_match()</a></code>, capture with PCRE2.</label></li>
-<li><label><input type="checkbox">M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.</label></li>
+<li><label><input type="checkbox" checked>M4 Vectorscan prefilter and rule sets: route lines to formats with <code><a href="reference/hs_verbs.html">hs_match()</a></code>, capture with PCRE2.</label></li>
+<li><label><input type="checkbox" checked>M5 Hardening: match and depth limits, invalid UTF-8, JIT fallback.</label></li>
 </ul><p><em>Exit criteria: <code><a href="reference/hs_capture.html">hs_capture()</a></code> on all platforms, sanitizer-clean, identical to <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">strcapture()</a></code> on its tests and at least 10× faster.</em></p>
 </div>
 <div class="section level2">

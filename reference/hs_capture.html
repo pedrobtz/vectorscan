@@ -54,9 +54,9 @@ C, about 20 times faster on large inputs.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hs_capture</span><span class="op">(</span><span class="va">pattern</span>, <span class="va">x</span>, proto <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hs_capture</span><span class="op">(</span><span class="va">pattern</span>, <span class="va">x</span>, proto <span class="op">=</span> <span class="cn">NULL</span>, match_limit <span class="op">=</span> <span class="cn">NULL</span>, depth_limit <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">hs_capture_compile</span><span class="op">(</span><span class="va">pattern</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">hs_capture_compile</span><span class="op">(</span><span class="va">pattern</span>, jit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -64,8 +64,9 @@ C, about 20 times faster on large inputs.</p>
 
 
 <dl><dt id="arg-pattern">pattern<a class="anchor" aria-label="anchor" href="#arg-pattern"></a></dt>
-<dd><p>A single regular expression with capture groups, or a
-pattern compiled with <code>hs_capture_compile()</code> to reuse across calls.</p></dd>
+<dd><p>A single regular expression with capture groups, a
+character vector of formats (see "Several formats"), or either compiled
+with <code>hs_capture_compile()</code> to reuse across calls.</p></dd>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
@@ -75,13 +76,26 @@ pattern compiled with <code>hs_capture_compile()</code> to reuse across calls.</
 <dt id="arg-proto">proto<a class="anchor" aria-label="anchor" href="#arg-proto"></a></dt>
 <dd><p>Optional data frame (typically with zero rows) giving the
 names and types of the columns, as in <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code>. It must have
-one column per capture group.</p></dd>
+one column per capture group; for several formats, one column per group
+name, matched by name.</p></dd>
+
+
+<dt id="arg-match-limit-depth-limit">match_limit, depth_limit<a class="anchor" aria-label="anchor" href="#arg-match-limit-depth-limit"></a></dt>
+<dd><p>Optional positive whole numbers: PCRE2's
+match limit and depth limit per element (see "Untrusted input"). <code>NULL</code>
+keeps PCRE2's defaults.</p></dd>
+
+
+<dt id="arg-jit">jit<a class="anchor" aria-label="anchor" href="#arg-jit"></a></dt>
+<dd><p>For <code>hs_capture_compile()</code>: use PCRE2's just-in-time compiler
+when available. <code>FALSE</code> runs PCRE2's interpreter, which is slower but
+gives the same results.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame with <code>length(x)</code> rows and one column per capture
-group.</p>
+group, plus a <code>pattern</code> column first for several formats.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -94,6 +108,38 @@ engine cannot report groups.</p>
 converted to the type of the matching <code>proto</code> column as
 <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code> converts it (<code><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer()</a></code> for an integer column,
 and so on); without it every column is character.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="several-formats">Several formats<a class="anchor" aria-label="anchor" href="#several-formats"></a></h2>
+
+
+<p><code>pattern</code> can also be a character vector of formats, typically named, for
+input that mixes them (log lines from several services, say). Each element
+is captured by the first format, in order, that matches it. The result
+gains a first column, <code>pattern</code>, with the name of that format (or the
+expression, for an unnamed one), and has one column per group name across
+all formats: groups with the same name share a column, and a format that
+lacks a group leaves it <code>NA</code>.</p>
+<p>Formats are routed with Vectorscan: one pass over <code>x</code> finds, for each
+element, the formats that can match it (Vectorscan's prefilter mode, which
+never misses a match), and PCRE2 then runs only there. The result is the
+same as trying every format on every element in order, but with many
+formats it is several times faster. A format Vectorscan cannot compile
+even in prefilter mode (PCRE2's branch reset <code>(?|...)</code>, for example) is
+simply tried on every element that is still unmatched.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="untrusted-input">Untrusted input<a class="anchor" aria-label="anchor" href="#untrusted-input"></a></h2>
+
+
+<p>Some patterns can take exponential time on some inputs (nested
+quantifiers such as <code>(a+)+$</code>, for example). <code>match_limit</code> bounds the work
+PCRE2 may do per element, and <code>depth_limit</code> its backtracking memory (in the
+interpreter; the just-in-time compiled code has its own fixed stack, and an
+element that exhausts it is retried in the interpreter). An element that
+hits a limit gives an <code>NA</code> row and counts towards the warning, so one
+pathological line cannot stall or abort a scan. Both default to PCRE2's
+own defaults (a match limit of 10,000,000).</p>
 <p>Elements that do not match, and <code>NA</code> elements, give a row of <code>NA</code>. A group
 that does not take part in the match (an optional group, or a branch not
 taken) is <code>NA</code>, where <code><a href="https://rdrr.io/r/utils/strcapture.html" class="external-link">utils::strcapture()</a></code> gives <code>""</code>. An element PCRE2
@@ -140,6 +186,17 @@ cannot match at all (for example invalid UTF-8) also gives an <code>NA</code> ro
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 2026-09-26 10:15:02  INFO api.server   42     listening</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2                &lt;NA&gt;  &lt;NA&gt;       &lt;NA&gt; &lt;NA&gt;          &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 2026-09-26 10:16:00 ERROR   auth.jwt   77 token expired</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Several formats</span></span></span>
+<span class="r-in"><span><span class="va">mixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GET /index.html 200"</span>, <span class="st">"user=ada action=login"</span>, <span class="st">"GET /api 500"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">hs_capture</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  http <span class="op">=</span> <span class="st">"^(?&lt;method&gt;[A-Z]+) (?&lt;path&gt;\\S+) (?&lt;status&gt;\\d{3})$"</span>,</span></span>
+<span class="r-in"><span>  audit <span class="op">=</span> <span class="st">"^user=(?&lt;user&gt;\\w+) action=(?&lt;action&gt;\\w+)$"</span></span></span>
+<span class="r-in"><span><span class="op">)</span>, <span class="va">mixed</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   pattern method        path status user action</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    http    GET /index.html    200 &lt;NA&gt;   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   audit   &lt;NA&gt;        &lt;NA&gt;   &lt;NA&gt;  ada  login</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    http    GET        /api    500 &lt;NA&gt;   &lt;NA&gt;</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
