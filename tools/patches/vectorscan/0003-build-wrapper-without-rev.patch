@@ -12,7 +12,7 @@ Local, not upstream.
 
 --- a/cmake/build_wrapper.sh
 +++ b/cmake/build_wrapper.sh
-@@ -9,7 +9,22 @@
+@@ -12,7 +12,22 @@
  KEEPSYMS_IN=$2
  shift 2
  # $@ contains the actual build command
@@ -36,8 +36,8 @@ Local, not upstream.
  trap cleanup INT QUIT EXIT
  SYMSFILE=$(mktemp -p /tmp ${PREFIX}_rename.syms.XXXXX)
  KEEPSYMS=$(mktemp -p /tmp keep.syms.XXXXX)
-@@ -28,6 +43,10 @@
- nm ${NM_FLAG} p -g -D ${LIBC_SO} | sed 's/\([^ @]*\).*/^\1$/' >> ${KEEPSYMS}
+@@ -31,6 +46,10 @@
+ ${NM} ${NM_FLAG} posix -g -D ${LIBC_SO} | sed 's/\([^ @]*\).*/^\1$/' >> ${KEEPSYMS}
  # build the object
  "$@"
 +if [ ! -f "${OUT}" ]; then
@@ -45,5 +45,5 @@ Local, not upstream.
 +    exit 1
 +fi
  # rename the symbols in the object
- nm ${NM_FLAG} p -g ${OUT} | cut -f1 -d' ' | grep -v -f ${KEEPSYMS} | sed -e "s/\(.*\)/\1\ ${PREFIX}_\1/" >> ${SYMSFILE}
+ ${NM} ${NM_FLAG} posix -g ${OUT} | cut -f1 -d' ' | grep -v -f ${KEEPSYMS} | sed -e "s/\(.*\)/\1\ ${PREFIX}_\1/" >> ${SYMSFILE}
  if test -s ${SYMSFILE}

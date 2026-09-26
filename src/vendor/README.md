@@ -1,8 +1,8 @@
 # Vendored Vectorscan
 
-This directory contains the Vectorscan 5.4.12 source tree from:
+This directory contains the Vectorscan 5.4.13 source tree from:
 
-<https://github.com/VectorCamp/vectorscan/tree/vectorscan/5.4.12>
+<https://github.com/VectorCamp/vectorscan/tree/vectorscan/5.4.13>
 
 Vectorscan is licensed under the BSD 3-Clause license. See
 `vectorscan/LICENSE` and `vectorscan/COPYING` for the upstream license text,

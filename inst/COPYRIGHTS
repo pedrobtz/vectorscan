@@ -6,7 +6,7 @@ Bundled third-party sources
 
 src/vendor/vectorscan/
 
-  Vectorscan 5.4.12, https://github.com/VectorCamp/vectorscan
+  Vectorscan 5.4.13, https://github.com/VectorCamp/vectorscan
   Copyright (c) 2015, Intel Corporation (Hyperscan)
   Copyright (c) 2020, VectorCamp PC
   Copyright (c) 2021, Arm Limited

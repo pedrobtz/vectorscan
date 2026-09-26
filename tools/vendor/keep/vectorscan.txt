@@ -24,6 +24,7 @@ cmake/archdetect.cmake	cmake/archdetect.cmake
 cmake/attrib.cmake	cmake/attrib.cmake
 cmake/backtrace.cmake	cmake/backtrace.cmake
 cmake/boost.cmake	cmake/boost.cmake
+cmake/build_wrapper.cmake	cmake/build_wrapper.cmake
 cmake/build_wrapper.sh	cmake/build_wrapper.sh
 cmake/cflags-arm.cmake	cmake/cflags-arm.cmake
 cmake/cflags-generic.cmake	cmake/cflags-generic.cmake
@@ -61,6 +62,7 @@ src/crc32.h	src/crc32.h
 src/database.c	src/database.c
 src/database.h	src/database.h
 src/dispatcher.c	src/dispatcher.c
+src/fdr/arm/fdr_impl.h	src/fdr/arm/fdr_impl.h
 src/fdr/engine_description.cpp	src/fdr/engine_description.cpp
 src/fdr/engine_description.h	src/fdr/engine_description.h
 src/fdr/fdr.c	src/fdr/fdr.c
@@ -76,10 +78,12 @@ src/fdr/fdr_dump.cpp	src/fdr/fdr_dump.cpp
 src/fdr/fdr_dump.h	src/fdr/fdr_dump.h
 src/fdr/fdr_engine_description.cpp	src/fdr/fdr_engine_description.cpp
 src/fdr/fdr_engine_description.h	src/fdr/fdr_engine_description.h
+src/fdr/fdr_impl.h	src/fdr/fdr_impl.h
 src/fdr/fdr_internal.h	src/fdr/fdr_internal.h
 src/fdr/fdr_loadval.h	src/fdr/fdr_loadval.h
 src/fdr/flood_compile.cpp	src/fdr/flood_compile.cpp
 src/fdr/flood_runtime.h	src/fdr/flood_runtime.h
+src/fdr/ppc64le/fdr_impl.h	src/fdr/ppc64le/fdr_impl.h
 src/fdr/teddy.cpp	src/fdr/teddy.cpp
 src/fdr/teddy.h	src/fdr/teddy.h
 src/fdr/teddy_compile.cpp	src/fdr/teddy_compile.cpp
@@ -89,6 +93,7 @@ src/fdr/teddy_engine_description.h	src/fdr/teddy_engine_description.h
 src/fdr/teddy_fat.cpp	src/fdr/teddy_fat.cpp
 src/fdr/teddy_internal.h	src/fdr/teddy_internal.h
 src/fdr/teddy_runtime_common.h	src/fdr/teddy_runtime_common.h
+src/fdr/x86/fdr_impl.h	src/fdr/x86/fdr_impl.h
 src/grey.cpp	src/grey.cpp
 src/grey.h	src/grey.h
 src/hs.cpp	src/hs.cpp
