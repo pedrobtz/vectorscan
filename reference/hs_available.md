@@ -24,5 +24,5 @@ was built with (bundled or system), or `NA` in a build without one.
 hs_available()
 #> [1] TRUE
 hs_version()
-#> [1] "5.4.13 2026-09-26"
+#> [1] "5.4.13 2026-09-28"
 ```
