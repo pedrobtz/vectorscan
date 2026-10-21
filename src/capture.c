@@ -1,26 +1,22 @@
-/* PCRE2, the engine behind hs_capture(). Built only when configure found a
-   PCRE2 (system or vendored); see .agents/capture-groups.md. */
+/* PCRE2, the engine behind hs_capture(), reached through zuregex's C API
+   (LinkingTo: zuregex). zuregex bundles one PCRE2 for the R ecosystem, so
+   this package no longer bundles or links its own; see
+   .agents/capture-groups.md. */
 
 #define R_NO_REMAP
 #include <R.h>
 #include <Rinternals.h>
 #include <string.h>
 
-#ifdef HAVE_PCRE2
+#include <zuregex-r.h>
 
-#ifndef PCRE2_CODE_UNIT_WIDTH
-#define PCRE2_CODE_UNIT_WIDTH 8
-#endif
-#include <pcre2.h>
-
-/* list(version = "10.48 2026-...", jit = TRUE/FALSE, source = "system" or
-   "vendored"). `jit` is whether this PCRE2 was built with JIT support; a
-   pattern can still fall back to the interpreter at run time. */
+/* list(version = "PCRE2 10.48 ...", jit = TRUE/FALSE, source = "zuregex").
+   `jit` is whether a pattern can be JIT-compiled on this machine; a pattern
+   can still fall back to the interpreter at run time. */
 SEXP vctrsn_pcre2_info(void) {
-  char version[64] = "";
-  pcre2_config(PCRE2_CONFIG_VERSION, version);
-  uint32_t jit = 0;
-  pcre2_config(PCRE2_CONFIG_JIT, &jit);
+  zr_pattern *probe = zr_compile("a", 1, 0, ZR_DIALECT_PCRE, NULL, 0);
+  int jit = probe != NULL && zr_jit(probe);
+  zr_free(probe);
 
   SEXP out = PROTECT(Rf_allocVector(VECSXP, 3));
   SEXP names = PROTECT(Rf_allocVector(STRSXP, 3));
@@ -28,84 +24,63 @@ SEXP vctrsn_pcre2_info(void) {
   SET_STRING_ELT(names, 1, Rf_mkChar("jit"));
   SET_STRING_ELT(names, 2, Rf_mkChar("source"));
   Rf_setAttrib(out, R_NamesSymbol, names);
+  /* zr_version() is "PCRE2 x.y yyyy-mm-dd"; keep "x.y yyyy-mm-dd". */
+  const char *version = zr_version();
+  if (strncmp(version, "PCRE2 ", 6) == 0) version += 6;
   SET_VECTOR_ELT(out, 0, Rf_mkString(version));
-  SET_VECTOR_ELT(out, 1, Rf_ScalarLogical(jit != 0));
-#ifdef VCTRSN_PCRE2_VENDORED
-  SET_VECTOR_ELT(out, 2, Rf_mkString("vendored"));
-#else
-  SET_VECTOR_ELT(out, 2, Rf_mkString("system"));
-#endif
+  SET_VECTOR_ELT(out, 1, Rf_ScalarLogical(jit));
+  SET_VECTOR_ELT(out, 2, Rf_mkString("zuregex"));
   UNPROTECT(2);
   return out;
 }
 
 /* -- compiled patterns ------------------------------------------------------ */
 
-static void pcre2_code_finalizer(SEXP xptr) {
-  pcre2_code *code = (pcre2_code *)R_ExternalPtrAddr(xptr);
-  if (code != NULL) {
-    pcre2_code_free(code);
+static void pattern_finalizer(SEXP xptr) {
+  zr_pattern *p = (zr_pattern *)R_ExternalPtrAddr(xptr);
+  if (p != NULL) {
+    zr_free(p);
     R_ClearExternalPtr(xptr);
   }
 }
 
-static pcre2_code *pcre2_code_addr(SEXP xptr) {
+static zr_pattern *pattern_addr(SEXP xptr) {
   if (TYPEOF(xptr) != EXTPTRSXP) {
     Rf_error("Internal error: PCRE2 pattern pointer is invalid.");
   }
-  pcre2_code *code = (pcre2_code *)R_ExternalPtrAddr(xptr);
-  if (code == NULL) {
+  zr_pattern *p = (zr_pattern *)R_ExternalPtrAddr(xptr);
+  if (p == NULL) {
     Rf_error("PCRE2 pattern pointer is no longer valid.");
   }
-  return code;
+  return p;
 }
 
 /* Compile `pattern` (a UTF-8 string) as base R's regexec(perl = TRUE) does:
-   PCRE2_UTF without PCRE2_UCP. JIT-compile it when this PCRE2 can; a JIT
-   failure only means the interpreter runs instead.
+   UTF-8 without Unicode properties, zuregex's default dialect. JIT-compile
+   it when asked and the platform allows; a JIT failure only means the
+   interpreter runs instead.
 
    Returns list(ptr, names, jit): `names` has one entry per capture group,
    "" for unnamed groups. */
 SEXP vctrsn_pcre2_compile(SEXP pattern, SEXP use_jit) {
   const char *text = Rf_translateCharUTF8(STRING_ELT(pattern, 0));
-  int errcode = 0;
-  PCRE2_SIZE erroffset = 0;
-  pcre2_code *code = pcre2_compile((PCRE2_SPTR)text, PCRE2_ZERO_TERMINATED,
-                                   PCRE2_UTF, &errcode, &erroffset, NULL);
-  if (code == NULL) {
-    PCRE2_UCHAR message[256];
-    pcre2_get_error_message(errcode, message, sizeof(message));
-    Rf_error("Invalid pattern at offset %d: %s", (int)erroffset,
-             (const char *)message);
+  uint32_t flags = Rf_asLogical(use_jit) == TRUE ? 0 : ZR_NO_JIT;
+  char message[256];
+  zr_pattern *p = zr_compile(text, strlen(text), flags, ZR_DIALECT_PCRE,
+                             message, sizeof(message));
+  if (p == NULL) {
+    Rf_error("Invalid pattern: %s", message);
   }
 
-  SEXP xptr = PROTECT(R_MakeExternalPtr(code, R_NilValue, R_NilValue));
-  R_RegisterCFinalizerEx(xptr, pcre2_code_finalizer, TRUE);
+  SEXP xptr = PROTECT(R_MakeExternalPtr(p, R_NilValue, R_NilValue));
+  R_RegisterCFinalizerEx(xptr, pattern_finalizer, TRUE);
 
-  int jit = Rf_asLogical(use_jit) == TRUE &&
-            pcre2_jit_compile(code, PCRE2_JIT_COMPLETE) == 0;
-
-  uint32_t ncap = 0;
-  pcre2_pattern_info(code, PCRE2_INFO_CAPTURECOUNT, &ncap);
+  int ncap = zr_group_count(p);
   SEXP names = PROTECT(Rf_allocVector(STRSXP, ncap));
-  for (uint32_t g = 0; g < ncap; ++g) {
-    SET_STRING_ELT(names, g, R_BlankString);
-  }
-
-  /* Name table entries: a 2-byte group number, then the NUL-terminated
-     name, padded to `entry_size`. */
-  uint32_t name_count = 0, entry_size = 0;
-  PCRE2_SPTR table = NULL;
-  pcre2_pattern_info(code, PCRE2_INFO_NAMECOUNT, &name_count);
-  pcre2_pattern_info(code, PCRE2_INFO_NAMEENTRYSIZE, &entry_size);
-  pcre2_pattern_info(code, PCRE2_INFO_NAMETABLE, &table);
-  for (uint32_t k = 0; k < name_count; ++k) {
-    PCRE2_SPTR entry = table + (size_t)k * entry_size;
-    uint32_t group = ((uint32_t)entry[0] << 8) | entry[1];
-    if (group >= 1 && group <= ncap) {
-      SET_STRING_ELT(names, group - 1,
-                     Rf_mkCharCE((const char *)(entry + 2), CE_UTF8));
-    }
+  for (int g = 1; g <= ncap; ++g) {
+    const char *name = zr_group_name(p, g);
+    SET_STRING_ELT(names, g - 1,
+                   name != NULL ? Rf_mkCharCE(name, CE_UTF8) : R_BlankString);
   }
 
   SEXP out = PROTECT(Rf_allocVector(VECSXP, 3));
@@ -116,67 +91,58 @@ SEXP vctrsn_pcre2_compile(SEXP pattern, SEXP use_jit) {
   Rf_setAttrib(out, R_NamesSymbol, out_names);
   SET_VECTOR_ELT(out, 0, xptr);
   SET_VECTOR_ELT(out, 1, names);
-  SET_VECTOR_ELT(out, 2, Rf_ScalarLogical(jit));
+  SET_VECTOR_ELT(out, 2, Rf_ScalarLogical(zr_jit(p)));
   UNPROTECT(4);
   return out;
 }
 
 /* -- capturing over a character vector ------------------------------------- */
 
-/* PCRE2's per-call allocations (the match data) come from R_alloc(), which
-   R reclaims itself if the call is left by an error or an interrupt, so no
-   exit path can leak them. */
-static void *r_alloc_for_pcre2(size_t size, void *unused) {
-  (void)unused;
-  return R_alloc(size, 1);
-}
-
-static void r_free_for_pcre2(void *ptr, void *unused) {
-  (void)ptr;
-  (void)unused;
+static void match_data_finalizer(SEXP xptr) {
+  zr_match_data *md = (zr_match_data *)R_ExternalPtrAddr(xptr);
+  if (md != NULL) {
+    zr_match_data_free(md);
+    R_ClearExternalPtr(xptr);
+  }
 }
 
 /* Match every element of `x` once (the first match, as regexec() does) and
    fill one character column per capture group in place.
 
    Returns list(matched, groups, errors):
-   - matched: TRUE / FALSE per element, NA for NA input or a PCRE2 error;
+   - matched: TRUE / FALSE per element, NA for NA input or a match error;
    - groups:  list of character vectors, NA where the element did not match
               or the group did not participate;
-   - errors:  the PCRE2 error code per element, 0 where there was none. */
+   - errors:  the zuregex status code per element, 0 where there was none. */
 SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
                                SEXP depth_limit) {
-  pcre2_code *code = pcre2_code_addr(code_xptr);
+  zr_pattern *p = pattern_addr(code_xptr);
   R_xlen_t n = XLENGTH(x);
-
-  uint32_t ncap = 0;
-  pcre2_pattern_info(code, PCRE2_INFO_CAPTURECOUNT, &ncap);
+  int ncap = zr_group_count(p);
 
   SEXP matched = PROTECT(Rf_allocVector(LGLSXP, n));
   SEXP errors = PROTECT(Rf_allocVector(INTSXP, n));
   SEXP groups = PROTECT(Rf_allocVector(VECSXP, ncap));
-  for (uint32_t g = 0; g < ncap; ++g) {
+  for (int g = 0; g < ncap; ++g) {
     SET_VECTOR_ELT(groups, g, Rf_allocVector(STRSXP, n));
   }
   int *matched_p = LOGICAL(matched);
   int *errors_p = INTEGER(errors);
 
-  pcre2_general_context *gcontext =
-      pcre2_general_context_create(r_alloc_for_pcre2, r_free_for_pcre2, NULL);
-  pcre2_match_data *md = pcre2_match_data_create_from_pattern(code, gcontext);
-  pcre2_match_context *mcontext = pcre2_match_context_create(gcontext);
-  if (gcontext == NULL || md == NULL || mcontext == NULL) {
+  /* The match data is held by an external pointer with a finalizer, so an
+     error or an interrupt in the loop cannot leak it. */
+  zr_match_data *md = zr_match_data_create(p);
+  if (md == NULL) {
     Rf_error("Out of memory while preparing a PCRE2 match.");
   }
+  SEXP md_xptr = PROTECT(R_MakeExternalPtr(md, R_NilValue, R_NilValue));
+  R_RegisterCFinalizerEx(md_xptr, match_data_finalizer, TRUE);
   /* NA leaves PCRE2's default. The match limit bounds the work per element
-     in both the interpreter and JIT; the depth limit (a heap limit since
-     PCRE2 10.30) applies to the interpreter. */
-  if (Rf_asInteger(match_limit) != NA_INTEGER) {
-    pcre2_set_match_limit(mcontext, (uint32_t)Rf_asInteger(match_limit));
-  }
-  if (Rf_asInteger(depth_limit) != NA_INTEGER) {
-    pcre2_set_depth_limit(mcontext, (uint32_t)Rf_asInteger(depth_limit));
-  }
+     in both the interpreter and JIT; the depth limit applies to the
+     interpreter. */
+  int ml = Rf_asInteger(match_limit), dl = Rf_asInteger(depth_limit);
+  zr_set_limits(md, ml == NA_INTEGER ? 0 : (uint32_t)ml,
+                dl == NA_INTEGER ? 0 : (uint32_t)dl, 0);
 
   /* Each subject is scanned from our own buffer with zeroed padding after
      it. PCRE2's JIT scans with wide loads that may read a little past the
@@ -195,8 +161,7 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
 
     errors_p[i] = 0;
     SEXP element = STRING_ELT(x, i);
-    int rc = PCRE2_ERROR_NOMATCH;
-    PCRE2_SIZE *ov = NULL;
+    int rc = ZR_NOMATCH;
     const char *text = NULL;
 
     if (element != NA_STRING) {
@@ -221,17 +186,15 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
       memcpy(buffer, utf8, length);
       memset(buffer + length, 0, padding);
       text = buffer;
-      rc = pcre2_match(code, (PCRE2_SPTR)text, length, 0, 0, md, mcontext);
+      rc = zr_match(p, text, length, 0, 0, md);
       /* JIT code has a fixed-size stack; a deeply nested match that
          exhausts it is retried in the interpreter, which has none. */
-      if (rc == PCRE2_ERROR_JIT_STACKLIMIT) {
-        rc = pcre2_match(code, (PCRE2_SPTR)text, length, 0, PCRE2_NO_JIT, md,
-                         mcontext);
+      if (rc == ZR_ERROR_JIT_STACK) {
+        rc = zr_match(p, text, length, 0, ZR_NO_JIT_MATCH, md);
       }
       if (rc > 0) {
         matched_p[i] = TRUE;
-        ov = pcre2_get_ovector_pointer(md);
-      } else if (rc == PCRE2_ERROR_NOMATCH) {
+      } else if (rc == ZR_NOMATCH) {
         matched_p[i] = FALSE;
       } else {
         matched_p[i] = NA_LOGICAL;
@@ -239,19 +202,19 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
       }
     }
 
-    for (uint32_t g = 1; g <= ncap; ++g) {
+    for (int g = 1; g <= ncap; ++g) {
       SEXP column = VECTOR_ELT(groups, g - 1);
-      if (ov != NULL && (int)g < rc && ov[2 * g] != PCRE2_UNSET) {
+      size_t start, end;
+      if (rc > 0 && zr_offsets(md, g, &start, &end) == ZR_OK) {
         SET_STRING_ELT(column, i,
-                       Rf_mkCharLenCE(text + ov[2 * g],
-                                      (int)(ov[2 * g + 1] - ov[2 * g]),
+                       Rf_mkCharLenCE(text + start, (int)(end - start),
                                       CE_UTF8));
       } else {
         SET_STRING_ELT(column, i, NA_STRING);
       }
     }
-    /* Releases what translateCharUTF8() took, never the match data, which
-       was allocated before the loop. */
+    /* Releases what translateCharUTF8() took, never the buffer, which was
+       allocated before the mark. */
     vmaxset(vmax);
   }
 
@@ -264,36 +227,11 @@ SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
   SET_VECTOR_ELT(out, 0, matched);
   SET_VECTOR_ELT(out, 1, groups);
   SET_VECTOR_ELT(out, 2, errors);
-  UNPROTECT(5);
+  UNPROTECT(6);
   return out;
 }
 
-/* PCRE2's message for an error code, for the warning hs_capture() gives. */
+/* The message for a status code, for the warning hs_capture() gives. */
 SEXP vctrsn_pcre2_error_message(SEXP code) {
-  PCRE2_UCHAR message[256];
-  int rc = pcre2_get_error_message(Rf_asInteger(code), message, sizeof(message));
-  if (rc < 0) {
-    return Rf_mkString("unknown PCRE2 error");
-  }
-  return Rf_mkString((const char *)message);
+  return Rf_mkString(zr_strerror(Rf_asInteger(code)));
 }
-
-#else
-
-SEXP vctrsn_pcre2_info(void) { return R_NilValue; }
-
-SEXP vctrsn_pcre2_error_message(SEXP code) { return Rf_mkString("PCRE2 unavailable"); }
-
-static SEXP no_pcre2(void) {
-  Rf_error("This build of vectorscan has no PCRE2, so capture groups are unavailable.");
-  return R_NilValue;
-}
-
-SEXP vctrsn_pcre2_compile(SEXP pattern, SEXP use_jit) { return no_pcre2(); }
-
-SEXP vctrsn_pcre2_capture_many(SEXP code_xptr, SEXP x, SEXP match_limit,
-                               SEXP depth_limit) {
-  return no_pcre2();
-}
-
-#endif

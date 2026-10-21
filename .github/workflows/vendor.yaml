@@ -36,4 +36,3 @@ jobs:
     with:
       paths: |
         src/vendor/vectorscan
-        src/vendor/pcre2

@@ -223,3 +223,14 @@ One PR each; each ends with the full CI profile green (`full-ci` label).
   Reconsider if Vectorscan 5.5 moves Chimera to PCRE2 and M0's numbers change.
 - **Calling R's own PCRE2 symbols directly** (on macOS they are inside
   `libR.dylib`): not part of R's API, and no headers ship with R.
+
+## 2026-10-21: PCRE2 from zuregex
+
+`hs_capture()` now reaches PCRE2 through zuregex's C API (zuregex design
+section 7, decision D9): `Imports` and `LinkingTo: zuregex`, `<zuregex-r.h>`,
+and the function table zuregex registers when it loads. The vendored copy in
+`src/vendor/pcre2`, the system and vendored routes in `configure`, and
+`VECTORSCAN_PCRE2` are gone, about 5 MB of source. The behaviour above is
+unchanged: the same PCRE2 10.48 with JIT, the same compile options (UTF-8
+without UCP), limits through a match context, the JIT stack retry in the
+interpreter, and PCRE2's messages for limit errors.

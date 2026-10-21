@@ -4,4 +4,5 @@
 #'
 #' @keywords internal
 #' @useDynLib vectorscan, .registration = TRUE
+#' @importFrom zuregex zuregex_info
 "_PACKAGE"
