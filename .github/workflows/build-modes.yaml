@@ -10,8 +10,10 @@
 # Plain r-lib/actions steps rather than pedrobtz/r-actions, because the
 # system job needs an apt package the reusable workflow has no input for.
 on:
-  push:
-    branches: [main, master]
+  # No `push:`: a pull request already checks its merge with main,
+  # and the schedule checks main (r-actions README, "Pushes to main").
+  schedule:
+    - cron: "18 15 * * 6"
   pull_request:
   workflow_dispatch:
 
