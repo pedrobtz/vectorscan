@@ -23,9 +23,6 @@ on:
       - 'vignettes/**'
       - '_pkgdown.yml'
       - 'docs/**'
-  schedule:
-    # Weekly, so that a latent problem surfaces without waiting for a push.
-    - cron: "28 15 * * 6"
   workflow_dispatch:
 
 name: native-checks
