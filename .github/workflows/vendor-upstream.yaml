@@ -6,9 +6,6 @@
 # detects: the pinned copy can sit here while upstream ships fixes. It never
 # fails a check; it opens an issue.
 on:
-  schedule:
-    # Mondays, 07:00 UTC.
-    - cron: '33 15 * * 6'
   workflow_dispatch:
 
 name: vendor-upstream.yaml
