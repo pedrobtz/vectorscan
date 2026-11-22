@@ -21,7 +21,7 @@ jobs:
   #
   # Pinned to a commit rather than @v1: this job holds an issues write token.
   vectorscan:
-    uses: pedrobtz/r-actions/.github/workflows/vendor-upstream.yml@68c22c173f9ddbb7e51284fe230053174e941afc # v1.15.0
+    uses: pedrobtz/r-actions/.github/workflows/vendor-upstream.yml@v1
     permissions:
       contents: read
       issues: write
