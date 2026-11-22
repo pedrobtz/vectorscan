@@ -26,5 +26,5 @@ if (hs_available()) {
   hs_compile(db, "foo")
   hs_info(db)
 }
-#> [1] "Version: 5.4.13 Features: AVX512VBMI Mode: BLOCK"
+#> [1] "Version: 5.4.13 Features: AVX2 Mode: BLOCK"
 ```

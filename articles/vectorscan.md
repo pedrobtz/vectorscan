@@ -298,10 +298,10 @@ base_time <- system.time({
 
 vs_time["elapsed"]
 #> elapsed 
-#>   0.009
+#>   0.012
 base_time["elapsed"]
 #> elapsed 
-#>   0.025
+#>   0.036
 ```
 
 The gap widens as you add more patterns. With a hundred rules (realistic
